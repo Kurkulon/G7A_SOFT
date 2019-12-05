@@ -118,6 +118,7 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>DLGUARM</Key>
+          <Name>Рт.</Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
@@ -151,7 +152,7 @@
           <Type>0</Type>
           <LineNumber>462</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134241072</Address>
+          <Address>134241032</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -165,34 +166,18 @@
         <Bp>
           <Number>1</Number>
           <Type>0</Type>
-          <LineNumber>584</LineNumber>
+          <LineNumber>2198</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134236168</Address>
+          <Address>134226684</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>d:\Work\G7A_SOFT\G7A_MEM\cpp\main.cpp</Filename>
+          <Filename>d:\Work\G7A_SOFT\G7A_MEM\cpp\flash.cpp</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\G7A_MEM_XMC48\cpp/main.cpp\584</Expression>
-        </Bp>
-        <Bp>
-          <Number>2</Number>
-          <Type>0</Type>
-          <LineNumber>580</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134236138</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>d:\Work\G7A_SOFT\G7A_MEM\cpp\main.cpp</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\G7A_MEM_XMC48\cpp/main.cpp\580</Expression>
+          <Expression>\\G7A_MEM_XMC48\cpp/flash.cpp\2198</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -421,6 +406,10 @@
       <pSingCmds></pSingCmds>
       <pMultCmds></pMultCmds>
       <SystemViewers>
+        <Entry>
+          <Name>System Viewer\FCE_KE2</Name>
+          <WinId>35904</WinId>
+        </Entry>
         <Entry>
           <Name>System Viewer\FCE_KE3</Name>
           <WinId>35905</WinId>
