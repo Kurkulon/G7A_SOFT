@@ -78,7 +78,7 @@ class ComPort
 		u32 _dma_act_mask;
 
 		bool IsTransmited() { return (_SU->INTFLAG & USART_TXC) && ((_chdma->CTRLA & DMCH_ENABLE) == 0); }
-		u16	GetDmaCounter() { u32 t = HW::DMAC->ACTIVE; return ((t & 0x9F00) == _dma_act_mask) ? (t >> 16) : _dmawrb->BTCNT; }
+		u32	GetDmaCounter() { u32 t = HW::DMAC->ACTIVE; return ((t & 0x9F00) == _dma_act_mask) ? (t >> 16) : _dmawrb->BTCNT; }
 		u16	GetRecievedLen() { return _pReadBuffer->maxLen - _prevDmaCounter; }
 
 	#elif defined(CPU_XMC48)
@@ -105,8 +105,10 @@ class ComPort
 		u32					_dlr;
 
 		bool IsTransmited() { return (_SU->PSR & BUSY) == 0 && !(_dma->CHENREG & _dmaChMask); }
-		u16	GetDmaCounter() { return BLOCK_TS(_chdma->CTLH); }
-		u16	GetRecievedLen() { return _pReadBuffer->maxLen - _prevDmaCounter; }
+//		u16	GetDmaCounter() { return BLOCK_TS(_chdma->CTLH); }
+		u32	GetDmaCounter() { return _chdma->DAR; }
+//		u16	GetRecievedLen() { return _pReadBuffer->maxLen - _prevDmaCounter; }
+		u16	GetRecievedLen() { return _chdma->DAR - _startDmaCounter; }
 
 	#endif
 
@@ -118,7 +120,8 @@ class ComPort
 	byte			_status485;
 	byte			_portNum;
 
-	word			_prevDmaCounter;
+	u32				_startDmaCounter;
+	u32				_prevDmaCounter;
 
 	ReadBuffer		*_pReadBuffer;
 	WriteBuffer		*_pWriteBuffer;

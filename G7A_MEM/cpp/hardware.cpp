@@ -98,7 +98,31 @@
 	#define	CRC_DMACH		31
 
 #elif defined(CPU_XMC48)
-	
+
+	// Test Pins
+	// 1	- P0.1	- main loop
+	// 2	- P0.0
+	// 3	- P0.10
+	// 4	- P0.9
+	// 5	- P3.2
+	// 40	- P2.15
+	// 41	- P2.14
+	// 55	- P5.7	- I2C_Handler
+	// 57	- P5.1	- ManRcvIRQ
+	// 70	- P1.13
+	// 71	- P1.12
+	// 72	- P1.11
+	// 76	- P1.3	- ManTrmIRQ
+	// 77	- P1.2	- MEM USART RTS	
+	// 79	- P1.0	- MEM USART READ	
+	// 80	- P1.9	- CRC_CCITT_DMA
+	// 92	- P3.4
+	// 94	- P0.11
+	// 95	- P0.12
+	// 96	- P0.6	- nc
+
+
+
 	#define	NAND_DMA		HW::GPDMA0
 	#define	NAND_DMACH		HW::GPDMA0_CH7
 	#define	NAND_DMA_CHEN	(0x101<<7)
@@ -716,34 +740,7 @@ extern "C" void SystemInit()
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-struct NandMemSize
-{
- 	u64 ch;	// chip
- 	u64 fl;	// full
- 	u32 bl;	// block
-//	u32 row;
-	u16 pg;	// page
-	u16 mask;
-	byte shPg; //(1 << x)
-	byte shBl; //(1 << x)
-	byte shCh;
-	//byte shRow;
-
-	byte bitCol;
-	byte bitPage; // 
-	byte bitBlock;
-
-	u16	pagesInBlock;
-
-
-	u16		maskPage;
-	u32		maskBlock;
-
-};
-
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-static NandMemSize nandSize;
+NandMemSize nandSize;
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -2975,6 +2972,8 @@ u16 CRC_CCITT_PIO(const void *data, u32 len, u16 init)
 
 u16 CRC_CCITT_DMA(const void *data, u32 len, u16 init)
 {
+	HW::P1->BSET(9);
+
 	byte *s = (byte*)data;
 
 	CRC_FCE->CRC = init;	//	DataCRC CRC = { init };
@@ -2993,6 +2992,8 @@ u16 CRC_CCITT_DMA(const void *data, u32 len, u16 init)
 	};
 
 	//if (len & 1) { CRC_FCE->IR = s[len-1]; };
+
+	HW::P1->BCLR(9);
 
 	return (byte)CRC_FCE->RES;
 }
@@ -3056,6 +3057,33 @@ static void Init_CRC_CCITT_DMA()
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+static void WDT_Init()
+{
+	#ifdef CPU_SAME53	
+
+
+	#elif defined(CPU_XMC48)
+
+		HW::WDT_Enable();
+
+		HW::WDT->WLB = 0;
+		HW::WDT->WUB = 4 * OFI_FREQUENCY;
+		HW::SCU_CLK->WDTCLKCR = 0|SCU_CLK_WDTCLKCR_WDTSEL_OFI;
+
+		#ifndef _DEBUG
+		HW::WDT->CTR = WDT_CTR_ENB_Msk|WDT_CTR_DSP_Msk;
+		#else
+		HW::WDT->CTR = WDT_CTR_ENB_Msk;
+		#endif
+
+	#endif
+
+	HW::ResetWDT();
+}
+
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 void InitHardware()
 {
 	using namespace HW;
@@ -3100,6 +3128,8 @@ void InitHardware()
 	InitManTransmit();
 	InitManRecieve();
 	Init_CRC_CCITT_DMA();
+
+	WDT_Init();
 
 #ifndef _DEBUG
 

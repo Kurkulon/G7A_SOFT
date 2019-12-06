@@ -35,7 +35,7 @@ enum trap_status
 static trap_status trapStatus = TRAP_WAIT;
 
 
-static const bool __trace = true;
+static const bool __trace = false;
 
 //char TrapTxDataBuffer[TRAP_TX_DATA_BUFFER_SIZE];
 
@@ -925,7 +925,7 @@ static bool UpdateSendVector()
 
 					trap.hdr.cmd = TRAP_MEMORY_COMMAND_VECTOR;
 					trap.session = flrb.hdr.session;
-					trap.device = 0xAA00; //h.device;
+					trap.device = flrb.hdr.device;
 					trap.rtc = flrb.hdr.rtc;
 					trap.flags = flrb.hdr.flags;
 

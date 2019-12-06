@@ -17,6 +17,35 @@
 #define NAND_RAWADR_MASK	(((u64)1 << (NAND_COL_BITS + NAND_PAGE_BITS + NAND_CHIP_BITS + NAND_BLOCK_BITS)) - 1)
 
 
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+struct NandMemSize
+{
+ 	u64 ch;	// chip
+ 	u64 fl;	// full
+ 	u32 bl;	// block
+//	u32 row;
+	u16 pg;	// page
+	u16 mask;
+	byte shPg; //(1 << x)
+	byte shBl; //(1 << x)
+	byte shCh;
+	//byte shRow;
+
+	byte bitCol;
+	byte bitPage; // 
+	byte bitBlock;
+
+	u16	pagesInBlock;
+
+
+	u16		maskPage;
+	u32		maskBlock;
+
+};
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 extern bool NAND_BUSY(); 
 extern bool NAND_CmdBusy();
 extern void NAND_WriteDataDMA(volatile void *src, u16 len);
@@ -36,6 +65,9 @@ extern void NAND_CmdReadPage(u16 col, u32 bl, u16 pg);
 extern void NAND_CmdWritePage(u16 col, u32 bl, u16 pg);
 extern void NAND_CmdWritePage2();
 extern byte NAND_CmdReadStatus();
+
+inline const NandMemSize* NAND_GetMemSize() { extern NandMemSize nandSize; return &nandSize; } 
+
 
 extern void Hardware_Init();
 

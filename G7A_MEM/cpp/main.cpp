@@ -469,8 +469,8 @@ static void UpdateParams()
 	enum C { S = (__LINE__+3) };
 	switch(i++)
 	{
-		CALL( UpdateTemp()			);
-		CALL( UpdateMan()			);
+		CALL( UpdateTemp()					);
+		CALL( UpdateMan(); HW::ResetWDT();	);
 	};
 
 	i = (i > (__LINE__-S-3)) ? 0 : i;
@@ -622,6 +622,8 @@ int main()
 			mtb.len = 1;
 			//SetTrmBoudRate(0);
 //			SendManData(&mtb);
+
+//			HW::ResetWDT();
 		};
 
 		if (rtm.Check(US2RT(500)))

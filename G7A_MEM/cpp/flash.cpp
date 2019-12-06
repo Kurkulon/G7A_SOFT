@@ -93,6 +93,8 @@ static bool flashEmpty = false;
 
 static bool testWriteFlash = false;
 
+static const bool verifyWritePage = false; // Проверка записаной страницы, путём чтения страницы и сравнения с буфером
+
 static SessionInfo lastSessionInfo;
 
 
@@ -107,6 +109,8 @@ __packed struct NVV // NonVolatileVars
 	u16 index;
 
 	u32 prevFilePage;
+
+	u32 badBlocks[4];
 };
 
 
@@ -181,34 +185,7 @@ static NandState nandState = NAND_STATE_WAIT;
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-struct NandMemSize
-{
- 	u64 ch;	// chip
- 	u64 fl;	// full
- 	u32 bl;	// block
-//	u32 row;
-	u16 pg;	// page
-	u16 mask;
-	byte shPg; //(1 << x)
-	byte shBl; //(1 << x)
-	byte shCh;
-	//byte shRow;
-
-	byte bitCol;
-	byte bitPage; // 
-	byte bitBlock;
-
-	u16	pagesInBlock;
-
-
-	u16		maskPage;
-	u32		maskBlock;
-
-};
-
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-static NandMemSize nandSize;
+static const NandMemSize *nandSZ;
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -412,7 +389,8 @@ bool EraseBlock::Update()
 			{																													
 				if (spare.validPage != 0xFFFF && spare.validBlock != 0xFFFF)									
 				{																												
-					errBlocks += 1;																							
+					errBlocks += 1;	
+					nvv.badBlocks[er.chip] += 1;
 																																
 					er.NextBlock();	
 
@@ -448,6 +426,7 @@ bool EraseBlock::Update()
 				if ((NAND_CmdReadStatus() & 1) != 0 && check) // erase error																	
 				{																												
 					errBlocks += 1;	
+					nvv.badBlocks[er.chip] += 1;
 
 //					__breakpoint(0);																							
 																																
@@ -569,7 +548,7 @@ void Write::Init()
 	spare.fbb = 0;		
 	spare.fbp = 0;		
 
-	spare.chipMask = nandSize.mask;
+	spare.chipMask = nandSZ->mask;
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -597,7 +576,7 @@ void Write::Init(u32 bl, u32 file, u32 prfile)
 	spare.fbb = 0;		
 	spare.fbp = 0;		
 
-	spare.chipMask = nandSize.mask;
+	spare.chipMask = nandSZ->mask;
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -629,7 +608,7 @@ void Write::SaveSession()
 void Write::Vector_Make(VecData *vd, u16 size)
 {
 	vd->h.session = spare.file;
-	vd->h.device = 0;
+//	vd->h.device = 0;
 	GetTime(&vd->h.rtc);
 
 	vd->h.prVecAdr = prWrAdr; 
@@ -818,7 +797,7 @@ bool Write::Update()
 				spare.validBlock = -1;
 				spare.badPages = -1;
 				spare.rawPage = wr.GetRawPage();
-				spare.chipMask = nandSize.mask;
+				spare.chipMask = nandSZ->mask;
 
 				spare.crc = GetCRC16((void*)&spare.file, sizeof(spare) - spare.CRC_SKIP - sizeof(spare.crc));
 
@@ -858,12 +837,14 @@ bool Write::Update()
 
 					state = WRITE_PAGE_4;
 				}
-				else 
+				else if (verifyWritePage)
 				{
-					//NAND_CmdReadPage(0, wr.block, wr.page);
-					//
-					//state = WRITE_PAGE_6;
-
+					NAND_CmdReadPage(0, wr.block, wr.page);
+					
+					state = WRITE_PAGE_6;
+				}
+				else
+				{
 					state = WRITE_PAGE_8;
 				};
 			};
@@ -1058,7 +1039,7 @@ bool Write::Update()
 			spare.fbb = 0;		
 			spare.fbp = 0;		
 
-			spare.chipMask = nandSize.mask;	
+			spare.chipMask = nandSZ->mask;	
 
 			SaveSession();
 
@@ -1489,7 +1470,7 @@ static void InitSessions()
 		while (write.Update()) ;
 	};
 
-	u32 ms = 0, me = 0, ls = -1;
+/*	u32 ms = 0, me = 0, ls = -1;
 	u32 sp = 0;
 
 	bool bm = false, bl = false;
@@ -1569,6 +1550,7 @@ static void InitSessions()
 
 
 	}; // 	for (u16 i = 128, ind = nvv.index; i > 0; i--, ind = (ind-1)&127)
+*/
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -1808,7 +1790,7 @@ void NAND_Idle()
 
 		case NAND_STATE_FULL_ERASE_START:	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-			t = eb = nandSize.fl >> (NAND_COL_BITS + NAND_PAGE_BITS); // blocks count
+			t = eb = nandSZ->fl >> (NAND_COL_BITS + NAND_PAGE_BITS); // blocks count
 
 			er.SetRawAdr(0);
 
@@ -1865,7 +1847,10 @@ void NAND_Idle()
 
 			if (!UpdateSendSession())
 			{
-				nandState = NAND_STATE_WAIT;
+				if (TRAP_TRACE_PrintString("NAND Bad Blocks: %lu, %lu, %lu, %lu", nvv.badBlocks[0], nvv.badBlocks[1], nvv.badBlocks[2], nvv.badBlocks[3]))
+				{
+					nandState = NAND_STATE_WAIT;
+				};
 			};
 
 			break;
@@ -1918,7 +1903,7 @@ u64 FLASH_Current_Adress_Get()
 
 u64 FLASH_Full_Size_Get()
 {
-	return nandSize.fl;
+	return nandSZ->fl;
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -1941,7 +1926,7 @@ i64 FLASH_Empty_Size_Get()
 
 u16 FLASH_Chip_Mask_Get()
 {
-	return nandSize.mask;
+	return nandSZ->mask;
 }
 
 
@@ -2189,7 +2174,7 @@ static bool RequestFunc(FLWB *fwb, ComPort::WriteBuffer *wb)
 	{
 //		freeReqList.Add(req);
 	}
-	else if (fwb->dataLen < 4)
+	else if (fwb->dataLen < 952)
 	{
 //		freeFlWrBuf.Add(fwb);
 	}
@@ -2209,6 +2194,8 @@ static bool RequestFunc(FLWB *fwb, ComPort::WriteBuffer *wb)
 //			*p.w = GetCRC16(fwb->vd.data, fwb->dataLen);
 
 			fwb->dataLen += 2;
+
+			fwb->vd.h.device = *((__packed u16*)(d+4));
 
 			if (RequestFlashWrite(fwb))
 			{
@@ -2235,7 +2222,7 @@ static void RequestTestWrite(FLWB *fwb)
 {
 	__packed struct Req 
 	{ 
-		u16 rw; u32 cnt; u32 cnt2; 
+		u32 cnt; 
 		
 		__packed struct Control	{ u16 version; u32 count; /* счётчик 50Гц измерений */ i16 voltage, temperature; byte status, flags; u16 errors; } con;
 		__packed struct Gen		{ u16 version; i16 voltage, current, offset, temperature;	byte status, flags;	u16 errors;	} gen;
@@ -2248,10 +2235,23 @@ static void RequestTestWrite(FLWB *fwb)
 		u16 crc; 
 	};
 
+	static u32 pt = 0;
+
 	if (fwb == 0)
 	{
 		return;
 	};
+
+	u32 t = GetMilliseconds();
+
+	if (t == pt)
+	{
+		freeFlWrBuf.Add(fwb);
+
+		return;
+	};
+
+	pt = t;
 
 	static byte nr = 0;
 	static byte nf = 0;
@@ -2261,16 +2261,15 @@ static void RequestTestWrite(FLWB *fwb)
 
 	Req &req = *((Req*)vd.data);
 
-	req.rw = 0xEC00;
+	vd.h.device = 0xEC00;
 	req.cnt = count;
-	req.cnt2 = count;
 
 	count += 1;
 
 	fwb->dataLen = sizeof(req);
 
-	req.crc = GetCRC16(fwb->vd.data, fwb->dataLen - 2);
-//	req.crc = CRC_CCITT_DMA(fwb->vd.data, fwb->dataLen - 2, 0xFFFF);
+//	req.crc = GetCRC16(fwb->vd.data, fwb->dataLen - 2);
+	req.crc = CRC_CCITT_DMA(fwb->vd.data, fwb->dataLen - 2, 0xFFFF);
 	
 	RequestFlashWrite(fwb);
 }
@@ -2337,7 +2336,7 @@ static void UpdateCom()
 
 			vd = &fwb->vd;
 
-			rb.data = ((byte*)vd->data)-4;
+			rb.data = ((byte*)vd->data)-10;
 			rb.maxLen = 0xF00;//sizeof(vd->data);
 
 			com1.Read(&rb, MS2RT(50), US2RT(200));
@@ -2488,6 +2487,11 @@ static void LoadVars()
 		GetTime(&nvv.f.start_rtc);
 		GetTime(&nvv.f.stop_rtc);
 		nvv.f.flags = 0;
+
+		for (u32 i = 0; i < ArraySize(nvv.badBlocks); i++)
+		{
+			nvv.badBlocks[i] = 0;
+		};
 
 		savesCount = 2;
 	};
@@ -2689,6 +2693,8 @@ static void LoadSessions()
 
 void FLASH_Init()
 {
+	nandSZ = NAND_GetMemSize();
+
 	LoadVars();
 
 	LoadSessions();

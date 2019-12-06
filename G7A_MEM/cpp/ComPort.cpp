@@ -24,6 +24,9 @@ extern dword millisecondsCount;
 		{false, HW::USART1,	 HW::PIOC, 1<<27, 2 }
 	};
 
+	#define READ_PIN_SET()	HW::PIOC->BSET(27)
+	#define READ_PIN_CLR()	HW::PIOC->BCLR(27)
+
 #elif defined(CPU_XMC48)	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 	#define __SCTR (PDL(1) | TRM(1) | FLE(7) | WLE(7))
@@ -46,11 +49,15 @@ extern dword millisecondsCount;
 	#define __TCSR (TDEN(1)|TDSSM(1))
 
 	ComPort::ComBase	ComPort::_bases[2] = { 
-		{false, 1, HW::USIC0_CH0,	 HW::P0, 0, PID_USIC0, HW::DMA0, 0 }, 
-		{false, 2, HW::USIC1_CH0,	 HW::P0, 0, PID_USIC1, HW::DMA0, 1 }
+		{false, 1, HW::USIC0_CH0,	 HW::P1, 1<<2, PID_USIC0, HW::DMA0, 0 }, 
+		{false, 2, HW::USIC1_CH0,	 HW::P0, 0<<0, PID_USIC1, HW::DMA0, 1 }
 	};
 
 	static u32 parityMask[3] = { PM(0), PM(3), PM(2) };
+
+	#define READ_PIN_SET()	HW::P1->BSET(0)
+	#define READ_PIN_CLR()	HW::P1->BCLR(0)
+
 
 #endif	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -597,8 +604,6 @@ void ComPort::EnableReceive(void* dst, word count)
 
 	#ifdef CPU_SAME53	
 
-		HW::PIOC->BSET(27);
-
 		_dmadsc->SRCADDR = &_SU->DATA;
 		_dmadsc->DSTADDR = (byte*)dst+count;
 		_dmadsc->DESCADDR = 0;
@@ -619,8 +624,6 @@ void ComPort::EnableReceive(void* dst, word count)
 		volatile u32 t;
 
 		__disable_irq();
-
-		HW::DLR->LNEN |= (1<<_dlr);
 
 		_dma->DMACFGREG = 1;
 
@@ -673,7 +676,7 @@ void ComPort::EnableReceive(void* dst, word count)
 		};
 
 		_chdma->SAR = (u32)&_SU->RBUF;
-		_chdma->DAR = (u32)dst;
+		_chdma->DAR = _startDmaCounter = _prevDmaCounter = (u32)dst;
 		_chdma->CFGL = HS_SEL_DST;
 		_chdma->CFGH = PROTCTL(1)|SRC_PER(_dlr);
 		_dma->CHENREG = _dmaChMask|(_dmaChMask<<8);
@@ -682,11 +685,11 @@ void ComPort::EnableReceive(void* dst, word count)
 		t = _SU->RBUF;
 		_SU->PSCR = ~0;
 
+		HW::DLR->LNEN |= (1<<_dlr);
+
 		_SU->CCR = _ModeRegister|RIEN;
 		_SU->INPR = 0;
 
-		_prevDmaCounter = 0;
-	
 		__enable_irq();
 
 	#endif
@@ -752,15 +755,13 @@ bool ComPort::Update()
 
 		case WAIT_READ: //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		{
-//			HW::PIOC->BSET(26);
-			u16 t = GetDmaCounter();
-//			HW::PIOC->BCLR(26);
+			u32 t = GetDmaCounter();
 
 			if (_prevDmaCounter == t)
 			{
 				if (_rtm.Timeout(_readTimeout))
 				{
-//					HW::PIOC->BCLR(27);
+					READ_PIN_CLR();
 
 					DisableReceive();
 					_pReadBuffer->len = GetRecievedLen();
@@ -771,11 +772,11 @@ bool ComPort::Update()
 			}
 			else
 			{
-//				HW::PIOC->BCLR(27);
+				READ_PIN_SET();
+
 				_prevDmaCounter = t;
 				_rtm.Reset();
 				_readTimeout = _postReadTimeout;
-//				HW::PIOC->BSET(27);
 			};
 
 		};
