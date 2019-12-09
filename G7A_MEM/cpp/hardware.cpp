@@ -16,6 +16,48 @@
 
 #ifdef CPU_SAME53	
 
+	// Test Pins
+	// 3	- PC00	- EN_VCORE
+	// 4	- PC01	- FCS3
+	// 5	- PC02	- FCS4
+	// 6	- PC03
+	// 14	- PB07
+	// 15	- PB08
+	// 16	- PB09
+	// 28	- PA10
+	// 29	- PA11
+	// 32	- PB10
+	// 33	- PB11
+	// 40	- PC10
+	// 41	- PC11
+	// 42	- PC12
+	// 43	- PC13
+	// 44	- PC14
+	// 52	- PA16
+	// 56	- PC16	- PHY_INT
+	// 57	- PC17
+	// 59	- PC19
+	// 60	- PC20	- GRXDV
+	// 61	- PC21
+	// 64	- PB16
+	// 65	- PB17
+	// 66	- PB18
+	// 68	- PB20	- I2C_Handler	
+	// 69	- PB21	- ManTrmIRQ
+	// 74	- PA24	- ManRcvIRQ
+	// 75	- PA25	- main loop
+	// 80	- PB24
+	// 81	- PB25
+	// 82	- PC24
+	// 83	- PC25
+	// 84	- PC26	- CRC_CCITT_DMA
+	// 85	- PC27	- MEM USART READ
+	// 86	- PC28	- MEM USART RTS	
+	// 87	- PA27
+	// 97	- PB00	- nc
+
+
+
 	#define GEN_MCK		0
 	#define GEN_32K		1
 	#define GEN_25M		2
@@ -64,8 +106,8 @@
 	#define Pin_ManRcvIRQ_Set()	HW::PIOA->BSET(24)
 	#define Pin_ManRcvIRQ_Clr()	HW::PIOA->BCLR(24)
 
-	#define Pin_ManTrmIRQ_Set()		
-	#define Pin_ManTrmIRQ_Clr()		
+	#define Pin_ManTrmIRQ_Set()	HW::PIOB->BSET(21)		
+	#define Pin_ManTrmIRQ_Clr()	HW::PIOB->BCLR(21)		
 
 	#define PIO_NAND_DATA	HW::PIOA
 	#define PIO_WP			HW::PIOB 
@@ -447,6 +489,8 @@ extern "C" void SystemInit()
 		HW::PIOA->CLR((1<<25)|(1<<24)|(1<<21));
 
 		PIO_MEM_USART->WRCONFIG = (MEM_TXD|MEM_RXD|MEM_SCK) |PORT_HWSEL_LO|PORT_PMUX(3)|PORT_WRPINCFG|PORT_PMUXEN|PORT_WRPMUX|PORT_PULLEN;
+
+		HW::PIOB->DIRSET = (1<<20)|(1<<21);
 
 		HW::PIOC->DIRSET = (1<<15)|(1<<28)|(1<<27)|(1<<26);
 		HW::PIOC->SET((1<<15));
@@ -1790,7 +1834,7 @@ static __irq void ManTrmIRQ()
 			data = manTB->data;
 			len = manTB->len;
 			stateManTrans = 1;
-			cmd = true;
+			cmd = false;
 
 			break;
 
@@ -2483,6 +2527,8 @@ static __irq void I2C_Handler()
 {
 	using namespace HW;
 
+	HW::PIOB->BSET(20);
+
 	byte state = I2C->INTFLAG;
 	bool nextdsc = false;
 
@@ -2578,6 +2624,8 @@ static __irq void I2C_Handler()
 			twi_lastDsc = twi_dsc = 0;
 		};
 	};
+
+	HW::PIOB->BCLR(20);
 }
 
 #elif defined(CPU_XMC48)
@@ -3023,6 +3071,8 @@ static void Init_CRC_CCITT_DMA()
 
 u16 CRC_CCITT_DMA(const void *data, u32 len, u16 init)
 {
+	HW::PIOC->BSET(26);
+
 	T_HW::DMADESC &dmadsc = DmaTable[CRC_DMACH];
 	T_HW::S_DMAC::S_DMAC_CH	&dmach = HW::DMAC->CH[CRC_DMACH];
 
@@ -3039,6 +3089,8 @@ u16 CRC_CCITT_DMA(const void *data, u32 len, u16 init)
 	HW::DMAC->SWTRIGCTRL = 1 << CRC_DMACH;
 
 	while ((dmach.CTRLA & DMCH_ENABLE) != 0);
+
+	HW::PIOC->BCLR(26);
 
 	return ReverseWord(HW::DMAC->CRCCHKSUM);
 }
@@ -3061,12 +3113,23 @@ static void WDT_Init()
 {
 	#ifdef CPU_SAME53	
 
+		HW::MCLK->APBAMASK |= APBA_WDT;
+
+		HW::WDT->CONFIG = WDT_WINDOW_CYC512|WDT_PER_CYC1024;
+	
+		#ifndef _DEBUG
+		HW::WDT->CTRLA = WDT_ENABLE|WDT_WEN|WDT_ALWAYSON;
+		#else
+		HW::WDT->CTRLA = WDT_ENABLE|WDT_WEN|WDT_ALWAYSON;
+		#endif
+
+		while(HW::WDT->SYNCBUSY);
 
 	#elif defined(CPU_XMC48)
 
 		HW::WDT_Enable();
 
-		HW::WDT->WLB = 0;
+		HW::WDT->WLB = 2 * OFI_FREQUENCY;
 		HW::WDT->WUB = 4 * OFI_FREQUENCY;
 		HW::SCU_CLK->WDTCLKCR = 0|SCU_CLK_WDTCLKCR_WDTSEL_OFI;
 
@@ -3075,10 +3138,10 @@ static void WDT_Init()
 		#else
 		HW::WDT->CTR = WDT_CTR_ENB_Msk;
 		#endif
+	
+		HW::ResetWDT();
 
 	#endif
-
-	HW::ResetWDT();
 }
 
 
@@ -3090,7 +3153,7 @@ void InitHardware()
 
 #ifdef CPU_SAME53	
 
-	HW::PIOA->BSET(13);
+//	HW::PIOA->BSET(13);
 
 	HW::GCLK->GENCTRL[GEN_32K]	= GCLK_DIV(1)	|GCLK_SRC_OSCULP32K	|GCLK_GENEN;
 

@@ -469,8 +469,8 @@ static void UpdateParams()
 	enum C { S = (__LINE__+3) };
 	switch(i++)
 	{
-		CALL( UpdateTemp()					);
-		CALL( UpdateMan(); HW::ResetWDT();	);
+		CALL( UpdateTemp()	);
+		CALL( UpdateMan(); 	);
 	};
 
 	i = (i > (__LINE__-S-3)) ? 0 : i;
@@ -623,13 +623,13 @@ int main()
 			//SetTrmBoudRate(0);
 //			SendManData(&mtb);
 
-//			HW::ResetWDT();
+			HW::ResetWDT();
 		};
 
-		if (rtm.Check(US2RT(500)))
-		{
-//			HW::P1->BTGL(3);
-		};
+//		if (rtm.Check(US2RT(500)))
+//		{
+////			HW::P1->BTGL(3);
+//		};
 
 	}; // while (1)
 }

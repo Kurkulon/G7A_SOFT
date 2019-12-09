@@ -635,23 +635,68 @@ namespace T_HW
 
 	struct S_WDT
 	{
-		RwReg8	CTRL     ;          /*	(*(RwReg8 *)0x40001000U) *< \brief (WDT) Control */
-		RwReg8	CONFIG   ;          /*	(*(RwReg8 *)0x40001001U) *< \brief (WDT) Configuration */
-		RwReg8	EWCTRL   ;          /*	(*(RwReg8 *)0x40001002U) *< \brief (WDT) Early Warning Interrupt Control */
-
-		RoReg8	z_reserved;
-
-		RwReg8	INTENCLR ;          /*	(*(RwReg8 *)0x40001004U) *< \brief (WDT) Interrupt Enable Clear */
-		RwReg8	INTENSET ;          /*	(*(RwReg8 *)0x40001005U) *< \brief (WDT) Interrupt Enable Set */
-		RwReg8	INTFLAG  ;          /*	(*(RwReg8 *)0x40001006U) *< \brief (WDT) Interrupt Flag Status and Clear */
-		RoReg8	STATUS   ;          /*	(*(RoReg8 *)0x40001007U) *< \brief (WDT) Status */
-		WoReg8	CLEAR    ;          /*	(*(WoReg8 *)0x40001008U) *< \brief (WDT) Clear */
+		RW8    CTRLA;       /**< \brief Offset: 0x0 (R/W  8) Control */
+		RW8    CONFIG;      /**< \brief Offset: 0x1 (R/W  8) Configuration */
+		RW8    EWCTRL;      /**< \brief Offset: 0x2 (R/W  8) Early Warning Interrupt Control */
+		RO8					z__Reserved1[0x1];
+		RW8    INTENCLR;    /**< \brief Offset: 0x4 (R/W  8) Interrupt Enable Clear */
+		RW8    INTENSET;    /**< \brief Offset: 0x5 (R/W  8) Interrupt Enable Set */
+		RW8    INTFLAG;     /**< \brief Offset: 0x6 (R/W  8) Interrupt Flag Status and Clear */
+	    RO8					z__Reserved2[0x1];
+		RO32	SYNCBUSY;    		/**< \brief Offset: 0x8 (R/  32) Synchronization Busy */
+		RW8		CLEAR;       		/**< \brief Offset: 0xC ( /W  8) Clear */
 
 		void Reset() { CLEAR = 0xA5; }
 	};
 
 	/* ========== Instance parameters for WDT peripheral ========== */
 	#define WDT_GCLK_ID                 3
+
+	#define	WDT_ENABLE         		(1<<1)            /**< \brief (WDT_CTRLA) Enable */
+	#define	WDT_WEN            		(1<<2)            /**< \brief (WDT_CTRLA) Watchdog Timer Window Mode Enable */
+	#define	WDT_ALWAYSON       		(1<<7)            /**< \brief (WDT_CTRLA) Always-On */
+	#define	WDT_EW 					(1<<0)            /**< \brief (WDT_INTFLAG) Early Warning */
+	#define	WDT_SYNCBUSY_ALWAYSON	(1<<3)            /**< \brief (WDT_SYNCBUSY) Always-On Synchronization Busy */
+	#define	WDT_SYNCBUSY_CLEAR   	(1<<4)            /**< \brief (WDT_SYNCBUSY) Clear Synchronization Busy */
+
+	#define	WDT_PER_CYC8          (0x0)   /**< \brief (WDT_CONFIG) 8 clock cycles */
+	#define	WDT_PER_CYC16         (0x1)   /**< \brief (WDT_CONFIG) 16 clock cycles */
+	#define	WDT_PER_CYC32         (0x2)   /**< \brief (WDT_CONFIG) 32 clock cycles */
+	#define	WDT_PER_CYC64         (0x3)   /**< \brief (WDT_CONFIG) 64 clock cycles */
+	#define	WDT_PER_CYC128        (0x4)   /**< \brief (WDT_CONFIG) 128 clock cycles */
+	#define	WDT_PER_CYC256        (0x5)   /**< \brief (WDT_CONFIG) 256 clock cycles */
+	#define	WDT_PER_CYC512        (0x6)   /**< \brief (WDT_CONFIG) 512 clock cycles */
+	#define	WDT_PER_CYC1024       (0x7)   /**< \brief (WDT_CONFIG) 1024 clock cycles */
+	#define	WDT_PER_CYC2048       (0x8)   /**< \brief (WDT_CONFIG) 2048 clock cycles */
+	#define	WDT_PER_CYC4096       (0x9)   /**< \brief (WDT_CONFIG) 4096 clock cycles */
+	#define	WDT_PER_CYC8192       (0xA)   /**< \brief (WDT_CONFIG) 8192 clock cycles */
+	#define	WDT_PER_CYC16384      (0xB)   /**< \brief (WDT_CONFIG) 16384 clock cycles */
+
+	#define	WDT_WINDOW_CYC8       (0x0<<4)   /**< \brief (WDT_CONFIG) 8 clock cycles */
+	#define	WDT_WINDOW_CYC16      (0x1<<4)   /**< \brief (WDT_CONFIG) 16 clock cycles */
+	#define	WDT_WINDOW_CYC32      (0x2<<4)   /**< \brief (WDT_CONFIG) 32 clock cycles */
+	#define	WDT_WINDOW_CYC64      (0x3<<4)   /**< \brief (WDT_CONFIG) 64 clock cycles */
+	#define	WDT_WINDOW_CYC128     (0x4<<4)   /**< \brief (WDT_CONFIG) 128 clock cycles */
+	#define	WDT_WINDOW_CYC256     (0x5<<4)   /**< \brief (WDT_CONFIG) 256 clock cycles */
+	#define	WDT_WINDOW_CYC512     (0x6<<4)   /**< \brief (WDT_CONFIG) 512 clock cycles */
+	#define	WDT_WINDOW_CYC1024    (0x7<<4)   /**< \brief (WDT_CONFIG) 1024 clock cycles */
+	#define	WDT_WINDOW_CYC2048    (0x8<<4)   /**< \brief (WDT_CONFIG) 2048 clock cycles */
+	#define	WDT_WINDOW_CYC4096    (0x9<<4)   /**< \brief (WDT_CONFIG) 4096 clock cycles */
+	#define	WDT_WINDOW_CYC8192    (0xA<<4)   /**< \brief (WDT_CONFIG) 8192 clock cycles */
+	#define	WDT_WINDOW_CYC16384   (0xB<<4)   /**< \brief (WDT_CONFIG) 16384 clock cycles */
+
+	#define	WDT_EWOFFSET_CYC8     (0x0)   /**< \brief (WDT_EWCTRL) 8 clock cycles */
+	#define	WDT_EWOFFSET_CYC16    (0x1)   /**< \brief (WDT_EWCTRL) 16 clock cycles */
+	#define	WDT_EWOFFSET_CYC32    (0x2)   /**< \brief (WDT_EWCTRL) 32 clock cycles */
+	#define	WDT_EWOFFSET_CYC64    (0x3)   /**< \brief (WDT_EWCTRL) 64 clock cycles */
+	#define	WDT_EWOFFSET_CYC128   (0x4)   /**< \brief (WDT_EWCTRL) 128 clock cycles */
+	#define	WDT_EWOFFSET_CYC256   (0x5)   /**< \brief (WDT_EWCTRL) 256 clock cycles */
+	#define	WDT_EWOFFSET_CYC512   (0x6)   /**< \brief (WDT_EWCTRL) 512 clock cycles */
+	#define	WDT_EWOFFSET_CYC1024  (0x7)   /**< \brief (WDT_EWCTRL) 1024 clock cycles */
+	#define	WDT_EWOFFSET_CYC2048  (0x8)   /**< \brief (WDT_EWCTRL) 2048 clock cycles */
+	#define	WDT_EWOFFSET_CYC4096  (0x9)   /**< \brief (WDT_EWCTRL) 4096 clock cycles */
+	#define	WDT_EWOFFSET_CYC8192  (0xA)   /**< \brief (WDT_EWCTRL) 8192 clock cycles */
+	#define	WDT_EWOFFSET_CYC16384 (0xB)   /**< \brief (WDT_EWCTRL) 16384 clock cycles */
 
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

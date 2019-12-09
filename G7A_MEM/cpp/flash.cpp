@@ -1470,7 +1470,7 @@ static void InitSessions()
 		while (write.Update()) ;
 	};
 
-/*	u32 ms = 0, me = 0, ls = -1;
+	u32 ms = 0, me = 0, ls = -1;
 	u32 sp = 0;
 
 	bool bm = false, bl = false;
@@ -1550,7 +1550,6 @@ static void InitSessions()
 
 
 	}; // 	for (u16 i = 128, ind = nvv.index; i > 0; i--, ind = (ind-1)&127)
-*/
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
