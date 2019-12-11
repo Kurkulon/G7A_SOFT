@@ -4,7 +4,7 @@
 #include "COM_DEF.h"
 
 #include "hardware.h"
-#include "options.h"
+//#include "options.h"
 
 //#pragma O3
 //#pragma Otime
@@ -40,8 +40,8 @@
 	// 60	- PC20	- GRXDV
 	// 61	- PC21
 	// 64	- PB16
-	// 65	- PB17
-	// 66	- PB18
+	// 65	- PB17	- GEN_1M
+	// 66	- PB18	- ManRcvIRQ sync true
 	// 68	- PB20	- I2C_Handler	
 	// 69	- PB21	- ManTrmIRQ
 	// 74	- PA24	- ManRcvIRQ
@@ -62,7 +62,7 @@
 	#define GEN_32K		1
 	#define GEN_25M		2
 	#define GEN_1M		3
-	#define GEN_500K	4
+	//#define GEN_500K	4
 
 	#define I2C			HW::I2C3
 	#define PIO_I2C		HW::PIOA 
@@ -108,6 +108,9 @@
 
 	#define Pin_ManTrmIRQ_Set()	HW::PIOB->BSET(21)		
 	#define Pin_ManTrmIRQ_Clr()	HW::PIOB->BCLR(21)		
+
+	#define Pin_ManRcvSync_Set()	HW::PIOB->BSET(18)		
+	#define Pin_ManRcvSync_Clr()	HW::PIOB->BCLR(18)		
 
 	#define PIO_NAND_DATA	HW::PIOA
 	#define PIO_WP			HW::PIOB 
@@ -211,6 +214,9 @@
 
 	#define Pin_ManTrmIRQ_Set()		HW::P1->SET(1<<3);
 	#define Pin_ManTrmIRQ_Clr()		HW::P1->CLR(1<<3);
+
+	#define Pin_ManRcvSync_Set()			
+	#define Pin_ManRcvSync_Clr()			
 
 	#define PIO_WP			HW::P3 
 	#define PIO_RB			HW::P1
@@ -490,7 +496,8 @@ extern "C" void SystemInit()
 
 		PIO_MEM_USART->WRCONFIG = (MEM_TXD|MEM_RXD|MEM_SCK) |PORT_HWSEL_LO|PORT_PMUX(3)|PORT_WRPINCFG|PORT_PMUXEN|PORT_WRPMUX|PORT_PULLEN;
 
-		HW::PIOB->DIRSET = (1<<20)|(1<<21);
+		HW::PIOB->DIRSET = (1<<18)|(1<<20)|(1<<21);
+		HW::PIOB->WRCONFIG = ((1<<17)>>16) |PORT_HWSEL_HI|PORT_PMUX(11)|PORT_WRPINCFG|PORT_PMUXEN|PORT_WRPMUX;
 
 		HW::PIOC->DIRSET = (1<<15)|(1<<28)|(1<<27)|(1<<26);
 		HW::PIOC->SET((1<<15));
@@ -1997,6 +2004,8 @@ bool SendManData(MTB *mtb)
 		ManTT->PRS = trmHalfPeriod-1;
 		ManTT->PSC = 3; //0.08us
 
+		ManCCU->GCSS = CCU4_S0SE;  
+
 		ManTT->SWR = ~0;
 		ManTT->INTE = CC4_PME;
 
@@ -2068,6 +2077,7 @@ static void ManRcvEnd(bool ok)
 #ifdef CPU_SAME53	
 	ManRT->INTENCLR = ~0;
 #elif defined(CPU_XMC48)
+	ManRT->INTE = 0;
 #endif
 
 	manRB->OK = ok;
@@ -2307,6 +2317,7 @@ static __irq void ManRcvIRQ2()
 		}
 	 	else
 		{
+			Pin_ManRcvSync_Set();
 
 			_sync = false;
 
@@ -2334,6 +2345,8 @@ static __irq void ManRcvIRQ2()
 
 				rcvManLen += 1;	
 			};
+
+			Pin_ManRcvSync_Clr();
 		};
 	};
 
@@ -3086,7 +3099,7 @@ u16 CRC_CCITT_DMA(const void *data, u32 len, u16 init)
 
 	dmach.CTRLA = DMCH_ENABLE/*|DMCH_TRIGACT_TRANSACTION*/;
 
-	HW::DMAC->SWTRIGCTRL = 1 << CRC_DMACH;
+	HW::DMAC->SWTRIGCTRL = 1UL << CRC_DMACH;
 
 	while ((dmach.CTRLA & DMCH_ENABLE) != 0);
 
@@ -3129,8 +3142,8 @@ static void WDT_Init()
 
 		HW::WDT_Enable();
 
-		HW::WDT->WLB = 2 * OFI_FREQUENCY;
-		HW::WDT->WUB = 4 * OFI_FREQUENCY;
+		HW::WDT->WLB = OFI_FREQUENCY/2;
+		HW::WDT->WUB = (3 * OFI_FREQUENCY)/2;
 		HW::SCU_CLK->WDTCLKCR = 0|SCU_CLK_WDTCLKCR_WDTSEL_OFI;
 
 		#ifndef _DEBUG
@@ -3138,8 +3151,6 @@ static void WDT_Init()
 		#else
 		HW::WDT->CTR = WDT_CTR_ENB_Msk;
 		#endif
-	
-		HW::ResetWDT();
 
 	#endif
 }
@@ -3157,11 +3168,11 @@ void InitHardware()
 
 	HW::GCLK->GENCTRL[GEN_32K]	= GCLK_DIV(1)	|GCLK_SRC_OSCULP32K	|GCLK_GENEN;
 
-	HW::GCLK->GENCTRL[GEN_1M]	= GCLK_DIV(25)	|GCLK_SRC_XOSC1		|GCLK_GENEN;
+	HW::GCLK->GENCTRL[GEN_1M]	= GCLK_DIV(25)	|GCLK_SRC_XOSC1		|GCLK_GENEN		|GCLK_OE;
 
 	HW::GCLK->GENCTRL[GEN_25M]	= GCLK_DIV(1)	|GCLK_SRC_XOSC1		|GCLK_GENEN;
 
-	HW::GCLK->GENCTRL[GEN_500K] = GCLK_DIV(50)	|GCLK_SRC_XOSC1		|GCLK_GENEN;
+//	HW::GCLK->GENCTRL[GEN_500K] = GCLK_DIV(50)	|GCLK_SRC_XOSC1		|GCLK_GENEN;
 
 
 	HW::MCLK->APBAMASK |= APBA_EIC;
@@ -3193,18 +3204,6 @@ void InitHardware()
 	Init_CRC_CCITT_DMA();
 
 	WDT_Init();
-
-#ifndef _DEBUG
-
-	//if ((WDT->CTRL & 0x82) == 0)
-	//{
-	//	WDT->CONFIG = 0x0B; // 16384 clock cycles
-	//	WDT->CTRL = 0x82; // Always on, enabled
-	//};
-
-	//ResetWDT();
-
-#endif
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

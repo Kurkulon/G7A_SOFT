@@ -97,6 +97,7 @@ static const bool verifyWritePage = false; // Проверка записаной страницы, путём
 
 static SessionInfo lastSessionInfo;
 
+u16 deviceID = 0;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -2194,7 +2195,7 @@ static bool RequestFunc(FLWB *fwb, ComPort::WriteBuffer *wb)
 
 			fwb->dataLen += 2;
 
-			fwb->vd.h.device = *((__packed u16*)(d+4));
+			fwb->vd.h.device = deviceID = *((__packed u16*)(d+4));
 
 			if (RequestFlashWrite(fwb))
 			{

@@ -211,6 +211,7 @@ extern void NAND_FullErase();
 
 extern void SetNumDevice(u16 num);
 extern u16 GetNumDevice();
+inline u16 GetDeviceID() { extern u16 deviceID; return deviceID; }
 
 extern void StartSendSession();
 extern FileDsc* GetSessionInfo(u16 session, u64 adr);
