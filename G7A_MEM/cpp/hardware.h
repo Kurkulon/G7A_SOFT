@@ -87,8 +87,10 @@ struct DSCI2C
 	u16				wlen;
 	u16				wlen2;
 	u16				rlen;
+	u16				readedLen;
 	byte			adr;
 	volatile bool	ready;
+	volatile bool	ack;
 };
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -97,6 +99,7 @@ struct DSCI2C
 //inline bool Read_I2C(DSCI2C *d) { return Write_I2C(d); }
 //extern bool Check_I2C_ready();
 extern bool I2C_AddRequest(DSCI2C *d);
+extern void I2C_Update();
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

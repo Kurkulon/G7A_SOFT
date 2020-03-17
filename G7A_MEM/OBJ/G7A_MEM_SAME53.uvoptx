@@ -117,10 +117,6 @@
       <TargetDriverDllRegistry>
         <SetRegEntry>
           <Number>0</Number>
-          <Key>DLGUARM</Key>
-        </SetRegEntry>
-        <SetRegEntry>
-          <Number>0</Number>
           <Key>UL2CM3</Key>
           <Name>UL2CM3(-S0 -C0 -P0 )  -FN1 -FC1000 -FD20000000 -FF0ATSAME53_512 -FL080000 -FS00 -FP0($$Device:ATSAME53N19A$keil\arm_addon\flash\ATSAME53_512.FLM)</Name>
         </SetRegEntry>

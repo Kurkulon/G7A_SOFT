@@ -449,14 +449,14 @@
 
 	#define __BRG (DCTQ(24))
 
-	#define __DX0CR (DSEL(1) | INSW(0) | DFEN(0) | DSEN(1) | DPOL(0) | SFSEL(0) | CM(0) | DXS(0))
-	#define __DX1CR (DSEL(0) | INSW(0) | DFEN(0) | DSEN(1) | DPOL(0) | SFSEL(0) | CM(0) | DXS(0))
+	#define __DX0CR (DSEL(1) | INSW(0) | DFEN(1) | DSEN(1) | DPOL(0) | SFSEL(1) | CM(0) | DXS(0))
+	#define __DX1CR (DSEL(0) | INSW(0) | DFEN(1) | DSEN(1) | DPOL(0) | SFSEL(1) | CM(0) | DXS(0))
 	#define __DX2CR (DSEL(0) | INSW(0) | DFEN(0) | DSEN(0) | DPOL(0) | SFSEL(0) | CM(0) | DXS(0))
 	#define __DX3CR (DSEL(0) | INSW(0) | DFEN(0) | DSEN(0) | DPOL(0) | SFSEL(0) | CM(0) | DXS(0))
 
 	#define __PCR (STIM)
 
-	#define __FDR (STEP(0x3FF) | DM(1))
+	#define __FDR ((1024 - (((MCK + 400000/2) / 400000 + 8) / 16)) | DM(1))
 
 	#define __TCSR (TDEN(1)|TDSSM(1))
 
@@ -2576,6 +2576,8 @@ static __irq void I2C_Handler()
 
 			twi_wrCount--;
 
+			twi_dsc->ack = true;
+
 			if(twi_wrCount == 0 && twi_wrCount2 != 0)
 			{
 				twi_wrPtr = twi_wrPtr2;
@@ -2603,6 +2605,7 @@ static __irq void I2C_Handler()
 	if (nextdsc)
 	{
 		twi_dsc->ready = true;
+		twi_dsc->readedLen = twi_dsc->rlen - twi_rdCount;
 
 		DSCI2C *ndsc = twi_dsc->next;
 
@@ -2612,6 +2615,8 @@ static __irq void I2C_Handler()
 			twi_dsc = ndsc;
 
 			twi_dsc->ready = false;
+			twi_dsc->ack = false;
+			twi_dsc->readedLen = 0;
 
 			twi_wrPtr = (byte*)twi_dsc->wdata;	
 			twi_rdPtr = (byte*)twi_dsc->rdata;	
@@ -2658,6 +2663,8 @@ static __irq void I2C_Handler()
 			I2C->TBUF[0] = TDF_MASTER_SEND | *twi_wrPtr++;
 
 			twi_wrCount--;
+
+			twi_dsc->ack = true;
 
 			if(twi_wrCount == 0 && twi_wrCount2 != 0)
 			{
@@ -2706,6 +2713,7 @@ static __irq void I2C_Handler()
 	else
 	{
 		twi_dsc->ready = true;
+		twi_dsc->readedLen = twi_dsc->rlen - twi_rdCount;
 
 //		state = 0;
 		
@@ -2717,6 +2725,8 @@ static __irq void I2C_Handler()
 			twi_dsc = ndsc;
 
 			twi_dsc->ready = false;
+			twi_dsc->ack = false;
+			twi_dsc->readedLen = 0;
 
 			twi_wrPtr = (byte*)twi_dsc->wdata;	
 			twi_rdPtr = (byte*)twi_dsc->rdata;	
@@ -2763,6 +2773,8 @@ bool I2C_Write(DSCI2C *d)
 	twi_lastDsc = twi_dsc = d;
 
 	twi_dsc->ready = false;
+	twi_dsc->ack = false;
+	twi_dsc->readedLen = 0;
 
 	twi_wrPtr = (byte*)twi_dsc->wdata;	
 	twi_rdPtr = (byte*)twi_dsc->rdata;	
@@ -2838,25 +2850,107 @@ bool I2C_AddRequest(DSCI2C *d)
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-//bool I2C_Check_ready()
-//{
-//	if (twi_dsc == 0)
-//	{ 
-//		return true; 
-//	}
-//	else if (I2C->STATUS.BUSSTATE == BUSSTATE_IDLE)
-//	{
-//		twi_dsc->ready = true;
-//		twi_dsc = 0;
-//
-//		return true;
-//	}
-//	else
-//	{
-//		return false;
-//	};
-//}
+void I2C_Update()
+{
+#ifdef CPU_SAME53
 
+#elif defined(CPU_XMC48)
+
+	using namespace HW;
+
+	static TM32 tm;
+
+	__disable_irq();
+
+	if (twi_dsc != 0)
+	{
+		if (I2C->PSR_IICMode & (PCR|NACK|ACK|RIF|AIF))
+		{
+			tm.Reset();
+		}
+		else if (tm.Check(10))
+		{
+			HW::Peripheral_Disable(PID_USIC2);
+
+ 			P5->ModePin0(A1OD);
+			P5->ModePin2(A1PP);
+
+			HW::Peripheral_Enable(I2C_PID);
+
+			I2C->KSCFG = MODEN|BPMODEN|BPNOM|NOMCFG(0);
+
+			I2C->SCTR = __SCTR;
+
+			I2C->FDR = __FDR;
+			I2C->BRG = __BRG;
+		    
+			I2C->TCSR = __TCSR;
+
+			I2C->PSCR = ~0;
+
+			I2C->CCR = 0;
+
+			I2C->DX0CR = __DX0CR;
+			I2C->DX1CR = __DX1CR;
+
+			I2C->CCR = __CCR;
+
+			I2C->PCR_IICMode = __PCR;
+
+			VectorTableExt[I2C_IRQ] = I2C_Handler;
+			CM4::NVIC->CLR_PR(I2C_IRQ);
+			CM4::NVIC->SET_ER(I2C_IRQ);
+
+			twi_dsc->ready = true;
+			twi_dsc->readedLen = twi_dsc->rlen - twi_rdCount;
+
+			DSCI2C *ndsc = twi_dsc->next;
+
+			if (ndsc != 0)
+			{
+				twi_dsc->next = 0;
+				twi_dsc = ndsc;
+
+				twi_dsc->ready = false;
+				twi_dsc->ack = false;
+				twi_dsc->readedLen = 0;
+
+				twi_wrPtr = (byte*)twi_dsc->wdata;	
+				twi_rdPtr = (byte*)twi_dsc->rdata;	
+				twi_wrPtr2 = (byte*)twi_dsc->wdata2;	
+				twi_wrCount = twi_dsc->wlen;
+				twi_wrCount2 = twi_dsc->wlen2;
+				twi_rdCount = twi_dsc->rlen;
+				twi_adr = twi_dsc->adr;
+
+				if (twi_wrPtr2 == 0) twi_wrCount2 = 0;
+
+				I2C->PSCR = ~0;//RIF|AIF|TBIF|ACK|NACK|PCR;
+
+				I2C->CCR |= RIEN|AIEN;
+				I2C->PCR_IICMode |= PCRIEN|NACKIEN|ARLIEN|SRRIEN|ERRIEN|ACKIEN;
+
+				I2C->TBUF[0] = TDF_MASTER_START | (twi_dsc->adr << 1) | ((twi_wrCount == 0) ? 1 : 0);
+			}
+			else
+			{
+				I2C->CCR = __CCR;
+				I2C->PCR_IICMode = __PCR;
+
+				twi_lastDsc = twi_dsc = 0;
+			};
+		};
+	}
+	else
+	{
+		tm.Reset();
+	};
+	
+	__enable_irq();
+
+#endif
+
+}
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -2905,13 +2999,13 @@ bool I2C_Init()
 	HW::Peripheral_Enable(I2C_PID);
 
  	P5->ModePin0(A1OD);
-	P5->ModePin2(A1OD);
+	P5->ModePin2(A1PP);
 
 	I2C->KSCFG = MODEN|BPMODEN|BPNOM|NOMCFG(0);
 
 	I2C->SCTR = __SCTR;
 
-	I2C->FDR = (1024 - (((MCK + 400000/2) / 400000 + 8) / 16)) | DM(1);
+	I2C->FDR = __FDR;
 	I2C->BRG = __BRG;
     
 	I2C->TCSR = __TCSR;

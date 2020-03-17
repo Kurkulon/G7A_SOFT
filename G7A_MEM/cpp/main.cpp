@@ -66,7 +66,7 @@ static void Response_0(u16 rw, MTB &mtb)
 	rsp.wrVec = FLASH_Vectors_Saved_Get();
 	rsp.errVec = FLASH_Vectors_Errors_Get();
 	*((__packed u64*)rsp.wrAdr) = FLASH_Current_Adress_Get();
-	rsp.temp = cpu_temp;//temp*5/2;
+	rsp.temp = temp*5/2;
 	rsp.status = FLASH_Status();
 
 	GetTime(&rsp.rtc);
@@ -209,7 +209,7 @@ static bool RequestMan_20(const u16 *data, u16 len, MTB &mtb)
 	rsp.wrVec = FLASH_Vectors_Saved_Get();
 	rsp.errVec = FLASH_Vectors_Errors_Get();
 	*((__packed u64*)rsp.wrAdr) = FLASH_Current_Adress_Get();
-	rsp.temp = temp;
+	rsp.temp = (temp+2)/4;
 	rsp.status = FLASH_Status();
 
 	GetTime(&rsp.rtc);
@@ -424,14 +424,21 @@ static void UpdateTemp()
 
 			if (dsc.ready)
 			{
-				i16 t = ((i16)ReverseWord(rbuf) + 32) / 64;
-
-				if (t < (-60*4))
+				if (dsc.ack && dsc.readedLen == dsc.rlen)
 				{
-					t += 256*4;
-				};
+					i16 t = ((i16)ReverseWord(rbuf) + 128) / 256;
 
-				temp = t;
+					if (t < (-60))
+					{
+						t += 256;
+					};
+
+					temp = t;
+				}
+				else
+				{
+					temp = -273;
+				};
 
 				i++;
 			};
@@ -577,8 +584,11 @@ static void UpdateParams()
 	enum C { S = (__LINE__+3) };
 	switch(i++)
 	{
-		CALL( UpdateTemp()	);
-		CALL( UpdateMan(); 	);
+		CALL( UpdateTemp()		);
+		CALL( UpdateMan(); 		);
+		CALL( FLASH_Update();	);
+		CALL( UpdateTraps();	);
+		CALL( I2C_Update();		);
 	};
 
 	i = (i > (__LINE__-S-3)) ? 0 : i;
@@ -598,7 +608,6 @@ static void UpdateMisc()
 	switch(i++)
 	{
 		CALL( UpdateEMAC();		);
-		CALL( FLASH_Update();	);
 		CALL( UpdateParams();	);
 	};
 
@@ -619,7 +628,6 @@ static void Update()
 	switch(i++)
 	{
 		CALL( NAND_Idle();		);
-		CALL( UpdateTraps();	);
 		CALL( UpdateMisc();		);
 	};
 
