@@ -499,8 +499,8 @@ extern "C" void SystemInit()
 		HW::PIOB->DIRSET = (1<<18)|(1<<20)|(1<<21);
 		HW::PIOB->WRCONFIG = ((1<<17)>>16) |PORT_HWSEL_HI|PORT_PMUX(11)|PORT_WRPINCFG|PORT_PMUXEN|PORT_WRPMUX;
 
-		HW::PIOC->DIRSET = (1<<15)|(1<<28)|(1<<27)|(1<<26);
-		HW::PIOC->SET((1<<15));
+		HW::PIOC->DIRSET = (1<<15)|(1<<28)|(1<<27)|(1<<26)|(1<<0);
+		HW::PIOC->SET((1<<15)/*|(1<<0)*/);
 
 		HW::PIOA->BCLR(25);
 		HW::PIOA->BSET(25);
@@ -3296,8 +3296,10 @@ void InitHardware()
 	InitManTransmit();
 	InitManRecieve();
 	Init_CRC_CCITT_DMA();
-
+	
 	WDT_Init();
+
+	HW::PIOC->BSET(0);
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
