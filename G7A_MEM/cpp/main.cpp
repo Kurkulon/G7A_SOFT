@@ -24,6 +24,7 @@ const char build_date[] __attribute__((used)) = "\n" __DATE__ "\n" __TIME__ "\n"
 u32 fps;
 i16 temp = 0;
 i16 cpu_temp = 0;
+i16 tempClock = 0;
 
 //inline u16 ReverseWord(u16 v) { __asm	{ rev16 v, v };	return v; }
 
@@ -66,7 +67,7 @@ static void Response_0(u16 rw, MTB &mtb)
 	rsp.wrVec = FLASH_Vectors_Saved_Get();
 	rsp.errVec = FLASH_Vectors_Errors_Get();
 	*((__packed u64*)rsp.wrAdr) = FLASH_Current_Adress_Get();
-	rsp.temp = temp*5/2;
+	rsp.temp = (temp+2)/4;
 	rsp.status = FLASH_Status();
 
 	GetTime(&rsp.rtc);
@@ -209,7 +210,7 @@ static bool RequestMan_20(const u16 *data, u16 len, MTB &mtb)
 	rsp.wrVec = FLASH_Vectors_Saved_Get();
 	rsp.errVec = FLASH_Vectors_Errors_Get();
 	*((__packed u64*)rsp.wrAdr) = FLASH_Current_Adress_Get();
-	rsp.temp = (temp+2)/4;
+	rsp.temp = (temp+5)/10;
 	rsp.status = FLASH_Status();
 
 	GetTime(&rsp.rtc);
@@ -433,11 +434,11 @@ static void UpdateTemp()
 						t += 256;
 					};
 
-					temp = t;
+					tempClock = t;
 				}
 				else
 				{
-					temp = -273;
+					tempClock = -273;
 				};
 
 				i++;
@@ -470,23 +471,66 @@ static void UpdateTemp()
 
 			if (dsc2.ready)
 			{
-				//HW::SCU_GENERAL->DTSCON = SCU_GENERAL_DTSCON_START_Msk;
+				buf[0] = 0;
 
-				i = 0; //i++;
+				dsc.adr = 0x49;
+				dsc.wdata = buf;
+				dsc.wlen = 1;
+				dsc.rdata = &rbuf;
+				dsc.rlen = 2;
+				dsc.wdata2 = 0;
+				dsc.wlen2 = 0;
+
+				if (I2C_AddRequest(&dsc))
+				{
+					i++;
+				};
 			};
 
 			break;
 
-		//case 4:
+		case 4:
 
-		//	if (HW::SCU_GENERAL->DTSSTAT & SCU_GENERAL_DTSSTAT_RDY_Msk)
-		//	{
-		//		cpu_temp = ((i32)(HW::SCU_GENERAL->DTSSTAT & SCU_GENERAL_DTSSTAT_RESULT_Msk) - 605) * 1000 / 205;
+			if (dsc.ready)
+			{
+				if (dsc.ack && dsc.readedLen == dsc.rlen)
+				{
+					i32 t = (i16)ReverseWord(rbuf);
 
-		//		i = 0;
-		//	};
+					temp = (t * 10 + 64) / 128;
+				};
+				//else
+				//{
+				//	temp = -2730;
+				//};
 
-		//	break;
+#ifdef CPU_SAME53	
+
+				i = 0;
+			};
+
+			break;
+
+#elif defined(CPU_XMC48)
+
+				HW::SCU_GENERAL->DTSCON = SCU_GENERAL_DTSCON_START_Msk;
+				
+				i++;
+			};
+
+			break;
+
+		case 5:
+
+			if (HW::SCU_GENERAL->DTSSTAT & SCU_GENERAL_DTSSTAT_RDY_Msk)
+			{
+				cpu_temp = ((i32)(HW::SCU_GENERAL->DTSSTAT & SCU_GENERAL_DTSSTAT_RESULT_Msk) - 605) * 1000 / 205;
+
+				i = 0;
+			};
+
+			break;
+#endif
 	};
 }
 
