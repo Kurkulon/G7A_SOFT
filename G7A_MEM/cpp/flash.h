@@ -8,7 +8,7 @@
 #include "trap_def.h"
 
 
-#define FLWB_LEN (8192+32)
+#define FLWB_LEN (NAND_PAGE_SIZE+32)
 #define FLRB_LEN 1536
 
 //#define NAND_MAX_CHIP		8

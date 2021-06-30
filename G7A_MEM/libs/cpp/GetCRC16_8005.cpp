@@ -1,12 +1,12 @@
 #include "types.h"
-#include "CRC16_CCIT.h"
+#include "CRC16_8005.h"
 
 #pragma O3
 #pragma Otime
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-word GetCRC16_CCIT(const void *data, u32 len, word init)
+word GetCRC16_8005(const void *data, u32 len, word init)
 {
 	DataCRC CRC = { init };
 
@@ -14,7 +14,7 @@ word GetCRC16_CCIT(const void *data, u32 len, word init)
 
 	for ( ; len > 0; len--)
 	{
-		CRC.w = tableCRC_CCIT[CRC.b[0] ^ *(s++)] ^ CRC.b[1];
+		CRC.w = tableCRC_8005[CRC.b[0] ^ *(s++)] ^ CRC.b[1];
 	};
 
 	return CRC.w;

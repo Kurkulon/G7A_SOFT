@@ -71,6 +71,16 @@ static List<FLRB> readFlBuf;
 static FLWB *curWrBuf = 0;
 static FLRB *curRdBuf = 0;
 
+struct PageBuffer { PageBuffer *next; u32 page; u32 prevPage; byte data[NAND_PAGE_SIZE]; };
+
+static PageBuffer _pageBuf[2];
+
+static List<PageBuffer> freePageBuffer;
+static List<PageBuffer> readyPageBuffer;
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
 //static SpareArea spareRead;
 //static SpareArea spareWrite;
 //static SpareArea spareErase;
@@ -111,7 +121,8 @@ __packed struct NVV // NonVolatileVars
 
 	u32 prevFilePage;
 
-	u32 badBlocks[4];
+	u32 badBlocks[NAND_MAX_CHIP];
+	u32 pageError[NAND_MAX_CHIP];
 };
 
 
@@ -174,7 +185,9 @@ enum NandState
 	NAND_STATE_FULL_ERASE_START,
 	NAND_STATE_FULL_ERASE_0,
 	NAND_STATE_CREATE_FILE,
-	NAND_STATE_SEND_SESSION
+	NAND_STATE_SEND_SESSION,
+	NAND_STATE_SEND_BAD_BLOCKS,
+	NAND_STATE_SEND_PAGE_ERRORS
 };
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -222,6 +235,11 @@ static void InitFlashBuffer()
 	for (byte i = 0; i < ArraySize(flashReadBuffer); i++)
 	{
 		freeFlRdBuf.Add(&flashReadBuffer[i]);
+	};
+	
+	for (byte i = 0; i < ArraySize(_pageBuf); i++)
+	{
+		freePageBuffer.Add(&_pageBuf[i]);
 	};
 }
 
@@ -501,8 +519,8 @@ struct Write
 
 	EraseBlock eraseBlock;
 
-	u32	wrBuf[2048/4];
-	u32	rdBuf[2112/4];
+	u32	wrBuf[NAND_PAGE_SIZE/4];
+	u32	rdBuf[(NAND_PAGE_SIZE+448)/4];
 
 
 	bool Start();
@@ -829,6 +847,7 @@ bool Write::Update()
 				if ((t & 1) != 0) // program error
 				{
 					spare.fbp += 1;
+					nvv.pageError[wr.chip] += 1;
 
 					NAND_CmdWritePage(wr.pg, wr.block, wr.page);
 
@@ -1160,37 +1179,64 @@ bool ReadSpare::Update()
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-namespace Read
+struct Read
 {
-	enum {	WAIT = 0,READ_START,READ_1, /*READ_2,*/ READ_PAGE,READ_PAGE_1,FIND_START,FIND_1,/*FIND_2,*/FIND_3/*,FIND_4*/};
+	enum {	WAIT = 0, READ_START, /*READ_1, READ_2, READ_3,*/ READ_PAGE, /*READ_PAGE_1,*/ FIND_START,FIND_1,/*FIND_2,*/FIND_3/*,FIND_4*/};
 
-	static FLADR rd(0, 0, 0, 0);
-	static byte*	rd_data = 0;
-	static u16		rd_count = 0;
+	FLADR	rd;
+	byte*	rd_data;
+	u16		rd_count;
 
-	static u32 		sparePage = -1;
+	u32 	sparePage;
+	u32 	prevSparePage;
 
-	static SpareArea spare;
+	SpareArea spare;
 
-	static ReadSpare readSpare;
+	ReadSpare readSpare;
 
-	static bool vecStart = false;
+	bool vecStart;
 
-	static byte state;
+	byte state;
+	byte statePage;
 
-	static bool Start();
-//	static bool Start(FLRB *flrb, FLADR *adr);
-	static bool Update();
-	static void End() { curRdBuf->ready = true; curRdBuf = 0; state = WAIT; }
+	PageBuffer *pagebuf;
+
+	Read() : sparePage(~0), prevSparePage(~0), rd_data(0), rd_count(0), vecStart(false), state(WAIT), statePage(0), pagebuf(0) {}
+	
+	bool Start();
+//	bool Start(FLRB *flrb, FLADR *adr);
+	bool Update();
+	void End() { curRdBuf->ready = true; curRdBuf = 0; state = WAIT; }
+	void UpdatePage();
+	void FlushPageBuffer();
 };
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-static bool Read::Start()
+static Read read;
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+void Read::FlushPageBuffer()
+{
+	if (pagebuf != 0)
+	{
+		freePageBuffer.Add(pagebuf);
+	};
+		
+	while ((pagebuf = readyPageBuffer.Get()) != 0)
+	{
+		freePageBuffer.Add(pagebuf);
+	};
+}
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+bool Read::Start()
 {
 	if ((curRdBuf = readFlBuf.Get()) != 0)
 	{
-		if (curRdBuf->useAdr) { rd.SetRawAdr(curRdBuf->adr); };
+		if (curRdBuf->useAdr) { rd.SetRawAdr(curRdBuf->adr); sparePage = rd.GetRawPage(); FlushPageBuffer(); };
 
 		vecStart = curRdBuf->vecStart;
 
@@ -1217,74 +1263,134 @@ static bool Read::Start()
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-static bool Read::Update()
+void Read::UpdatePage()
 {
+	static PageBuffer *pb = 0;
+	static FLADR padr;
+
+
+	switch(statePage)
+	{
+		case 0:	
+
+			if (sparePage != ~0ul)
+			{
+
+				pb = freePageBuffer.Get();
+
+				if (pb != 0)
+				{
+					padr.SetRawPage(sparePage);
+
+					//NAND_Chip_Select(padr.chip);
+
+					readSpare.Start(&spare, &padr);	
+
+					statePage++;
+				};
+			};
+			
+			break;
+
+		case 1:	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+			if (!readSpare.Update())
+			{
+				pb->prevPage = prevSparePage;
+				pb->page = sparePage = padr.GetRawPage();
+
+				NAND_CmdRandomRead(0);
+
+				statePage++;
+			};
+
+			break;
+
+		case 2:	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+			
+			if(!NAND_BUSY())
+			{
+				NAND_ReadDataDMA(pb->data, sizeof(pb->data));
+
+				statePage++;
+			};
+
+			break;
+
+		case 3:	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+			
+			if(NAND_CheckDataComplete())
+			{
+				readyPageBuffer.Add(pb);
+
+				prevSparePage = sparePage;
+
+				sparePage++;
+
+				statePage = 0;	
+			};
+
+			break;
+	};
+
+}
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+bool Read::Update()
+{
+	UpdatePage();
+
 	switch(state)
 	{
 		case WAIT:	return false;
 
 		case READ_START:	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-			NAND_Chip_Select(rd.chip);
-
-			if (rd.GetRawPage() != sparePage)
+			if (pagebuf == 0)
 			{
-				readSpare.Start(&spare, &rd);
-//				NAND_CmdReadPage(rd.pg, rd.block, rd.page);
+				pagebuf = readyPageBuffer.Get();
 
-				state = READ_1;
-			}
-			else
-			{
-				NAND_CmdReadPage(rd.col, rd.block, rd.page);
+				if (pagebuf != 0)
+				{
+					u16 col = rd.col;
 
-				state = READ_PAGE;
+					rd.SetRawPage(pagebuf->page);
+					rd.col = col;
+				};
 			};
 
-			break;
-
-		case READ_1:	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++	
-
-			if (!readSpare.Update())
+			if (pagebuf != 0)
 			{
-				sparePage = rd.GetRawPage();
-
-				NAND_CmdRandomRead(rd.col);
-
-				state = READ_PAGE;
-			};
-
-			break;
-
-		//case READ_2:	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++	
-
-
-		//	break;
-
-		case READ_PAGE:	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++	
-
-			if(!NAND_BUSY())
-			{
+		//HW::PIOC->BSET(25);
 				register u16 c = rd.pg - rd.col;
 
 				if (rd_count < c) c = rd_count;
 
-				NAND_ReadDataDMA(rd_data, c);
+				NAND_CopyDataDMA(pagebuf->data+rd.col, rd_data, c);
 
 				rd_count -= c;
 				rd.raw += c;
 				rd_data += c;
 				curRdBuf->len += c;
 
-				state = READ_PAGE_1;
+				state = READ_PAGE;
 			};
 
 			break;
 
-		case READ_PAGE_1:	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++	
+		case READ_PAGE:	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++	
 
-			if (NAND_CheckDataComplete())
+			if (NAND_CheckCopyComplete())
 			{
+		//HW::PIOC->BCLR(25);
+				if (rd.GetRawPage() != pagebuf->page)
+				{ 
+					freePageBuffer.Add(pagebuf);
+
+					pagebuf = 0;
+				};
+
 				if (rd_count == 0)
 				{
 					if (vecStart)
@@ -1313,6 +1419,10 @@ static bool Read::Update()
 						{
 							// Искать вектор
 
+							sparePage = ~0;
+
+							FlushPageBuffer();
+
 							state = FIND_START;
 						};
 					}
@@ -1333,50 +1443,55 @@ static bool Read::Update()
 
 		case FIND_START:	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++	
 
-			if (spare.start == -1 || spare.fpn == -1)
+			if (statePage == 0)
 			{
-				if (rd.page == 0)
+				if (spare.start == -1 || spare.fpn == -1)
 				{
-					// Вектора кончились
-					state = FIND_3;
+					if (rd.page == 0)
+					{
+						// Вектора кончились
+						state = FIND_3;
+					}
+					else
+					{
+						rd.NextPage();
+
+						readSpare.Start(&spare, &rd);
+
+						state = FIND_1;
+					};
 				}
-				else
+				else if (spare.crc != 0 || spare.vecFstOff == 0xFFFF || spare.vecLstOff == 0xFFFF || rd.col > spare.vecLstOff)
 				{
 					rd.NextPage();
 
 					readSpare.Start(&spare, &rd);
 
 					state = FIND_1;
-				};
-			}
-			else if (spare.crc != 0 || spare.vecFstOff == 0xFFFF || spare.vecLstOff == 0xFFFF || rd.col > spare.vecLstOff)
-			{
-				rd.NextPage();
-
-				readSpare.Start(&spare, &rd);
-
-				state = FIND_1;
-			}
-			else 
-			{
-				if (rd.col <= spare.vecFstOff)
-				{
-					rd.col = spare.vecFstOff;
 				}
-				else if (rd.col <= (spare.vecFstOff+spare.vecFstLen))
+				else 
 				{
-					rd.col = spare.vecFstOff+spare.vecFstLen;
-				}
-				else if (rd.col <= spare.vecLstOff)
-				{
-					rd.col = spare.vecLstOff;
+					if (rd.col <= spare.vecFstOff)
+					{
+						rd.col = spare.vecFstOff;
+					}
+					else if (rd.col <= (spare.vecFstOff+spare.vecFstLen))
+					{
+						rd.col = spare.vecFstOff+spare.vecFstLen;
+					}
+					else if (rd.col <= spare.vecLstOff)
+					{
+						rd.col = spare.vecLstOff;
+					};
+
+					rd_data = (byte*)&curRdBuf->hdr;
+					rd_count = sizeof(curRdBuf->hdr);
+					curRdBuf->len = 0;	
+
+					sparePage = rd.GetRawPage();
+
+					state = READ_START;
 				};
-
-				rd_data = (byte*)&curRdBuf->hdr;
-				rd_count = sizeof(curRdBuf->hdr);
-				curRdBuf->len = 0;	
-
-				state = READ_START;
 			};
 
 			break;
@@ -1385,8 +1500,6 @@ static bool Read::Update()
 
 			if (!readSpare.Update())	//(!NAND_BUSY())
 			{
-				sparePage = rd.GetRawPage();
-
 				state = FIND_START;
 			};
 
@@ -1761,12 +1874,14 @@ void NAND_Idle()
 			{
 				nandState = NAND_STATE_WRITE_START;
 			}
-			else if (Read::Start())
+			else if (read.Start())
 			{
 				nandState = NAND_STATE_READ_START;
 			};
 
 			if (tm.Check(500)) { TRAP_MEMORY_SendStatus(-1, FLASH_STATUS_NONE); };
+
+			read.UpdatePage();
 
 			break;
 
@@ -1781,7 +1896,7 @@ void NAND_Idle()
 
 		case NAND_STATE_READ_START:	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-			if (!Read::Update())
+			if (!read.Update())
 			{
 				nandState = NAND_STATE_WAIT;
 			};
@@ -1847,10 +1962,25 @@ void NAND_Idle()
 
 			if (!UpdateSendSession())
 			{
-				if (TRAP_TRACE_PrintString("NAND Bad Blocks: %lu, %lu, %lu, %lu", nvv.badBlocks[0], nvv.badBlocks[1], nvv.badBlocks[2], nvv.badBlocks[3]))
-				{
-					nandState = NAND_STATE_WAIT;
-				};
+				nandState = NAND_STATE_SEND_BAD_BLOCKS;
+			};
+
+			break;
+
+		case NAND_STATE_SEND_BAD_BLOCKS:	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+			if (TRAP_TRACE_PrintString("NAND chip mask: 0x%02hX; Bad Blocks: %lu, %lu", NAND_GetMemSize()->mask, nvv.badBlocks[0], nvv.badBlocks[1]))
+			{
+				nandState = NAND_STATE_SEND_PAGE_ERRORS;
+			};
+
+			break;
+
+		case NAND_STATE_SEND_PAGE_ERRORS:	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+			if (TRAP_TRACE_PrintString("NAND Page Error: %lu, %lu", nvv.pageError[0], nvv.pageError[1]))
+			{
+				nandState = NAND_STATE_WAIT;
 			};
 
 			break;
@@ -2491,6 +2621,11 @@ static void LoadVars()
 		for (u32 i = 0; i < ArraySize(nvv.badBlocks); i++)
 		{
 			nvv.badBlocks[i] = 0;
+		};
+
+		for (u32 i = 0; i < ArraySize(nvv.pageError); i++)
+		{
+			nvv.pageError[i] = 0;
 		};
 
 		savesCount = 2;

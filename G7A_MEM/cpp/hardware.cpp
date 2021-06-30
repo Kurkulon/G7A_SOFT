@@ -4,7 +4,7 @@
 #include "COM_DEF.h"
 
 #include "hardware.h"
-//#include "options.h"
+#include "CRC16_8005.h"
 
 //#pragma O3
 //#pragma Otime
@@ -63,6 +63,13 @@
 	#define GEN_25M		2
 	#define GEN_1M		3
 	//#define GEN_500K	4
+
+	#define	NAND_DMACH				0
+	#define	COM1_DMACH				1
+	#define	COM2_DMACH				2
+	#define	COM3_DMACH				3
+	#define	NAND_MEMCOPY_DMACH		30
+	#define	CRC_DMACH				31
 
 	#define I2C			HW::I2C3
 	#define PIO_I2C		HW::PIOA 
@@ -139,8 +146,6 @@
 	#define MEM_TXD			(1<<PIN_MEM_TXD) 
 	#define MEM_RXD			(1<<PIN_MEM_RXD) 
 	#define MEM_SCK			(1<<PIN_MEM_SCK) 
-
-	#define	CRC_DMACH		31
 
 #elif defined(CPU_XMC48)
 
@@ -491,15 +496,15 @@ extern "C" void SystemInit()
 
 	#ifdef CPU_SAME53	
 
-		HW::PIOA->DIRSET = (1<<25)|(1<<24)|(1<<21)|0xFF;
+		HW::PIOA->DIRSET = (1<<25)|(1<<24)|(1<<21);
 		HW::PIOA->CLR((1<<25)|(1<<24)|(1<<21));
 
-		PIO_MEM_USART->WRCONFIG = (MEM_TXD|MEM_RXD|MEM_SCK) |PORT_HWSEL_LO|PORT_PMUX(3)|PORT_WRPINCFG|PORT_PMUXEN|PORT_WRPMUX|PORT_PULLEN;
+		PIO_MEM_USART->SetWRCONFIG(MEM_TXD|MEM_RXD|MEM_SCK, PORT_PMUX(3)|PORT_WRPINCFG|PORT_PMUXEN|PORT_WRPMUX|PORT_PULLEN);
 
 		HW::PIOB->DIRSET = (1<<18)|(1<<20)|(1<<21);
-		HW::PIOB->WRCONFIG = ((1<<17)>>16) |PORT_HWSEL_HI|PORT_PMUX(11)|PORT_WRPINCFG|PORT_PMUXEN|PORT_WRPMUX;
+		//HW::PIOB->SetWRCONFIG((1<<17), PORT_PMUX(11)|PORT_WRPINCFG|PORT_PMUXEN|PORT_WRPMUX;
 
-		HW::PIOC->DIRSET = (1<<15)|(1<<28)|(1<<27)|(1<<26)|(1<<0);
+		HW::PIOC->DIRSET = (1<<15)|(1<<28)|(1<<27)|(1<<26)|(1<<25)|(1<<0);
 		HW::PIOC->SET((1<<15)/*|(1<<0)*/);
 
 		HW::PIOA->BCLR(25);
@@ -647,13 +652,13 @@ extern "C" void SystemInit()
 
 		P0->ModePin0(	G_PP	);
 		P0->ModePin1(	G_PP	);
-		P0->ModePin2(	HWIO1, 0);
-		P0->ModePin3(	HWIO1, 0);
-		P0->ModePin4(	HWIO1, 0);
-		P0->ModePin5(	HWIO1, 0);
+		P0->ModePin2(	HWIO1	);
+		P0->ModePin3(	HWIO1	);
+		P0->ModePin4(	HWIO1	);
+		P0->ModePin5(	HWIO1	);
 		P0->ModePin6(	G_PP	);
-		P0->ModePin7(	HWIO1, 0);
-		P0->ModePin8(	HWIO1, 0);
+		P0->ModePin7(	HWIO1	);
+		P0->ModePin8(	HWIO1	);
 		P0->ModePin9(	G_PP	);
 		P0->ModePin10(	G_PP	);
 		P0->ModePin11(	G_PP	);
@@ -675,8 +680,8 @@ extern "C" void SystemInit()
 		P1->ModePin11(	G_PP	);
 		P1->ModePin12(	G_PP	);
 		P1->ModePin13(	G_PP	);
-		P1->ModePin14(	HWIO1, 0);
-		P1->ModePin15(	HWIO1, 0);
+		P1->ModePin14(	HWIO1	);
+		P1->ModePin15(	HWIO1	);
 
 		P1->PPS = 0;
 
@@ -685,24 +690,24 @@ extern "C" void SystemInit()
 		P2->ModePin2(	I2DPU	);
 		P2->ModePin3(	I1DPD	);
 		P2->ModePin4(	I1DPD	);
-		P2->ModePin5(	A1PP, 0	);
+		P2->ModePin5(	A1PP	);
 		P2->ModePin6(	I2DPU	);
 		P2->ModePin7(	A1PP	);
-		P2->ModePin8(	A1PP, 0	);
-		P2->ModePin9(	A1PP, 0	);
+		P2->ModePin8(	A1PP	);
+		P2->ModePin9(	A1PP	);
 		P2->ModePin10(	G_PP	);
 		P2->ModePin14(	G_PP	);
 		P2->ModePin15(	G_PP	);
 
 		P2->PPS = 0;
 
-		P3->ModePin0(	HWIO1, 0);
-		P3->ModePin1(	HWIO1, 0);
+		P3->ModePin0(	HWIO1	);
+		P3->ModePin1(	HWIO1	);
 		P3->ModePin2(	G_PP	);
 		P3->ModePin3(	G_PP	);
 		P3->ModePin4(	G_PP	);
-		P3->ModePin5(	HWIO1, 0);
-		P3->ModePin6(	HWIO1, 0);
+		P3->ModePin5(	HWIO1	);
+		P3->ModePin6(	HWIO1	);
 
 		P3->PPS = 0;
 
@@ -777,17 +782,20 @@ extern "C" void SystemInit()
 //#define NAND_READ_PACK_BYTES	512
 //#define NAND_WRITE_PACK_BYTES	256
 
-#define NAND_CMD_RESET			0xFF
-#define NAND_CMD_READ_ID		0x90
-#define NAND_CMD_READ_1			0x00
-#define NAND_CMD_READ_2			0x30
-#define NAND_CMD_RANDREAD_1		0x05
-#define NAND_CMD_RANDREAD_2		0xE0
-#define NAND_CMD_PAGE_PROGRAM_1	0x80
-#define NAND_CMD_PAGE_PROGRAM_2	0x10
-#define NAND_CMD_READ_STATUS	0x70
-#define NAND_CMD_BLOCK_ERASE_1	0x60
-#define NAND_CMD_BLOCK_ERASE_2	0xD0
+#define NAND_CMD_RESET				0xFF
+#define NAND_CMD_READ_ID			0x90
+#define NAND_CMD_READ_1				0x00
+#define NAND_CMD_READ_2				0x30
+#define NAND_CMD_RANDREAD_1			0x05
+#define NAND_CMD_RANDREAD_2			0xE0
+#define NAND_CMD_PAGE_PROGRAM_1		0x80
+#define NAND_CMD_PAGE_PROGRAM_2		0x10
+#define NAND_CMD_READ_STATUS		0x70
+#define NAND_CMD_BLOCK_ERASE_1		0x60
+#define NAND_CMD_BLOCK_ERASE_2		0xD0
+#define NAND_CMD_READ_PARAM			0xEC
+#define NAND_CMD_CHANGE_WRCOL		0x85
+#define NAND_CMD_COPYBACK_PROGRAM	0x85
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -801,6 +809,41 @@ __packed struct NandID
  	byte device;
  	byte data[3];
 };
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+__packed struct NandParamPage
+{
+ 	char	signature[4];
+ 	u16		revisionNumber;
+ 	u16		featuresSupported;
+	u16		optionalCommandsSupported;
+	byte	_rezerved1[22];
+	char	deviceManufacturer[12];
+	char	deviceModel[20];
+	byte	JEDEC_manufacturer_ID;
+	u16		dateCode;
+	byte	_rezerved2[13];
+	u32		numberDataBytesPerPage;
+	u16		numberSpareBytesPerPage;
+	byte	_rezerved3[6];
+	u32		numberPagesPerBlock;
+	u32		numberBlocksPerLUN;
+	byte	numberLUNsPerChip;
+	byte	numberAddressCycles;
+	byte	numberBitsPerCell;
+	u16		badBlocksMaximumPerLUN;
+	u16		blockEndurans;
+	byte	guaranteedValidBlocks;
+	u16		blockEnduranceForGuaranteedValidBlocks;
+	byte	numberProgramsPerPage;
+	byte	_rezerved4[143];
+	u16		integrityCRC;
+};
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+NandParamPage nandParamPage[NAND_MAX_CHIP];
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -1078,7 +1121,7 @@ bool NAND_CheckDataComplete()
 {
 	#ifdef CPU_SAME53
 
-		if ((HW::DMAC->CH[0].CTRLA & DMCH_ENABLE) == 0)
+		if ((HW::DMAC->CH[NAND_DMACH].CTRLA & DMCH_ENABLE) == 0 || (HW::DMAC->CH[NAND_DMACH].INTFLAG & DMCH_TCMPL))
 		{
 			PIO_WE_RE->SET(WE|RE);
 			PIO_WE_RE->DIRSET = WE|RE;
@@ -1101,6 +1144,21 @@ bool NAND_CheckDataComplete()
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+bool NAND_CheckCopyComplete()
+{
+	#ifdef CPU_SAME53
+
+		return (HW::DMAC->CH[NAND_MEMCOPY_DMACH].CTRLA & DMCH_ENABLE) == 0 || (HW::DMAC->CH[NAND_MEMCOPY_DMACH].INTFLAG & DMCH_TCMPL);
+	
+	#elif defined(CPU_XMC48)
+
+		return (NAND_DMA->CHENREG & NAND_DMA_CHST) == 0;
+
+	#endif
+}
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 static bool NAND_Read_ID(NandID *id)
 {
 	NAND_DIR_OUT();
@@ -1113,6 +1171,22 @@ static bool NAND_Read_ID(NandID *id)
 	while (!NAND_CheckDataComplete());
 
 	return true;
+}
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+static void NAND_Read_PARAM(NandParamPage *pp)
+{
+	NAND_DIR_OUT();
+	CMD_LATCH(NAND_CMD_READ_PARAM);
+	ADR_LATCH(0);
+	NAND_DIR_IN();
+
+	while(NAND_BUSY());
+	
+	NAND_ReadDataDMA(pp, sizeof(NandParamPage)); while (!NAND_CheckDataComplete());
+
+	PIO_WE_RE->SET(RE); 
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -1258,16 +1332,16 @@ static void NAND_Init()
 	{
 		NAND_Chip_Select(chip);
 		ResetNand();
-		NandID k9k8g08u_id;
-		NAND_Read_ID(&k9k8g08u_id);
+		NandID id;
+		NAND_Read_ID(&id);
 		
-		if((k9k8g08u_id.marker == 0xEC) && (k9k8g08u_id.device == 0xD3))
+		if((id.marker == 0xEC) && (id.device == 0xD3))
 		{
 			if (nandSize.shCh == 0)
 			{
-				nandSize.pg = 1 << (nandSize.bitCol = nandSize.shPg = ((k9k8g08u_id.data[1] >> 0) & 0x03) + 10);
-				nandSize.bl = 1 << (nandSize.shBl = ((k9k8g08u_id.data[1] >> 4) & 0x03) + 16);
-				nandSize.ch = 1 << (nandSize.shCh = (((k9k8g08u_id.data[2] >> 4) & 0x07) + 23) + (((k9k8g08u_id.data[2] >> 2) & 0x03) + 0));
+				nandSize.pg = 1 << (nandSize.bitCol = nandSize.shPg = ((id.data[1] >> 0) & 0x03) + 10);
+				nandSize.bl = 1 << (nandSize.shBl = ((id.data[1] >> 4) & 0x03) + 16);
+				nandSize.ch = 1 << (nandSize.shCh = (((id.data[2] >> 4) & 0x07) + 23) + (((id.data[2] >> 2) & 0x03) + 0));
 //				nandSize.row = 1 << (nandSize.shRow = nandSize.shCh - nandSize.shPg);
 				
 				nandSize.pagesInBlock = 1 << (nandSize.bitPage = nandSize.shBl - nandSize.shPg);
@@ -1279,7 +1353,35 @@ static void NAND_Init()
 			nandSize.fl += nandSize.ch;
 			
 			nandSize.mask |= (1 << chip);
+		}
+		else if((id.marker == 0x2C) && (id.device == 0x68))
+		{
+			NandParamPage &np = nandParamPage[chip];
+
+			NAND_Read_PARAM(&np);
+
+			u16 crc = GetCRC16_8005(&np, 4, ~0);
+
+			if (np.integrityCRC == crc || np.integrityCRC == 0xA61F)
+			{
+				if (nandSize.mask == 0)
+				{
+					nandSize.pg = np.numberDataBytesPerPage;
+					nandSize.pagesInBlock = np.numberPagesPerBlock;
+					nandSize.bl = np.numberBlocksPerLUN * np.numberLUNsPerChip;
+					nandSize.ch = nandSize.pg * nandSize.pagesInBlock;
+					nandSize.ch *= nandSize.bl;
+
+					//nandSize.maskPage = nandSize.pagesInBlock - 1;
+					//nandSize.maskBlock = 0;//(1 << (nandSize.bitBlock = nandSize.shCh - nandSize.shBl)) - 1;
+				};
+				
+				nandSize.fl += nandSize.ch;
+				
+				nandSize.mask |= (1 << chip);
+			};
 		};
+
 	};
 
 	NAND_Chip_Disable();
@@ -1299,15 +1401,15 @@ void NAND_WriteDataDMA_old(volatile void *src, u16 len)
 	nandTC->CTRLA = 0;
 	nandTC->CTRLA = TC_SWRST;
 
-	DmaTable[0].SRCADDR = (byte*)src+len;
-	DmaTable[0].DSTADDR = &HW::PIOA->OUT;
-	DmaTable[0].DESCADDR = 0;
-	DmaTable[0].BTCNT = len;
-	DmaTable[0].BTCTRL = DMDSC_VALID|DMDSC_BEATSIZE_BYTE|DMDSC_SRCINC|DMDSC_EVOSEL_BEAT;
+	DmaTable[NAND_DMACH].SRCADDR = (byte*)src+len;
+	DmaTable[NAND_DMACH].DSTADDR = &HW::PIOA->OUT;
+	DmaTable[NAND_DMACH].DESCADDR = 0;
+	DmaTable[NAND_DMACH].BTCNT = len;
+	DmaTable[NAND_DMACH].BTCTRL = DMDSC_VALID|DMDSC_BEATSIZE_BYTE|DMDSC_SRCINC|DMDSC_EVOSEL_BEAT;
 
-	DMAC->CH[0].EVCTRL = DMCH_EVOE;
-	DMAC->CH[0].PRILVL = DMCH_PRILVL_LVL3;
-	DMAC->CH[0].CTRLA = DMCH_ENABLE|DMCH_TRIGACT_BURST|DMCH_TRIGSRC_TC0_MC0;
+	DMAC->CH[NAND_DMACH].EVCTRL = DMCH_EVOE;
+	DMAC->CH[NAND_DMACH].PRILVL = DMCH_PRILVL_LVL3;
+	DMAC->CH[NAND_DMACH].CTRLA = DMCH_ENABLE|DMCH_TRIGACT_BURST|DMCH_TRIGSRC_TC0_MC0;
 
 	PIO_WE_RE->EVCTRL.EV[0] = PIN_WE|PORT_PORTEI|PORT_EVACT_SET;
 	PIO_WE_RE->EVCTRL.EV[1] = PIN_WE|PORT_PORTEI|PORT_EVACT_CLR;
@@ -1345,15 +1447,17 @@ void NAND_WriteDataDMA(volatile void *src, u16 len)
 		nandTCC->CTRLA = 0;
 		nandTCC->CTRLA = TC_SWRST;
 
-		DmaTable[0].SRCADDR = (byte*)src+len;
-		DmaTable[0].DSTADDR = &HW::PIOA->OUT;
-		DmaTable[0].DESCADDR = 0;
-		DmaTable[0].BTCNT = len;
-		DmaTable[0].BTCTRL = DMDSC_VALID|DMDSC_BEATSIZE_BYTE|DMDSC_SRCINC|DMDSC_EVOSEL_BEAT;
+		DmaTable[NAND_DMACH].SRCADDR = (byte*)src+len;
+		DmaTable[NAND_DMACH].DSTADDR = &HW::PIOA->OUT;
+		DmaTable[NAND_DMACH].DESCADDR = 0;
+		DmaTable[NAND_DMACH].BTCNT = len;
+		DmaTable[NAND_DMACH].BTCTRL = DMDSC_VALID|DMDSC_BEATSIZE_BYTE|DMDSC_SRCINC|DMDSC_EVOSEL_BEAT;
 
-		DMAC->CH[0].EVCTRL = DMCH_EVOE;
-		DMAC->CH[0].PRILVL = DMCH_PRILVL_LVL3;
-		DMAC->CH[0].CTRLA = DMCH_ENABLE|DMCH_TRIGACT_BURST|DMCH_TRIGSRC_TCC0_MC0;
+		DMAC->CH[NAND_DMACH].INTENCLR = ~0;
+		DMAC->CH[NAND_DMACH].INTFLAG = ~0;
+		DMAC->CH[NAND_DMACH].EVCTRL = DMCH_EVOE;
+		DMAC->CH[NAND_DMACH].PRILVL = DMCH_PRILVL_LVL3;
+		DMAC->CH[NAND_DMACH].CTRLA = DMCH_ENABLE|DMCH_TRIGACT_BURST|DMCH_TRIGSRC_TCC0_MC0;
 
 		nandTCC->WAVE = TCC_WAVEGEN_NPWM|TCC_POL0;
 		nandTCC->DRVCTRL = TCC_NRE0|TCC_NRE1|TCC_NRV0|TCC_NRV1;
@@ -1371,7 +1475,7 @@ void NAND_WriteDataDMA(volatile void *src, u16 len)
 		nandTCC->CTRLBSET = TC_ONESHOT;
 		nandTCC->CTRLA = TC_ENABLE;
 
-		DMAC->SWTRIGCTRL = 1;
+		DMAC->SWTRIGCTRL = 1<<NAND_DMACH;
 
 	#elif defined(CPU_XMC48)
 
@@ -1426,15 +1530,15 @@ void NAND_ReadDataDMA_old(volatile void *dst, u16 len)
 	nandTC->CTRLA = 0;
 	nandTC->CTRLA = TC_SWRST;
 
-	DmaTable[0].SRCADDR = &PIO_NAND_DATA->IN;
-	DmaTable[0].DSTADDR = (byte*)dst+len;
-	DmaTable[0].DESCADDR = 0;
-	DmaTable[0].BTCNT = len;
-	DmaTable[0].BTCTRL = DMDSC_VALID|DMDSC_BEATSIZE_BYTE|DMDSC_DSTINC|DMDSC_EVOSEL_BEAT;
+	DmaTable[NAND_DMACH].SRCADDR = &PIO_NAND_DATA->IN;
+	DmaTable[NAND_DMACH].DSTADDR = (byte*)dst+len;
+	DmaTable[NAND_DMACH].DESCADDR = 0;
+	DmaTable[NAND_DMACH].BTCNT = len;
+	DmaTable[NAND_DMACH].BTCTRL = DMDSC_VALID|DMDSC_BEATSIZE_BYTE|DMDSC_DSTINC|DMDSC_EVOSEL_BEAT;
 
-	DMAC->CH[0].EVCTRL = DMCH_EVOE;
-	DMAC->CH[0].PRILVL = DMCH_PRILVL_LVL3;
-	DMAC->CH[0].CTRLA = DMCH_ENABLE|DMCH_TRIGACT_BURST|DMCH_TRIGSRC_TC0_MC0;
+	DMAC->CH[NAND_DMACH].EVCTRL = DMCH_EVOE;
+	DMAC->CH[NAND_DMACH].PRILVL = DMCH_PRILVL_LVL3;
+	DMAC->CH[NAND_DMACH].CTRLA = DMCH_ENABLE|DMCH_TRIGACT_BURST|DMCH_TRIGSRC_TC0_MC0;
 
 	PIO_WE_RE->EVCTRL.EV[0] = PIN_RE|PORT_PORTEI|PORT_EVACT_CLR;
 	PIO_WE_RE->EVCTRL.EV[1] = PIN_RE|PORT_PORTEI|PORT_EVACT_SET;
@@ -1472,15 +1576,17 @@ void NAND_ReadDataDMA(volatile void *dst, u16 len)
 		nandTCC->CTRLA = 0;
 		nandTCC->CTRLA = TC_SWRST;
 
-		DmaTable[0].SRCADDR = &PIO_NAND_DATA->IN;
-		DmaTable[0].DSTADDR = (byte*)dst+len;
-		DmaTable[0].DESCADDR = 0;
-		DmaTable[0].BTCNT = len;
-		DmaTable[0].BTCTRL = DMDSC_VALID|DMDSC_BEATSIZE_BYTE|DMDSC_DSTINC|DMDSC_EVOSEL_BEAT;
+		DmaTable[NAND_DMACH].SRCADDR = &PIO_NAND_DATA->IN;
+		DmaTable[NAND_DMACH].DSTADDR = (byte*)dst+len;
+		DmaTable[NAND_DMACH].DESCADDR = 0;
+		DmaTable[NAND_DMACH].BTCNT = len;
+		DmaTable[NAND_DMACH].BTCTRL = DMDSC_VALID|DMDSC_BEATSIZE_BYTE|DMDSC_DSTINC|DMDSC_EVOSEL_BEAT;
 
-		DMAC->CH[0].EVCTRL = DMCH_EVOE;
-		DMAC->CH[0].PRILVL = DMCH_PRILVL_LVL3;
-		DMAC->CH[0].CTRLA = DMCH_ENABLE|DMCH_TRIGACT_BURST|DMCH_TRIGSRC_TCC0_MC0;
+		DMAC->CH[NAND_DMACH].INTENCLR = ~0;
+		DMAC->CH[NAND_DMACH].INTFLAG = ~0;
+		DMAC->CH[NAND_DMACH].EVCTRL = DMCH_EVOE;
+		DMAC->CH[NAND_DMACH].PRILVL = DMCH_PRILVL_LVL3;
+		DMAC->CH[NAND_DMACH].CTRLA = DMCH_ENABLE|DMCH_TRIGACT_BURST|DMCH_TRIGSRC_TCC0_MC0;
 
 		//PIO_WE_RE->EVCTRL.EV[0] = PIN_RE|PORT_PORTEI|PORT_EVACT_CLR;
 		//PIO_WE_RE->EVCTRL.EV[1] = PIN_RE|PORT_PORTEI|PORT_EVACT_SET;
@@ -1489,7 +1595,7 @@ void NAND_ReadDataDMA(volatile void *dst, u16 len)
 		nandTCC->WAVE = TCC_WAVEGEN_NPWM|TCC_POL0;
 		nandTCC->DRVCTRL = TCC_NRE0|TCC_NRE1|TCC_NRV0|TCC_NRV1;
 		nandTCC->PER = 250;
-		nandTCC->CC[0] = 1; 
+		nandTCC->CC[0] = 2; 
 		nandTCC->CC[1] = 2; 
 
 		nandTCC->EVCTRL = TCC_OVFEO|TCC_MCEO0|TCC_TCEI1|TCC_EVACT1_RETRIGGER;
@@ -1553,14 +1659,16 @@ void NAND_CopyDataDMA(volatile void *src, volatile void *dst, u16 len)
 
 	#ifdef CPU_SAME53	
 
-		DmaTable[0].SRCADDR = (byte*)src+len;
-		DmaTable[0].DSTADDR = (byte*)dst+len;
-		DmaTable[0].DESCADDR = 0;
-		DmaTable[0].BTCNT = len;
-		DmaTable[0].BTCTRL = DMDSC_VALID|DMDSC_BEATSIZE_BYTE|DMDSC_DSTINC|DMDSC_SRCINC;
+		DmaTable[NAND_MEMCOPY_DMACH].SRCADDR = (byte*)src+len;
+		DmaTable[NAND_MEMCOPY_DMACH].DSTADDR = (byte*)dst+len;
+		DmaTable[NAND_MEMCOPY_DMACH].DESCADDR = 0;
+		DmaTable[NAND_MEMCOPY_DMACH].BTCNT = len;
+		DmaTable[NAND_MEMCOPY_DMACH].BTCTRL = DMDSC_VALID|DMDSC_BEATSIZE_BYTE|DMDSC_DSTINC|DMDSC_SRCINC;
 
-		DMAC->CH[0].CTRLA = DMCH_ENABLE|DMCH_TRIGACT_TRANSACTION;
-		DMAC->SWTRIGCTRL = 1;
+		DMAC->CH[NAND_MEMCOPY_DMACH].INTENCLR = ~0;
+		DMAC->CH[NAND_MEMCOPY_DMACH].INTFLAG = ~0;
+		DMAC->CH[NAND_MEMCOPY_DMACH].CTRLA = DMCH_ENABLE|DMCH_TRIGACT_TRANSACTION;
+		DMAC->SWTRIGCTRL = 1<<NAND_MEMCOPY_DMACH;
 
 	#elif defined(CPU_XMC48)
 
@@ -1577,6 +1685,21 @@ void NAND_CopyDataDMA(volatile void *src, volatile void *dst, u16 len)
 		NAND_DMACH->CFGH = PROTCTL(1);
 
 		NAND_DMA->CHENREG = NAND_DMA_CHEN;
+
+	#endif
+}
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+u32 NAND_GetMaxBlockLenDMA()
+{
+	#ifdef CPU_SAME53	
+
+		return 0xFFFF;
+
+	#elif defined(CPU_XMC48)
+
+		return BLOCK_TS(~0);
 
 	#endif
 }
@@ -3191,15 +3314,62 @@ u16 CRC_CCITT_DMA(const void *data, u32 len, u16 init)
 
 	HW::DMAC->CRCCTRL = DMAC_CRCBEATSIZE_BYTE|DMAC_CRCPOLY_CRC16|DMAC_CRCMODE_CRCGEN|DMAC_CRCSRC(0x20+CRC_DMACH);
 
+	dmach.INTENCLR = ~0;
+	dmach.INTFLAG = ~0;
 	dmach.CTRLA = DMCH_ENABLE/*|DMCH_TRIGACT_TRANSACTION*/;
 
 	HW::DMAC->SWTRIGCTRL = 1UL << CRC_DMACH;
 
-	while ((dmach.CTRLA & DMCH_ENABLE) != 0);
+	while (((dmach.CTRLA & DMCH_ENABLE) != 0) && (dmach.INTFLAG & DMCH_TCMPL) == 0);
 
 	HW::PIOC->BCLR(26);
 
 	return ReverseWord(HW::DMAC->CRCCHKSUM);
+}
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+void CRC_CCITT_DMA_Async(const void *data, u32 len, u16 init)
+{
+	HW::PIOC->BSET(26);
+
+	T_HW::DMADESC &dmadsc = DmaTable[CRC_DMACH];
+	T_HW::S_DMAC::S_DMAC_CH	&dmach = HW::DMAC->CH[CRC_DMACH];
+
+	dmadsc.DESCADDR = 0;
+	dmadsc.DSTADDR = (void*)init;
+	dmadsc.SRCADDR = (byte*)data+len;
+	dmadsc.BTCNT = len;
+	dmadsc.BTCTRL = DMDSC_VALID|DMDSC_BEATSIZE_BYTE|DMDSC_SRCINC;
+
+	HW::DMAC->CRCCTRL = DMAC_CRCBEATSIZE_BYTE|DMAC_CRCPOLY_CRC16|DMAC_CRCMODE_CRCGEN|DMAC_CRCSRC(0x20+CRC_DMACH);
+
+	dmach.INTENCLR = ~0;
+	dmach.INTFLAG = ~0;
+	dmach.CTRLA = DMCH_ENABLE/*|DMCH_TRIGACT_TRANSACTION*/;
+
+	HW::DMAC->SWTRIGCTRL = 1UL << CRC_DMACH;
+}
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+bool CRC_CCITT_DMA_CheckComplete(u16 *crc)
+{
+	//T_HW::DMADESC &dmadsc = DmaTable[CRC_DMACH];
+	T_HW::S_DMAC::S_DMAC_CH	&dmach = HW::DMAC->CH[CRC_DMACH];
+
+	if ((dmach.CTRLA & DMCH_ENABLE) == 0 || (dmach.INTFLAG & DMCH_TCMPL))
+	{
+		*crc = ReverseWord(HW::DMAC->CRCCHKSUM);
+
+		HW::PIOC->BCLR(26);
+
+		return true;
+	}
+	else
+	{
+		return false;
+	};
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -3273,7 +3443,7 @@ void InitHardware()
 	HW::GCLK->PCHCTRL[GCLK_EIC] = GCLK_GEN(GEN_MCK)|GCLK_CHEN;
 
 	EIC->EVCTRL = EIC_EXTINT3;
-	EIC->CONFIG[0] = EIC_FILTEN(3)|EIC_SENSE_BOTH(3);
+	EIC->SetConfig(EIC_EXTINT3, 1, EIC_SENSE_BOTH);
 	EIC->INTENCLR = EIC_EXTINT3;
 	EIC->CTRLA = EIC_ENABLE;
 

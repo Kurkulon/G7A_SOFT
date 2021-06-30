@@ -631,7 +631,6 @@ static void UpdateParams()
 		CALL( UpdateTemp()		);
 		CALL( UpdateMan(); 		);
 		CALL( FLASH_Update();	);
-		CALL( UpdateTraps();	);
 		CALL( I2C_Update();		);
 	};
 
@@ -651,7 +650,6 @@ static void UpdateMisc()
 	enum C { S = (__LINE__+3) };
 	switch(i++)
 	{
-		CALL( UpdateEMAC();		);
 		CALL( UpdateParams();	);
 	};
 
@@ -664,20 +662,10 @@ static void UpdateMisc()
 
 static void Update()
 {
-	static byte i = 0;
-
-	#define CALL(p) case (__LINE__-S): p; break;
-
-	enum C { S = (__LINE__+3) };
-	switch(i++)
-	{
-		CALL( NAND_Idle();		);
-		CALL( UpdateMisc();		);
-	};
-
-	i = (i > (__LINE__-S-3)) ? 0 : i;
-
-	#undef CALL
+	NAND_Idle();		
+	UpdateEMAC();		
+	UpdateTraps();	
+	UpdateParams();	
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

@@ -9,12 +9,13 @@
 #define NAND_MAX_CHIP		2
 #define NAND_CHIP_MASK		1
 #define NAND_CHIP_BITS		1
-#define NAND_COL_BITS		11
-#define NAND_BLOCK_BITS		13
-#define NAND_PAGE_BITS		6
+#define NAND_COL_BITS		13
+#define NAND_BLOCK_BITS		12
+#define NAND_PAGE_BITS		7
 #define NAND_RAWPAGE_MASK	((1 << (NAND_PAGE_BITS + NAND_CHIP_BITS + NAND_BLOCK_BITS)) - 1)
 #define NAND_RAWBLOCK_MASK	((1 << (NAND_CHIP_BITS + NAND_BLOCK_BITS)) - 1)
 #define NAND_RAWADR_MASK	(((u64)1 << (NAND_COL_BITS + NAND_PAGE_BITS + NAND_CHIP_BITS + NAND_BLOCK_BITS)) - 1)
+#define NAND_PAGE_SIZE		(1u << NAND_COL_BITS)
 
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -58,6 +59,7 @@ extern void NAND_Chip_Select(byte chip);
 extern void NAND_Chip_Disable();
 extern void NAND_WRITE(byte data);
 extern void NAND_CopyDataDMA(volatile void *src, volatile void *dst, u16 len);
+extern bool NAND_CheckCopyComplete();
 
 extern void NAND_CmdEraseBlock(u32 bl);
 extern void NAND_CmdRandomRead(u16 col);
@@ -68,6 +70,8 @@ extern byte NAND_CmdReadStatus();
 
 inline const NandMemSize* NAND_GetMemSize() { extern NandMemSize nandSize; return &nandSize; } 
 
+extern u32 NAND_GetMaxBlockLenDMA();
+
 
 extern void Hardware_Init();
 
@@ -75,6 +79,8 @@ extern void UpdateHardware();
 
 extern u16 CRC_CCITT_PIO(const void *data, u32 len, u16 init);
 extern u16 CRC_CCITT_DMA(const void *data, u32 len, u16 init);
+extern void CRC_CCITT_DMA_Async(const void *data, u32 len, u16 init);
+extern bool CRC_CCITT_DMA_CheckComplete(u16 *crc);
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
