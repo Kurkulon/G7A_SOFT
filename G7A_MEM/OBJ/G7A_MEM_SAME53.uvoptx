@@ -120,7 +120,7 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>DLGUARM</Key>
-          <Name></Name>
+          <Name>d</Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
@@ -148,88 +148,7 @@
           <Name></Name>
         </SetRegEntry>
       </TargetDriverDllRegistry>
-      <Breakpoint>
-        <Bp>
-          <Number>0</Number>
-          <Type>0</Type>
-          <LineNumber>1365</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>32622</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>d:\Work\G7A_SOFT\G7A_MEM\cpp\hardware.cpp</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\G7A_MEM_SAME53\cpp/hardware.cpp\1365</Expression>
-        </Bp>
-        <Bp>
-          <Number>1</Number>
-          <Type>0</Type>
-          <LineNumber>1336</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>32230</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>d:\Work\G7A_SOFT\G7A_MEM\cpp\hardware.cpp</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\G7A_MEM_SAME53\cpp/hardware.cpp\1336</Expression>
-        </Bp>
-        <Bp>
-          <Number>2</Number>
-          <Type>0</Type>
-          <LineNumber>1338</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>32324</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>d:\Work\G7A_SOFT\G7A_MEM\cpp\hardware.cpp</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\G7A_MEM_SAME53\cpp/hardware.cpp\1338</Expression>
-        </Bp>
-        <Bp>
-          <Number>3</Number>
-          <Type>0</Type>
-          <LineNumber>1338</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>32330</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>d:\Work\G7A_SOFT\G7A_MEM\cpp\hardware.cpp</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\\cpp/hardware.cpp\1338</Expression>
-        </Bp>
-        <Bp>
-          <Number>4</Number>
-          <Type>0</Type>
-          <LineNumber>1338</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>32348</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>d:\Work\G7A_SOFT\G7A_MEM\cpp\hardware.cpp</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\\cpp/hardware.cpp\1338</Expression>
-        </Bp>
-      </Breakpoint>
+      <Breakpoint/>
       <WatchWindow1>
         <Ww>
           <count>0</count>
@@ -295,6 +214,11 @@
           <count>12</count>
           <WinNumber>1</WinNumber>
           <ItemText>read</ItemText>
+        </Ww>
+        <Ww>
+          <count>13</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>nandParamPage</ItemText>
         </Ww>
       </WatchWindow1>
       <WatchWindow2>

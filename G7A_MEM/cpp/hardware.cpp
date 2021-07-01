@@ -477,8 +477,9 @@
 #endif
 
 
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-//static void InitVectorTable();
+static void delay(u32 cycles) { for(volatile u32 i = 0UL; i < cycles ;++i) { __nop(); }}
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -796,6 +797,8 @@ extern "C" void SystemInit()
 #define NAND_CMD_READ_PARAM			0xEC
 #define NAND_CMD_CHANGE_WRCOL		0x85
 #define NAND_CMD_COPYBACK_PROGRAM	0x85
+#define NAND_CMD_SET_FEATURES		0xEF
+#define NAND_CMD_GET_FEATURES		0xEE
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -898,8 +901,10 @@ void NAND_WRITE(byte data)
 		PIO_WE_RE->CLR(WE); 
 		PIO_NAND_DATA->OUT8(data); 
 		__nop(); __nop(); __nop(); __nop(); __nop(); __nop(); __nop(); __nop(); __nop(); __nop();
-		__nop(); __nop(); __nop(); __nop(); __nop(); __nop(); __nop(); __nop(); __nop(); __nop();
+		//__nop(); __nop(); __nop(); __nop(); __nop(); __nop(); __nop(); __nop(); __nop(); __nop();
 		PIO_WE_RE->SET(WE); 
+		__nop(); __nop(); __nop(); __nop(); __nop(); __nop(); __nop(); __nop(); __nop(); __nop();
+		//__nop(); __nop(); __nop(); __nop(); __nop(); __nop(); __nop(); __nop(); __nop(); __nop();
 
 	#elif defined(CPU_XMC48)
 
@@ -1100,6 +1105,7 @@ bool ResetNand()
 	while(NAND_BUSY());
 	NAND_DIR_OUT();
 	CMD_LATCH(NAND_CMD_RESET);
+	while(!NAND_BUSY());
 	while(NAND_BUSY());
 	return true;
 }
@@ -1159,6 +1165,43 @@ bool NAND_CheckCopyComplete()
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+static void NAND_Set_Features(byte adr, byte p1, byte p2, byte p3, byte p4)
+{
+	NAND_DIR_OUT();
+	CMD_LATCH(NAND_CMD_SET_FEATURES);
+	ADR_LATCH(adr);
+	NAND_WRITE(p1); 
+	NAND_WRITE(p2); 
+	NAND_WRITE(p3); 
+	NAND_WRITE(p4); 
+	while(!NAND_BUSY());
+	while(NAND_BUSY());
+
+	NAND_DIR_IN();
+}
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+static void NAND_Get_Features(byte adr, byte* p)
+{
+	NAND_DIR_OUT();
+	CMD_LATCH(NAND_CMD_GET_FEATURES);
+	ADR_LATCH(adr);
+
+	while(!NAND_BUSY());
+
+	NAND_DIR_IN();
+
+	while(NAND_BUSY());
+
+	p[0] = NAND_READ(); 
+	p[1] = NAND_READ(); 
+	p[2] = NAND_READ(); 
+	p[3] = NAND_READ(); 
+}
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 static bool NAND_Read_ID(NandID *id)
 {
 	NAND_DIR_OUT();
@@ -1182,6 +1225,7 @@ static void NAND_Read_PARAM(NandParamPage *pp)
 	ADR_LATCH(0);
 	NAND_DIR_IN();
 
+	while(!NAND_BUSY());
 	while(NAND_BUSY());
 	
 	NAND_ReadDataDMA(pp, sizeof(NandParamPage)); while (!NAND_CheckDataComplete());
@@ -1251,6 +1295,8 @@ void NAND_CmdWritePage2()
 static void NAND_Init()
 {
 	using namespace HW;
+
+	byte p[4];
 
 #ifdef CPU_SAME53
 
@@ -1331,6 +1377,7 @@ static void NAND_Init()
 	for(byte chip = 0; chip < NAND_MAX_CHIP; chip ++)
 	{
 		NAND_Chip_Select(chip);
+		
 		ResetNand();
 		NandID id;
 		NAND_Read_ID(&id);
@@ -1356,11 +1403,17 @@ static void NAND_Init()
 		}
 		else if((id.marker == 0x2C) && (id.device == 0x68))
 		{
+			NAND_Set_Features(1, 5, 0, 0, 0);
+			
+			ResetNand();
+
+			NAND_Get_Features(1, p);
+
 			NandParamPage &np = nandParamPage[chip];
 
 			NAND_Read_PARAM(&np);
 
-			u16 crc = GetCRC16_8005(&np, 4, ~0);
+			u16 crc = GetCRC16_8005(&np, sizeof(np)-2, ~0);
 
 			if (np.integrityCRC == crc || np.integrityCRC == 0xA61F)
 			{
