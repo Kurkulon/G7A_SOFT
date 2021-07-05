@@ -86,6 +86,7 @@
 	#define EVENT_NAND_3	2
 	#define EVENT_MANR_1	3
 	#define EVENT_MANR_2	4
+	#define EVENT_MANR_3	5
 
 	#define nandTC			HW::TC0
 	#define nandTCC			HW::TCC0
@@ -98,6 +99,7 @@
 
 	#define MANT_IRQ		TCC4_0_IRQ
 	#define MANR_IRQ		TCC2_1_IRQ
+	#define MANR_EXTINT		3
 
 	#define PIO_MANCH		HW::PIOB
 	#define PIN_MEMTX1		31 
@@ -1792,6 +1794,10 @@ static u16* rcvManPtr = 0;
 static u16 rcvManCount = 0;
 
 static u16 rcvManLen = 0;
+static u16 rcvManLen72 = 0;
+static u16 rcvManLen96 = 0;
+static u16 rcvManLen24 = 0;
+static u16 rcvManLen48 = 0;
 
 static MRB *manRB = 0;
 
@@ -2438,7 +2444,7 @@ static __irq void ManRcvIRQ2()
 
 		u32 len = ManRT->CC[0];
 
-		ManRT->CTRLBSET = TCC_CMD_RETRIGGER;
+		//ManRT->CTRLBSET = TCC_CMD_RETRIGGER;
 
 	#elif defined(CPU_XMC48)
 
@@ -2453,12 +2459,16 @@ static __irq void ManRcvIRQ2()
 
 	if (len <= MT(60))
 	{
-		_length += (len <= MT(36)) ? 1 : 2;
-
-		if(_length >= 3)
+		if (len <= MT(36))
 		{
-			_sync = false;
+			_length += 1; rcvManLen24 = len;
+		}
+		else
+		{
+			_length += 2; rcvManLen48 = len;
 		};
+
+		if(_length >= 3) { _sync = false; };
 	}
 	else
 	{
@@ -2474,8 +2484,17 @@ static __irq void ManRcvIRQ2()
 			_data = 0;
 			_parity_temp = _parity;
 			_number = 0;
-			_length = (len <= MT(84)) ? 1 : 2;
 			_command = !_state; 
+
+			if (len <= MT(84))
+			{
+				_length = 1; rcvManLen72 = len;
+			}
+			else
+			{
+				_length = 2; rcvManLen96 = len;
+			};
+
 		};
 	};
 
@@ -2576,23 +2595,32 @@ static void InitManRecieve()
 	HW::GCLK->PCHCTRL[EVENT_MANR_1+GCLK_EVSYS0] = GCLK_GEN(GEN_MCK)|GCLK_CHEN;
 	HW::GCLK->PCHCTRL[EVENT_MANR_2+GCLK_EVSYS0] = GCLK_GEN(GEN_MCK)|GCLK_CHEN;
 
-	EVSYS->CH[EVENT_MANR_1].CHANNEL = EVGEN_EIC_EXTINT_3|EVSYS_PATH_ASYNCHRONOUS;
+	EIC->CTRLA = 0;
+	while(EIC->SYNCBUSY);
+
+	EIC->EVCTRL |= EIC_EXTINT0<<MANR_EXTINT;
+	EIC->SetConfig(MANR_EXTINT, 1, EIC_SENSE_BOTH);
+	EIC->INTENCLR = EIC_EXTINT0<<MANR_EXTINT;
+	EIC->CTRLA = EIC_ENABLE;
+
+	EVSYS->CH[EVENT_MANR_1].CHANNEL = (EVGEN_EIC_EXTINT_0+MANR_EXTINT)|EVSYS_PATH_ASYNCHRONOUS;
 	EVSYS->USER[EVSYS_USER_TCC3_EV_0] = EVENT_MANR_1+1;
 
-	EVSYS->CH[EVENT_MANR_2].CHANNEL = EVGEN_TCC3_OVF|EVSYS_PATH_ASYNCHRONOUS|EVSYS_EDGSEL_RISING_EDGE;;
+	EVSYS->CH[EVENT_MANR_2].CHANNEL = EVGEN_TCC3_OVF|EVSYS_PATH_ASYNCHRONOUS|EVSYS_EDGSEL_RISING_EDGE;
 	EVSYS->USER[EVSYS_USER_TCC2_MC_0] = EVENT_MANR_2+1;
+	EVSYS->USER[EVSYS_USER_TCC2_EV_0] = EVENT_MANR_2+1;
 
 	PIO_MANCH->DIRCLR = MANCHRX;
 	PIO_MANCH->CTRL |= MANCHRX;
 
-	PIO_MANCH->WRCONFIG = (MANCHRX>>16)|PORT_HWSEL_HI|PORT_PMUX(0)|PORT_WRPINCFG|PORT_PMUXEN|PORT_WRPMUX|PORT_INEN;
+	PIO_MANCH->SetWRCONFIG(MANCHRX, PORT_PMUX(0)|PORT_WRPINCFG|PORT_PMUXEN|PORT_WRPMUX|PORT_INEN);
 	PIO_MANCH->PINCFG[PIN_MANCHRX] = PINGFG_INEN|PINGFG_PMUXEN;
 
 	ManRT->CTRLA = TCC_SWRST;
 	while(ManRT->SYNCBUSY);
 
 	ManRT->CTRLA = TCC_CPTEN0;
-	ManRT->EVCTRL = TCC_MCEI0;
+	ManRT->EVCTRL = TCC_MCEI0|TCC_TCEI0|TCC_EVACT0_RETRIGGER;
 
 	ManRT->PER = ~0;
 	ManRT->CC[1] = 250;
@@ -2683,7 +2711,7 @@ bool RcvManData(MRB *mrb)
 	#ifdef CPU_SAME53	
 
 		ManRT->INTFLAG = ~0;
-		ManRT->INTENSET = TCC_MC0;
+		ManRT->INTENSET = TCC_MC0;//|TCC_TRG;
 
 	#elif defined(CPU_XMC48)
 
@@ -3495,10 +3523,6 @@ void InitHardware()
 	HW::MCLK->APBAMASK |= APBA_EIC;
 	HW::GCLK->PCHCTRL[GCLK_EIC] = GCLK_GEN(GEN_MCK)|GCLK_CHEN;
 
-	EIC->EVCTRL = EIC_EXTINT3;
-	EIC->SetConfig(EIC_EXTINT3, 1, EIC_SENSE_BOTH);
-	EIC->INTENCLR = EIC_EXTINT3;
-	EIC->CTRLA = EIC_ENABLE;
 
 	HW::MCLK->APBBMASK |= APBB_EVSYS;
 
