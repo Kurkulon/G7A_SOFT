@@ -5,6 +5,7 @@
 
 #include "hardware.h"
 #include "CRC16_8005.h"
+#include "CRC16.h"
 
 //#pragma O3
 //#pragma Otime
@@ -1415,9 +1416,9 @@ static void NAND_Init()
 
 			NAND_Read_PARAM(&np);
 
-			u16 crc = GetCRC16_8005(&np, sizeof(np)-2, ~0);
+			u16 crc = GetCRC16_8005_refl(&np, sizeof(np)-2, 0x4F4E);
 
-			if (np.integrityCRC == crc || np.integrityCRC == 0xA61F)
+			if (np.integrityCRC == crc/* || np.integrityCRC == 0xA61F*/)
 			{
 				if (nandSize.mask == 0)
 				{

@@ -628,6 +628,7 @@ static void UpdateParams()
 	enum C { S = (__LINE__+3) };
 	switch(i++)
 	{
+		CALL( UpdateEMAC()		);
 		CALL( UpdateTemp()		);
 		CALL( UpdateMan(); 		);
 		CALL( FLASH_Update();	);
@@ -663,9 +664,16 @@ static void UpdateMisc()
 static void Update()
 {
 	NAND_Idle();		
-	UpdateEMAC();		
-	UpdateTraps();	
-	UpdateParams();	
+	
+	if (EmacIsConnected())
+	{
+		UpdateEMAC();		
+		UpdateTraps();	
+	}
+	else
+	{
+		UpdateParams();	
+	};
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

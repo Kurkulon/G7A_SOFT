@@ -21,3 +21,19 @@ word GetCRC16_8005(const void *data, u32 len, word init)
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+word GetCRC16_8005_refl(const void *data, u32 len, word init)
+{
+	DataCRC CRC = { init };
+
+	const byte *s = (const byte*)data;
+
+	for ( ; len > 0; len--)
+	{
+		CRC.w = tableCRC_8005[CRC.b[1] ^ *(s++)] ^ (CRC.w<<8);
+	};
+
+	return CRC.w;
+}
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
