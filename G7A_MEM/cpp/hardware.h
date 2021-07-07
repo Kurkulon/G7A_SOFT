@@ -138,6 +138,7 @@ extern void ManRcvUpdate();
 //extern void ManRcvStop();
 
 extern bool SendMLT3(MTB *mtb);
+extern bool SendManData_2(MTB *mtb);
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

@@ -90,26 +90,41 @@
 	#define EVENT_MANR_3	5
 
 	#define nandTC			HW::TC0
+	//#define				HW::TC1
+	//#define 				HW::TC2
+	//#define 				HW::TC3
+	//#define 				HW::TC4
+	//#define 				HW::TC5
+	//#define 				HW::TC6
+	//#define 				HW::TC7
+
 	#define nandTCC			HW::TCC0
+	#define	ManTCC			HW::TCC4
 	#define ManRT			HW::TCC2
 	#define ManIT			HW::TCC3
 	#define ManTT			HW::TCC4
 	#define MltTmr			HW::TCC4
 	#define MT(v)			(v)
 	#define BOUD2CLK(x)		((u32)(1000000/x+0.5))
+	#define US2MT(v)		(v)//((v)*(u64)MCK/2/1000000)
 
 	#define MANT_IRQ		TCC4_0_IRQ
 	#define MANR_IRQ		TCC2_1_IRQ
 	#define MANR_EXTINT		3
+	#define MANT_IRQ_2		TCC4_1_IRQ
 
 	#define PIO_MANCH		HW::PIOB
 	#define PIN_MEMTX1		31 
 	#define PIN_MEMTX2		30 
 	#define PIN_MANCHRX		19 
+	#define PIN_TX1			10 
+	#define PIN_TX2			11 
 
 	#define MEMTX1			(1UL<<PIN_MEMTX1)
 	#define MEMTX2			(1UL<<PIN_MEMTX2)
 	#define MANCHRX			(1UL<<PIN_MANCHRX) 
+	#define TX1				(1UL<<PIN_TX1)
+	#define TX2				(1UL<<PIN_TX2)
 
 	//#define ManRxd()		((PIO_MANCH->IN >> PIN_MANCHRX) & 1)
 
@@ -2254,6 +2269,236 @@ static void InitManTransmit()
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+byte stateMT = 0;
+static MTB *manTB2 = 0;
+static bool trmBusy2 = false;
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+static __irq void ManTrmIRQ_2()
+{
+
+	static u32 tw = 0;
+	static u16 count = 0;
+	//static byte i = 0;
+	static const u16 *data = 0;
+	static u16 len = 0;
+
+	HW::PIOA->BSET(10);
+
+	switch (stateMT)
+	{
+		case 0:	// 1-st sync imp 
+
+			HW::PIOA->BSET(11); 
+
+			data = manTB2->data;
+			len = manTB2->len;
+
+			ManTCC->CC[0] += US2MT(72);
+			stateMT++;
+
+			break;
+
+		case 1:	// 2-nd sync imp
+
+			tw = ((u32)(*data) << 1) | (CheckParity(*data) & 1);
+
+			data++;
+			len--;
+
+			count = 17;
+
+			if (tw & 0x10000)
+			{
+				ManTCC->CC[0] += US2MT(96);
+				ManTCC->CC[1] += US2MT(96);
+				stateMT += 2;
+			}
+			else
+			{
+				ManTCC->CC[0] += US2MT(72);
+				ManTCC->CC[1] += US2MT(72);
+				stateMT++;
+			};
+ 
+			break;
+
+		case 2: // 1-st half bit
+
+			ManTCC->CC[0] += US2MT(24);
+			ManTCC->CC[1] += US2MT(24);
+			stateMT++;
+
+			break;
+
+		case 3:	// 2-nd half bit
+
+			count--;
+
+			if (count != 0)
+			{
+				u32 t = tw;
+				tw <<= 1;
+
+				t = (t ^ tw) & 0x10000;
+
+				if (t)
+				{
+					ManTCC->CC[0] += US2MT(48);
+					ManTCC->CC[1] += US2MT(48);
+					stateMT = 3;
+				}
+				else
+				{
+					ManTCC->CC[0] += US2MT(24);
+					ManTCC->CC[1] += US2MT(24);
+					stateMT = 2;
+				};
+			}
+			else
+			{
+				if (len == 0)
+				{
+					if (manTB2->next != 0)
+					{
+						manTB2->ready = true;
+
+						manTB2 = manTB2->next;
+
+						len = manTB2->len;
+						data = manTB2->data;
+					};
+				};
+
+				if (len > 0)
+				{
+					u32 t = (tw & 0x10000) ? US2MT(96) : US2MT(72);
+
+					ManTCC->CC[0] += t;
+					ManTCC->CC[1] += t;
+					stateMT = 1;
+				}
+				else
+				{
+					ManTCC->CC[0] += US2MT(24);
+					ManTCC->CC[1] += US2MT(24);
+
+					stateMT++;
+				}
+			};
+
+			break;
+
+		case 4:
+
+//			ManDisable();
+			stateMT = 0;
+
+			ManTCC->CTRLA = 0;
+			ManTCC->INTENCLR = ~0;
+
+			manTB2->ready = true;
+			trmBusy2 = false;
+
+			break;
+
+
+	}; // 	switch (stateManTrans)
+
+
+	ManTCC->CTRLBSET = TCC_CMD_UPDATE;
+
+	ManTCC->INTFLAG = TCC_MC0;
+
+	HW::PIOA->BCLR(10);
+	HW::PIOA->BCLR(11);
+}
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+bool SendManData_2(MTB *mtb)
+{
+	if (trmBusy2 || mtb == 0 || mtb->data == 0 || mtb->len == 0)
+	{
+		return false;
+	};
+
+	mtb->ready = false;
+
+	manTB2 = mtb;
+
+	stateMT = 0;
+
+	ManTCC->CTRLA = TCC_PRESCALER_DIV1;
+	ManTCC->WAVE = TCC_WAVEGEN_NFRQ;//|TCC_POL0;
+	ManTCC->DRVCTRL = 0;//TCC_INVEN1;
+	ManTCC->PER = 0xFFFFFF;
+	ManTCC->CC[0] = US2MT(100); 
+	ManTCC->CC[1] = US2MT(171); 
+
+	ManTCC->EVCTRL = 0;
+
+	ManTCC->INTENCLR = ~0;
+	ManTCC->INTENSET = TCC_MC0;
+	ManTCC->INTFLAG = ~0;
+
+	ManTCC->CTRLBCLR = TCC_LUPD;
+
+	ManTCC->CTRLA = TCC_ENABLE|TCC_PRESCALER_DIV1;
+	ManTCC->CTRLBSET = TCC_CMD_RETRIGGER;
+
+	return trmBusy2 = true;
+}
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+static void InitManTransmit_2()
+{
+	using namespace HW;
+
+	HW::PIOA->DIRSET = (1<<10)|(1<<11);
+
+	VectorTableExt[MANT_IRQ_2] = ManTrmIRQ_2;
+	CM4::NVIC->CLR_PR(MANT_IRQ_2);
+	CM4::NVIC->SET_ER(MANT_IRQ_2);
+
+	//HW::MCLK->APBBMASK |= APBB_TCC1;
+
+	HW::GCLK->PCHCTRL[GCLK_TCC4] = GCLK_GEN(GEN_1M)|GCLK_CHEN;
+	HW::MCLK->APBDMASK |= APBD_TCC4;
+
+	PIO_MANCH->DIRCLR = MEMTX1|MEMTX2;
+	PIO_MANCH->SetWRCONFIG(MEMTX1|MEMTX2, PORT_PMUX_F|PORT_WRPINCFG|PORT_PMUXEN|PORT_WRPMUX|PORT_PULLEN);
+
+	ManTCC->CTRLA = TCC_SWRST;
+
+	while(ManTCC->SYNCBUSY);
+
+	//ManTCC->CTRLA = TCC_PRESCALER_DIV2;
+	//ManTCC->WAVE = TCC_WAVEGEN_NFRQ;//|TCC_POL0;
+	//ManTCC->DRVCTRL = 0;//TCC_NRE0|TCC_NRE1|TCC_NRV0|TCC_NRV1;
+	//ManTCC->PER = 0xFFFFFF;
+	//ManTCC->CC[0] = US2MT(100); 
+	////ManTCC->CCBUF[0] = 25; 
+	//ManTCC->CC[1] = 25; 
+
+	//ManTCC->EVCTRL = 0;
+
+	//ManTCC->INTENCLR = ~0;
+	//ManTCC->INTENSET = TCC_MC0;
+	//ManTCC->INTFLAG = ~0;
+
+	//ManTCC->CTRLBCLR = TCC_LUPD;
+
+	//ManTCC->CTRLA = TCC_ENABLE|TCC_PRESCALER_DIV2;
+	//ManTCC->CTRLBSET = TCC_CMD_RETRIGGER;
+}
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 static void ManRcvEnd(bool ok)
 {
@@ -2272,157 +2517,10 @@ static void ManRcvEnd(bool ok)
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-/*
-class Receiver
-{
-	private:
-		u32 _number;
-		u32 _length;
-		u32 _data_temp;
-		u32 _data;
-		bool _command_temp;
-		bool _command;
-		bool _parity_temp;
-		bool _parity;
-		bool _sync;
-		bool _state;
-
-    public:
-
-		enum status_type
-		{
-			STATUS_WAIT = 0,
-			STATUS_SYNC,
-			STATUS_HANDLE,
-			STATUS_CHECK,
-			STATUS_READY,
-			STATUS_ERROR_LENGTH,
-			STATUS_ERROR_STRUCT,
-		};
-
-		Receiver(bool parity);
-		status_type Parse(u16 len);	
-		u16 GetData() { return _data; }
-		bool GetType() { return _command; }
-};
-
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-Receiver::Receiver(bool parity)
-{
-	_state = false;
-	_number = 0;
-	_length = 0;
-	_data_temp = 0;
-	_data = 0;
-	_command_temp = false;
-	_command = false;
-	_parity = parity;
-	_parity_temp = false;
-	_sync = false;
-}
-
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Receiver::status_type Receiver::Parse(u16 len)
-{	
-	_state = !_state;
-
-	if((len <= 12) || (len > 108))
-	{
-//		HW::PIOB->SODR = 1<<10;
-
-		_number = 0;
-		_length = 0;
-		_sync = false;
-
-//		HW::PIOB->CODR = 1<<10;
-
-		return STATUS_ERROR_LENGTH;
-	}
-	else if(len <= 36)                
-	{	
-		_length++;
-	}
-	else if(len <= 60)
-	{	
-		_length += 2;
-	}
-	else
-	{
-		HW::PIOA->BSET(3);
-
-		_sync = true;
-		_data_temp = 0;
-		_parity_temp = _parity;
-		_number = 0;
-		_length = (len <= 84) ? 1 : 2;
-		_command_temp = !_state; 
-	};
-
-	if(_length >= 3)
-	{
-		_number = 0;
-		_length = 0;
-		_sync = false;
-
-
-		return STATUS_ERROR_STRUCT;
-	};
-
-	if(_sync)
-	{
-		if(_length == 2)
-		{
-			if(_number < 16)
-			{
-				_data_temp <<= 1;
-				_data_temp |= _state;
-				_parity_temp ^= _state;
-				_number ++;
-				_length = 0;
-			}
-		 	else
-			{
-				_data = _data_temp;
-				_data_temp = 0;
-				_command = _command_temp;
-				_command_temp = false;
-				_number = 0;
-				_length = 0;
-				_sync = false;
-
-				if(_state != _parity_temp)
-				{
-					_state = !_state;
-					_data = (~_data);
-					_command = !_command;
-				};
-
-				return STATUS_READY;
-			};
-		};
-
-		return (_number < 16) ? STATUS_HANDLE : STATUS_CHECK;
-	};
-
-	return STATUS_WAIT;
-}
-*/
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-//static Receiver manRcv(true);
-
-//u32 lastCaptureValue = 0;
-//byte manRcvState = 0;
-//
-//u32 manRcvTime1 = 0;
-//u32 manRcvTime2 = 0;
-//u32 manRcvTime3 = 0;
-//u32 manRcvTime4 = 0;
 
 static RTM manRcvTime;
-
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -3541,11 +3639,13 @@ void InitHardware()
 	I2C_Init();
 	InitClock();
 
-	InitManTransmit();
+	//InitManTransmit();
 	InitManRecieve();
 	Init_CRC_CCITT_DMA();
 	
 	WDT_Init();
+
+	InitManTransmit_2();
 
 	HW::PIOC->BSET(0);
 }

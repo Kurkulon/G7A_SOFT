@@ -708,6 +708,20 @@ namespace T_HW
 	#define	PORT_PULLEN       	(1<<18)
 	#define	PORT_DRVSTR       	(1<<22)
 	#define PORT_PMUX(value)	(((value)&15)<<24)
+	#define PORT_PMUX_A			(0<<24)
+	#define PORT_PMUX_B			(1<<24)
+	#define PORT_PMUX_C			(2<<24)
+	#define PORT_PMUX_D			(3<<24)
+	#define PORT_PMUX_E			(4<<24)
+	#define PORT_PMUX_F			(5<<24)
+	#define PORT_PMUX_G			(6<<24)
+	#define PORT_PMUX_H			(7<<24)
+	#define PORT_PMUX_I			(8<<24)
+	#define PORT_PMUX_J			(9<<24)
+	#define PORT_PMUX_K			(10<<24)
+	#define PORT_PMUX_L			(11<<24)
+	#define PORT_PMUX_M			(12<<24)
+	#define PORT_PMUX_N			(13<<24)
 	#define	PORT_WRPMUX       	(1<<28)
 	#define	PORT_WRPINCFG      	(1<<30)
 	#define	PORT_HWSEL_LO      	(0<<31)
@@ -1207,35 +1221,34 @@ namespace T_HW
 
 	struct S_TCC
 	{
-		RW32        CTRLA;       		/**< \brief Offset: 0x00 (R/W 32) Control A */
-		RW8         CTRLBCLR;    		/**< \brief Offset: 0x04 (R/W  8) Control B Clear */
-		RW8         CTRLBSET;    		/**< \brief Offset: 0x05 (R/W  8) Control B Set */
-		RO8         z__Reserved1[0x2];
-		RO32        SYNCBUSY;    		/**< \brief Offset: 0x08 (R/  32) Synchronization Busy */
-		RW32       	FCTRLA;      		/**< \brief Offset: 0x0C (R/W 32) Recoverable Fault A Configuration */
-		RW32       	FCTRLB;      		/**< \brief Offset: 0x10 (R/W 32) Recoverable Fault B Configuration */
-		RW32        WEXCTRL;     		/**< \brief Offset: 0x14 (R/W 32) Waveform Extension Configuration */
-		RW32        DRVCTRL;     		/**< \brief Offset: 0x18 (R/W 32) Driver Control */
-		RO8         z__Reserved2[0x2];
-		RW8         DBGCTRL;			/**< \brief Offset: 0x1E (R/W  8) Debug Control */
-		RO8         z__Reserved3[0x1];
-		RW32        EVCTRL;      		/**< \brief Offset: 0x20 (R/W 32) Event Control */
-		RW32      	INTENCLR;    		/**< \brief Offset: 0x24 (R/W 32) Interrupt Enable Clear */
-		RW32      	INTENSET;    		/**< \brief Offset: 0x28 (R/W 32) Interrupt Enable Set */
-		RW32		INTFLAG;     		/**< \brief Offset: 0x2C (R/W 32) Interrupt Flag Status and Clear */
-		RW32        STATUS;      		/**< \brief Offset: 0x30 (R/W 32) Status */
-		RW32        COUNT;       		/**< \brief Offset: 0x34 (R/W 32) Count */
-		RW16        PATT;        		/**< \brief Offset: 0x38 (R/W 16) Pattern */
-		RO8         z__Reserved4[0x2];
-		RW32        WAVE;        		/**< \brief Offset: 0x3C (R/W 32) Waveform Control */
-		RW32        PER;         		/**< \brief Offset: 0x40 (R/W 32) Period */
-		RW32        CC[4];       		/**< \brief Offset: 0x44 (R/W 32) Compare and Capture */
-		RO8         z__Reserved5[0x10];	
-		RW16        PATTB;				/**< \brief Offset: 0x64 (R/W 16) Pattern Buffer */
-		RO8         z__Reserved6[0x2];
-		RW32        WAVEB;       		/**< \brief Offset: 0x68 (R/W 32) Waveform Control Buffer */
-		RW32		PERB;        		/**< \brief Offset: 0x6C (R/W 32) Period Buffer */
-		RW32        CCB[4];      		/**< \brief Offset: 0x70 (R/W 32) Compare and Capture Buffer */
+		RW32	CTRLA;       		/**< \brief Offset: 0x00 (R/W 32) Control A */
+		RW8     CTRLBCLR;    		/**< \brief Offset: 0x04 (R/W  8) Control B Clear */
+		RW8     CTRLBSET;    		/**< \brief Offset: 0x05 (R/W  8) Control B Set */
+		RO8     z__Reserved1[0x2];
+		RO32    SYNCBUSY;    		/**< \brief Offset: 0x08 (R/  32) Synchronization Busy */
+		RW32    FCTRLA;      		/**< \brief Offset: 0x0C (R/W 32) Recoverable Fault A Configuration */
+		RW32    FCTRLB;      		/**< \brief Offset: 0x10 (R/W 32) Recoverable Fault B Configuration */
+		RW32    WEXCTRL;     		/**< \brief Offset: 0x14 (R/W 32) Waveform Extension Configuration */
+		RW32    DRVCTRL;     		/**< \brief Offset: 0x18 (R/W 32) Driver Control */
+		RO8     z__Reserved2[0x2];
+		RW8     DBGCTRL;			/**< \brief Offset: 0x1E (R/W  8) Debug Control */
+		RO8     z__Reserved3[0x1];
+		RW32	EVCTRL;      		/**< \brief Offset: 0x20 (R/W 32) Event Control */
+		RW32	INTENCLR;    		/**< \brief Offset: 0x24 (R/W 32) Interrupt Enable Clear */
+		RW32	INTENSET;    		/**< \brief Offset: 0x28 (R/W 32) Interrupt Enable Set */
+		RW32	INTFLAG;     		/**< \brief Offset: 0x2C (R/W 32) Interrupt Flag Status and Clear */
+		RW32	STATUS;      		/**< \brief Offset: 0x30 (R/W 32) Status */
+		RW32    COUNT;       		/**< \brief Offset: 0x34 (R/W 32) Count */
+		RW16	PATT;        		/**< \brief Offset: 0x38 (R/W 16) Pattern */
+		RO8		z__Reserved4[0x2];
+		RW32	WAVE;        		/**< \brief Offset: 0x3C (R/W 32) Waveform Control */
+		RW32	PER;         		/**< \brief Offset: 0x40 (R/W 32) Period */
+		RW32	CC[6];       		/**< \brief Offset: 0x44 (R/W 32) Compare and Capture */
+		RO8     z__Reserved5[0x8];
+		RW16    PATTBUF;			/**< \brief Offset: 0x64 (R/W 16) Pattern Buffer */
+		RO8     z__Reserved6[0x6];
+		RW32	PERBUF;      		/**< \brief Offset: 0x6C (R/W 32) Period Buffer */
+		RW32	CCBUF[6];    		/**< \brief Offset: 0x70 (R/W 32) Compare and Capture Buffer */
 	};
 
 	typedef S_TCC S_TCC0, S_TCC1, S_TCC2, S_TCC3, S_TCC4;

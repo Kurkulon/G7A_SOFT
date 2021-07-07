@@ -598,7 +598,8 @@ static void UpdateMan()
 			if (tm.Check(US2RT(100)))
 			{
 //				SetTrmBoudRate(3); /*mtb.data = tableCRC;*/ mtb.len = 5; SendMLT3(&mtb);
-				SendManData(&mtb);
+				//SendManData(&mtb);
+				SendManData_2(&mtb);
 
 				i++;
 			};
