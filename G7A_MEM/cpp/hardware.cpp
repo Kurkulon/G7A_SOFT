@@ -22,11 +22,11 @@
 	// 4	- PC01	- FCS3
 	// 5	- PC02	- FCS4
 	// 6	- PC03
-	// 14	- PB07
+	// 14	- PB07	- Clock_IRQ
 	// 15	- PB08
 	// 16	- PB09
-	// 28	- PA10
-	// 29	- PA11
+	// 28	- PA10	- ManTrmIRQ2
+	// 29	- PA11	- ManTrmIRQ2
 	// 32	- PB10
 	// 33	- PB11
 	// 40	- PC10
@@ -164,6 +164,13 @@
 	#define MEM_TXD			(1<<PIN_MEM_TXD) 
 	#define MEM_RXD			(1<<PIN_MEM_RXD) 
 	#define MEM_SCK			(1<<PIN_MEM_SCK) 
+
+	#define CLOCK_EXTINT	7
+	#define CLOCK_IRQ		(EIC_0_IRQ+CLOCK_EXTINT)
+	#define PIO_RTC			HW::PIOB
+	#define PIN_RTCINT		23 
+	#define RTCINT			(1UL<<PIN_RTCINT)
+
 
 #elif defined(CPU_XMC48)
 
@@ -1815,6 +1822,16 @@ static u16 rcvManLen96 = 0;
 static u16 rcvManLen24 = 0;
 static u16 rcvManLen48 = 0;
 
+static u32 rcvManSum72 = 0;
+static u32 rcvManSum96 = 0;
+static u32 rcvManSum24 = 0;
+static u32 rcvManSum48 = 0;
+
+static u16 rcvManCount72 = 0;
+static u16 rcvManCount96 = 0;
+static u16 rcvManCount24 = 0;
+static u16 rcvManCount48 = 0;
+
 static MRB *manRB = 0;
 
 
@@ -2274,15 +2291,14 @@ static void InitManTransmit()
 byte stateMT = 0;
 static MTB *manTB2 = 0;
 static bool trmBusy2 = false;
+static bool trmTurbo = false;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 static __irq void ManTrmIRQ_2()
 {
-
 	static u32 tw = 0;
 	static u16 count = 0;
-	//static byte i = 0;
 	static const u16 *data = 0;
 	static u16 len = 0;
 
@@ -2297,7 +2313,7 @@ static __irq void ManTrmIRQ_2()
 			data = manTB2->data;
 			len = manTB2->len;
 
-			ManTCC->CC[0] += US2MT(72);
+			ManTCC->CC[0] += trmHalfPeriod*3; //US2MT(72);
 			stateMT++;
 
 			break;
@@ -2313,14 +2329,14 @@ static __irq void ManTrmIRQ_2()
 
 			if (tw & 0x10000)
 			{
-				ManTCC->CC[0] += US2MT(96);
-				ManTCC->CC[1] += US2MT(96);
+				ManTCC->CC[0] += trmHalfPeriod*4; //US2MT(96);
+				ManTCC->CC[1] += trmHalfPeriod*4; //US2MT(96);
 				stateMT += 2;
 			}
 			else
 			{
-				ManTCC->CC[0] += US2MT(72);
-				ManTCC->CC[1] += US2MT(72);
+				ManTCC->CC[0] += trmHalfPeriod*3; //US2MT(72);
+				ManTCC->CC[1] += trmHalfPeriod*3; //US2MT(72);
 				stateMT++;
 			};
  
@@ -2328,8 +2344,8 @@ static __irq void ManTrmIRQ_2()
 
 		case 2: // 1-st half bit
 
-			ManTCC->CC[0] += US2MT(24);
-			ManTCC->CC[1] += US2MT(24);
+			ManTCC->CC[0] += trmHalfPeriod; //US2MT(24);
+			ManTCC->CC[1] += trmHalfPeriod; //US2MT(24);
 			stateMT++;
 
 			break;
@@ -2347,14 +2363,14 @@ static __irq void ManTrmIRQ_2()
 
 				if (t)
 				{
-					ManTCC->CC[0] += US2MT(48);
-					ManTCC->CC[1] += US2MT(48);
+					ManTCC->CC[0] += trmHalfPeriod*2; //US2MT(48);
+					ManTCC->CC[1] += trmHalfPeriod*2; //US2MT(48);
 					stateMT = 3;
 				}
 				else
 				{
-					ManTCC->CC[0] += US2MT(24);
-					ManTCC->CC[1] += US2MT(24);
+					ManTCC->CC[0] += trmHalfPeriod; //US2MT(24);
+					ManTCC->CC[1] += trmHalfPeriod; //US2MT(24);
 					stateMT = 2;
 				};
 			}
@@ -2375,24 +2391,64 @@ static __irq void ManTrmIRQ_2()
 
 				if (len > 0)
 				{
-					u32 t = (tw & 0x10000) ? US2MT(96) : US2MT(72);
+					if (!trmTurbo)
+					{
+						if (tw & 0x10000)
+						{
+							ManTCC->CC[0] += trmHalfPeriod*4;
+							ManTCC->CC[1] += trmHalfPeriod*4;
+							stateMT = 1;
+						}
+						else
+						{
+							ManTCC->CC[0] += trmHalfPeriod; //US2MT(24);
+							ManTCC->CC[1] += trmHalfPeriod; //US2MT(24);
+							stateMT++;
+						};
+					}
+					else
+					{
+						tw = ((u32)(*data) << 1) | (CheckParity(*data) & 1);
 
-					ManTCC->CC[0] += t;
-					ManTCC->CC[1] += t;
-					stateMT = 1;
+						data++;
+						len--;
+
+						count = 17;
+
+						if (tw & 0x10000)
+						{
+							ManTCC->CC[0] += trmHalfPeriod*4; //US2MT(96);
+							ManTCC->CC[1] += trmHalfPeriod*4; //US2MT(96);
+							stateMT = 3;
+						}
+						else
+						{
+							ManTCC->CC[0] += trmHalfPeriod*3; //US2MT(72);
+							ManTCC->CC[1] += trmHalfPeriod*3; //US2MT(72);
+							stateMT = 2;
+						};
+					};
 				}
 				else
 				{
-					ManTCC->CC[0] += US2MT(24);
-					ManTCC->CC[1] += US2MT(24);
+					ManTCC->CC[0] += trmHalfPeriod; //US2MT(24);
+					ManTCC->CC[1] += trmHalfPeriod; //US2MT(24);
 
-					stateMT++;
+					stateMT += 2;
 				}
 			};
 
 			break;
 
 		case 4:
+
+			ManTCC->CC[0] += trmHalfPeriod*3;
+			ManTCC->CC[1] += trmHalfPeriod*3;
+			stateMT = 1;
+
+			break;
+
+		case 5:
 
 //			ManDisable();
 			stateMT = 0;
@@ -2437,7 +2493,7 @@ bool SendManData_2(MTB *mtb)
 	ManTCC->DRVCTRL = 0;//TCC_INVEN1;
 	ManTCC->PER = 0xFFFFFF;
 	ManTCC->CC[0] = US2MT(100); 
-	ManTCC->CC[1] = US2MT(171); 
+	ManTCC->CC[1] = US2MT(100)+trmHalfPeriod*3; 
 
 	ManTCC->EVCTRL = 0;
 
@@ -2476,25 +2532,6 @@ static void InitManTransmit_2()
 	ManTCC->CTRLA = TCC_SWRST;
 
 	while(ManTCC->SYNCBUSY);
-
-	//ManTCC->CTRLA = TCC_PRESCALER_DIV2;
-	//ManTCC->WAVE = TCC_WAVEGEN_NFRQ;//|TCC_POL0;
-	//ManTCC->DRVCTRL = 0;//TCC_NRE0|TCC_NRE1|TCC_NRV0|TCC_NRV1;
-	//ManTCC->PER = 0xFFFFFF;
-	//ManTCC->CC[0] = US2MT(100); 
-	////ManTCC->CCBUF[0] = 25; 
-	//ManTCC->CC[1] = 25; 
-
-	//ManTCC->EVCTRL = 0;
-
-	//ManTCC->INTENCLR = ~0;
-	//ManTCC->INTENSET = TCC_MC0;
-	//ManTCC->INTFLAG = ~0;
-
-	//ManTCC->CTRLBCLR = TCC_LUPD;
-
-	//ManTCC->CTRLA = TCC_ENABLE|TCC_PRESCALER_DIV2;
-	//ManTCC->CTRLBSET = TCC_CMD_RETRIGGER;
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -2511,6 +2548,11 @@ static void ManRcvEnd(bool ok)
 	manRB->OK = ok;
 	manRB->ready = true;
 	manRB->len = rcvManLen;
+
+	rcvManLen96 = (rcvManCount96 != 0) ? (rcvManSum96 / rcvManCount96) : 0;
+	rcvManLen72 = (rcvManCount72 != 0) ? (rcvManSum72 / rcvManCount72) : 0;
+	rcvManLen48 = (rcvManCount48 != 0) ? (rcvManSum48 / rcvManCount48) : 0;
+	rcvManLen24 = (rcvManCount24 != 0) ? (rcvManSum24 / rcvManCount24) : 0;
 	
 	rcvBusy = false;
 }
@@ -2560,11 +2602,11 @@ static __irq void ManRcvIRQ2()
 	{
 		if (len <= MT(36))
 		{
-			_length += 1; rcvManLen24 = len;
+			_length += 1; rcvManSum24 += len; rcvManCount24++;
 		}
 		else
 		{
-			_length += 2; rcvManLen48 = len;
+			_length += 2; rcvManSum48 += len; rcvManCount48++;
 		};
 
 		if(_length >= 3) { _sync = false; };
@@ -2587,11 +2629,11 @@ static __irq void ManRcvIRQ2()
 
 			if (len <= MT(84))
 			{
-				_length = 1; rcvManLen72 = len;
+				_length = 1; rcvManSum72 += len; rcvManCount72++;
 			}
 			else
 			{
-				_length = 2; rcvManLen96 = len;
+				_length = 2; rcvManSum96 += len; rcvManCount96++;
 			};
 
 		};
@@ -2694,8 +2736,16 @@ static void InitManRecieve()
 	HW::GCLK->PCHCTRL[EVENT_MANR_1+GCLK_EVSYS0] = GCLK_GEN(GEN_MCK)|GCLK_CHEN;
 	HW::GCLK->PCHCTRL[EVENT_MANR_2+GCLK_EVSYS0] = GCLK_GEN(GEN_MCK)|GCLK_CHEN;
 
-	EIC->CTRLA = 0;
-	while(EIC->SYNCBUSY);
+	if ((EIC->CTRLA & EIC_ENABLE) == 0)
+	{
+		EIC->CTRLA = EIC_SWRST;
+		while(EIC->SYNCBUSY);
+	}
+	else
+	{
+		EIC->CTRLA = 0;
+		while(EIC->SYNCBUSY);
+	};
 
 	EIC->EVCTRL |= EIC_EXTINT0<<MANR_EXTINT;
 	EIC->SetConfig(MANR_EXTINT, 1, EIC_SENSE_BOTH);
@@ -2806,6 +2856,11 @@ bool RcvManData(MRB *mrb)
 
 	rcvManPtr = manRB->data;
 	rcvManCount = manRB->maxLen;
+
+	rcvManSum96 = 0; rcvManCount96 = 0;
+	rcvManSum72 = 0; rcvManCount72 = 0;
+	rcvManSum48 = 0; rcvManCount48 = 0;
+	rcvManSum24 = 0; rcvManCount24 = 0;
 
 	#ifdef CPU_SAME53	
 
@@ -3370,16 +3425,55 @@ void SetClock(const RTC &t)
 	};
 }
 
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+static __irq void Clock_IRQ()
+{
+	HW::PIOB->BSET(7);
+
+	timeBDC.msec = (timeBDC.msec < 500) ? 0 : 999;
+
+	HW::EIC->INTFLAG = 1 << CLOCK_EXTINT;
+	HW::PIOB->BCLR(7);
+}
+
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 static void InitClock()
 {
+	using namespace HW;
+
+	VectorTableExt[CLOCK_IRQ] = Clock_IRQ;
+	CM4::NVIC->CLR_PR(CLOCK_IRQ);
+	CM4::NVIC->SET_ER(CLOCK_IRQ);	
+
+	PIOB->DIRSET = 1 << 7;
+
+	PIO_RTC->SetWRCONFIG(RTCINT, PORT_PMUX_A|PORT_WRPINCFG|PORT_PMUXEN|PORT_WRPMUX|PORT_INEN);
+
+	if ((EIC->CTRLA & EIC_ENABLE) == 0)
+	{
+		EIC->CTRLA = EIC_SWRST;
+		while(EIC->SYNCBUSY);
+	}
+	else
+	{
+		EIC->CTRLA = 0;
+		while(EIC->SYNCBUSY);
+	};
+
+	EIC->EVCTRL &= ~(1 << CLOCK_EXTINT);
+	EIC->SetConfig(CLOCK_EXTINT, 1, EIC_SENSE_FALL);
+	EIC->ASYNCH |= 1<<CLOCK_EXTINT;
+	EIC->INTENSET = 1 << CLOCK_EXTINT;
+	EIC->CTRLA = EIC_ENABLE;
+
 	DSCI2C dsc;
 
 	byte reg = 0;
 	byte buf[10];
 	
-	RTC t;
+	::RTC t;
 
 	dsc.adr = 0x68;
 	dsc.wdata = &reg;
@@ -3391,7 +3485,7 @@ static void InitClock()
 
 	I2C_AddRequest(&dsc);
 
-	while (!dsc.ready);
+	while (!dsc.ready);// { HW::WDT->Update(); };
 
 	t.sec	= (buf[0]&0xF) + ((buf[0]>>4)*10);
 	t.min	= (buf[1]&0xF) + ((buf[1]>>4)*10);
@@ -3640,12 +3734,12 @@ void InitHardware()
 	InitClock();
 
 	//InitManTransmit();
+	InitManTransmit_2();
 	InitManRecieve();
 	Init_CRC_CCITT_DMA();
 	
 	WDT_Init();
 
-	InitManTransmit_2();
 
 	HW::PIOC->BSET(0);
 }

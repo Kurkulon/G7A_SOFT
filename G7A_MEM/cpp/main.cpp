@@ -595,9 +595,8 @@ static void UpdateMan()
 
 		case 2:
 
-			if (tm.Check(US2RT(100)))
+			//if (tm.Check(US2RT(100)))
 			{
-//				SetTrmBoudRate(3); /*mtb.data = tableCRC;*/ mtb.len = 5; SendMLT3(&mtb);
 				//SendManData(&mtb);
 				SendManData_2(&mtb);
 
@@ -691,19 +690,10 @@ static void Update()
 
 #endif
 
-//static ComPort com1;
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 int main()
 {
-	static bool c = true;
-
-	static byte buf[100];
-
-	volatile byte * const FLD = (byte*)0x60000000;	
-
-//	RTM32 tm;
-//	Dbt db(100);
-
 //	__breakpoint(0);
 
 	InitHardware();
@@ -717,25 +707,8 @@ int main()
 	u32 fc = 0;
 
 	TM32 tm;
-//	RTM rtm;
 
 	tm.pt = 0;
-
-	buf[0] = 0x01;
-	buf[1] = 0x01;
-	buf[2] = 0x01;
-	buf[3] = 0x01;
-	buf[4] = 0x01;
-	buf[5] = 0x01;
-
-	txbuf[0] = 0x0101;
-	txbuf[1] = 0x0101;
-	txbuf[2] = 0x0101;
-	txbuf[3] = 0x0101;
-
-//	ComPort::WriteBuffer wb;
-
-//	com1.ConnectSync(0, 2000000, 2, 2);
 
 	while (1)
 	{
@@ -743,32 +716,7 @@ int main()
 
 		Update();
 
-		//txbuf[2] = CRC_CCITT_DMA(txbuf, 2, 0xFFFF);
-		//txbuf[3] = GetCRC16_CCIT(txbuf, 2, 0xFFFF);
-
 		FPS_PIN_CLR();
-
-		//CRC_CCITT_DMA(txbuf, 6, 0xFFFF);
-		//GetCRC16_CCIT(txbuf, 6, 0xFFFF);
-
-
-		//com1.TransmitByte(0x52);
-		//com1.Update();
-
-
-
-//		if (NAND_CheckDataComplete())
-//		{
-//			NAND_Chip_Select(0);
-//			NAND_CmdWritePage(0, 0, 0);
-//			NAND_WriteDataDMA(txbuf, 43);
-////			NAND_CopyDataDMA(txbuf, txbuf+1, 1000);
-//		};
-
-		//*FLD = 0;
-		//*FLD = 0;
-		//*FLD = 0;
-		//*FLD = 0;
 
 		fc++;
 
@@ -776,19 +724,8 @@ int main()
 		{ 
 			fps = fc; fc = 0; 
 
-			mtb.next = 0;
-			mtb.data = txbuf;
-			mtb.len = 1;
-			//SetTrmBoudRate(0);
-			//SendManData(&mtb);
-
 			HW::ResetWDT();
 		};
-
-//		if (rtm.Check(US2RT(500)))
-//		{
-////			HW::P1->BTGL(3);
-//		};
 
 	}; // while (1)
 }
