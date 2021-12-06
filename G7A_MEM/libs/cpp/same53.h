@@ -631,7 +631,32 @@ namespace T_HW
 	#define	VREF_SEL_2V4       (0x6<<16)   		/**< \brief (SUPC_VREF) 2.4V voltage reference typical value */
 	#define	VREF_SEL_2V5       (0x7<<16)   		/**< \brief (SUPC_VREF) 2.5V voltage reference typical value */
 
+	#define BOD33_ENABLE           	(1<<1)               /**< (SUPC_BOD33) Enable Position */
+	#define BOD33_ACTION_NONE      	(0x0<<2)             /**< (SUPC_BOD33) No action  */
+	#define BOD33_ACTION_RESET     	(0x1<<2)             /**< (SUPC_BOD33) The BOD33 generates a reset  */
+	#define BOD33_ACTION_INT       	(0x2<<2)             /**< (SUPC_BOD33) The BOD33 generates an interrupt  */
+	#define BOD33_ACTION_BKUP      	(0x3<<2)             /**< (SUPC_BOD33) The BOD33 puts the device in backup sleep mode  */
+	#define BOD33_STDBYCFG          (1<<4)               /**< (SUPC_BOD33) Configuration in Standby mode Position */
+	#define BOD33_RUNSTDBY          (1<<5)               /**< (SUPC_BOD33) Run in Standby mode Position */
+	#define BOD33_RUNHIB            (1<<6)               /**< (SUPC_BOD33) Run in Hibernate mode Position */
+	#define BOD33_RUNBKUP           (1<<7)               /**< (SUPC_BOD33) Run in Backup mode Position */
+	#define BOD33_HYST(value)       (((value)&15)<<8)
+	#define BOD33_PSEL_NODIV        (0x0<<12)             /**< (SUPC_BOD33) Not divided  */
+	#define BOD33_PSEL_DIV4         (0x1<<12)             /**< (SUPC_BOD33) Divide clock by 4  */
+	#define BOD33_PSEL_DIV8         (0x2<<12)             /**< (SUPC_BOD33) Divide clock by 8  */
+	#define BOD33_PSEL_DIV16        (0x3<<12)             /**< (SUPC_BOD33) Divide clock by 16  */
+	#define BOD33_PSEL_DIV32        (0x4<<12)             /**< (SUPC_BOD33) Divide clock by 32  */
+	#define BOD33_PSEL_DIV64        (0x5<<12)             /**< (SUPC_BOD33) Divide clock by 64  */
+	#define BOD33_PSEL_DIV128       (0x6<<12)             /**< (SUPC_BOD33) Divide clock by 128  */
+	#define BOD33_PSEL_DIV256       (0x7<<12)             /**< (SUPC_BOD33) Divide clock by 256  */
+	#define BOD33_LEVEL(value)    	(((value)&0xFF)<<16)
+	#define BOD33_VBATLEVEL(value)	(((value)&0xFF)<<24) 
 
+	#define SUPC_BOD33RDY  			(1<<0)                                               /**< (SUPC_STATUS) BOD33 Ready Position */
+	#define SUPC_BOD33DET  			(1<<1)                                               /**< (SUPC_STATUS) BOD33 Detection Position */
+	#define SUPC_B33SRDY   			(1<<2)                                               /**< (SUPC_STATUS) BOD33 Synchronization Ready Position */
+	#define SUPC_VREGRDY   			(1<<8)                                               /**< (SUPC_STATUS) Voltage Regulator Ready Position */
+	#define SUPC_VCORERDY  			(1<<10)                                              /**< (SUPC_STATUS) VDDCORE Ready Position */
 
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
