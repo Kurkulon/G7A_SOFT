@@ -43,7 +43,7 @@ cpu_scatter = SAM7X.sct
 !else ifeq targetcpu SAME53
 
 cpu_compiler_options = --cpu=CORTEX-M4.fp.sp --thumb
-cpu_asm_options = --cpu CORTEX-M4.fp.sp --apcs /interwork	--pd "__PROGNAME__ SETS \"KAPCAP G7A.2.1(MC ynp)-3.1\""
+cpu_asm_options = --cpu CORTEX-M4.fp.sp --apcs /interwork	--pd "__PROGNAME__ SETS \"KAPCAP G7A.2.1(MC ynp)-3.3\""
 cpu_link_options = --cpu CORTEX-M4.fp.sp
 cpu_obj = $(objdir)\startup_SAME53.o
 cpu_scatter = SAME53.sct
