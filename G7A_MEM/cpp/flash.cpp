@@ -109,6 +109,8 @@ static SessionInfo lastSessionInfo;
 
 u16 deviceID = 0;
 
+static u64 flashUsedSize = 0;
+
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 __packed struct NVV // NonVolatileVars  
@@ -1793,6 +1795,94 @@ static void InitSessions()
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+static void InitSessionsNew()
+{
+	//__breakpoint(0);
+
+	SpareArea spare;
+	ReadSpare rdspr;
+
+	write.Init();
+
+	if (nvv.f.size > 0)
+	{
+		write.CreateNextFile();
+
+		while (write.Update()) ;
+	};
+
+	FLADR firstSessionAdr = write.wr;
+
+	u16 firstSessionNum = 0;
+	bool firstSessionValid = false;
+
+	u16 count = 100;
+
+	while (count--)
+	{
+		rdspr.Start(&spare, &firstSessionAdr);	while (rdspr.Update());
+
+		if (spare.crc == 0)
+		{ 
+			firstSessionNum = spare.file; 
+			firstSessionValid = true; 
+			break; 
+		};
+	};
+
+	bool c = false;
+
+	flashUsedSize = 0;
+
+	for (u16 i = 128, ind = nvv.index; i > 0; i--, ind = (ind-1)&127)
+	{
+		FileDsc &f = nvsi[ind].f;
+
+		if (firstSessionValid && f.session == firstSessionNum)
+		{
+			f.startPage = firstSessionAdr.GetRawPage();
+			//f.size = ???;
+
+			firstSessionValid = false;
+			c = true;
+		}
+		else if (c)
+		{
+			f.size = 0;
+		}
+		else if (f.size != 0)
+		{
+			FLADR adr(f.startPage);
+
+			count = 100;
+
+			while (count--)
+			{
+				rdspr.Start(&spare, &adr);	while (rdspr.Update());
+
+				if (spare.crc == 0 ) break;
+
+				adr.NextPage();
+			};
+
+			if (spare.crc != 0 || f.session != spare.file)
+			{
+				f.size = 0;
+			};
+		};
+
+		flashUsedSize += f.size;
+	}; 
+
+	u64 fullSize = FLASH_Full_Size_Get();
+
+	if (flashUsedSize > fullSize) flashUsedSize = fullSize;
+
+	NAND_Chip_Disable();
+}
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 //bool GetSessionNow(SessionInfo *si)
 //{
 //	static SpareArea spare;
@@ -2165,9 +2255,7 @@ u64 FLASH_Full_Size_Get()
 
 u64 FLASH_Used_Size_Get()
 {
-	i64 size = FLASH_Full_Size_Get();
-
-	return size;
+	return flashUsedSize;
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -2963,7 +3051,7 @@ void FLASH_Init()
 
 	InitCom();
 
-	InitSessions();
+	InitSessionsNew();
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
