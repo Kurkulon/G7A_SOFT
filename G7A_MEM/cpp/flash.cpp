@@ -2330,6 +2330,17 @@ static Rsp rspData;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+static byte GetRequestCRC(byte *s, u32 len)
+{
+	byte crc = 0;
+
+	while (len > 0)	{ crc += *(s++); len--;	};
+
+	return crc;
+}
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 static bool CreateRsp01(ComPort::WriteBuffer *wb)
 {
 	static Rsp rsp;
@@ -2353,16 +2364,25 @@ static bool CreateRsp01(ComPort::WriteBuffer *wb)
 
 static bool CreateRsp02(ComPort::WriteBuffer *wb)
 {
-	static Rsp rsp;
+	static trap_memory_control_main_type rsp;
 
 	if (wb == 0)
 	{
 		return false;
 	};
 
-	rsp.adr = 1;
-	rsp.func = 2;
-	rsp.f2.crc = GetCRC16(&rsp, sizeof(rsp)-2);
+	rsp.header.dst = DEVICE_MEMORY;
+	rsp.header.src = DEVICE_CONTROL;
+	rsp.header.cmd = DEVICE_COMMAND_MAIN;
+	rsp.header.crc = 0;
+
+	rsp.memory_data.version = 2;
+	rsp.memory_data.serial = 2;
+	rsp.memory_data.temperature = 2;
+	rsp.memory_data.status = 0;
+	rsp.memory_data.errors = 0;
+
+	rsp.header.crc = GetRequestCRC((byte*)&rsp, sizeof(rsp));
 
 	wb->data = &rsp;
 	wb->len = sizeof(rsp);
@@ -2496,17 +2516,6 @@ static bool RequestFunc02(FLWB *fwb, ComPort::WriteBuffer *wb)
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-static byte GetRequestCRC(byte *s, u32 len)
-{
-	byte crc = 0;
-
-	while (len > 0)	{ crc += *(s++); len--;	};
-
-	return crc;
-}
-
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
 static bool RequestFunc(FLWB *fwb, ComPort::WriteBuffer *wb)
 {
 	bool result = false;
@@ -2517,10 +2526,10 @@ static bool RequestFunc(FLWB *fwb, ComPort::WriteBuffer *wb)
 	{
 //		freeReqList.Add(req);
 	}
-	else if (fwb->dataLen < 952)
-	{
+	//else if (fwb->dataLen < 952)
+	//{
 //		freeFlWrBuf.Add(fwb);
-	}
+//	}
 	else
 	{
 		d[3] = -d[3];
@@ -2680,7 +2689,7 @@ static void UpdateCom()
 			vd = &fwb->vd;
 
 			rb.data = ((byte*)vd->data)-10;
-			rb.maxLen = 0xF00;//sizeof(vd->data);
+			rb.maxLen = sizeof(vd->data);
 
 			com1.Read(&rb, MS2RT(50), US2RT(200));
 

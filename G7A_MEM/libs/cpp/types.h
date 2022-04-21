@@ -7,14 +7,21 @@
 //#endif
 //#endif
 
-#ifdef WIN32
+#ifndef __CC_ARM //WIN32
 
-#define __packed /**/
+#define __packed /*__declspec(align(1))*/
 #define __softfp /**/
-#define __irq /**/
+#define __irq __declspec(naked)
+#define __align(v)
+#define __attribute__(v)
+#define __func__ __FUNCTION__
 
 inline void __disable_irq() {}
 inline void __enable_irq() {}
+//inline void __nop() {}
+
+#define __CC_ARM
+#define __TARGET_FPU_VFP
 
 #endif 
 
