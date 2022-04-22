@@ -77,7 +77,7 @@ class ComPort
 		u32 _dmaCh;
 		u32 _dma_act_mask;
 
-		bool IsTransmited() { return (_SU->INTFLAG & USART_TXC) && ((_chdma->CTRLA & DMCH_ENABLE) == 0); }
+		bool IsTransmited() { return (_SU->INTFLAG & USART_TXC)/* && ((_chdma->CTRLA & DMCH_ENABLE) == 0)*/; }
 		u32	GetDmaCounter() { u32 t = HW::DMAC->ACTIVE; return ((t & 0x9F00) == _dma_act_mask) ? (t >> 16) : _dmawrb->BTCNT; }
 		u16	GetRecievedLen() { return _pReadBuffer->maxLen - _prevDmaCounter; }
 

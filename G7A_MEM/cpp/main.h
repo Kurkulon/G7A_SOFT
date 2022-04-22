@@ -1,7 +1,11 @@
 #ifndef MEMORY_AT91SAM7X256_H
 #define MEMORY_AT91SAM7X256_H
 
-#define VERSION			0x0102
+
+extern i16 GetDeviceTemp();
+extern u16 GetDeviceVersion();
+
+//#define VERSION			0x0102
 
 //#define MAIN_MODE_CHECK_MS	500
 //

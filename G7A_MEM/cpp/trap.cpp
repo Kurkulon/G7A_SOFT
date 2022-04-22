@@ -147,7 +147,7 @@ bool TRAP_INFO_SendInfo()
 
 	trap.hdr.cmd = TRAP_INFO_COMMAND_INFO;
 
-	trap.version = VERSION;
+	trap.version = GetDeviceVersion();
 	trap.number = GetNumDevice(); //FRAM_Main_Device_Number_Get();
 	trap.memory_mask = FLASH_Chip_Mask_Get();
 	trap.memory_size = FLASH_Full_Size_Get();

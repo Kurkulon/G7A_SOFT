@@ -486,17 +486,22 @@ void ComPort::EnableTransmit(void* src, word count)
 
 	#ifdef CPU_SAME53	
 
+		_chdma->CTRLA = 0;
+
 		_dmadsc->SRCADDR = (byte*)src+count;
 		_dmadsc->DSTADDR = &_SU->DATA;
 		_dmadsc->DESCADDR = 0;
 		_dmadsc->BTCNT = count;
 		_dmadsc->BTCTRL = DMDSC_VALID|DMDSC_BEATSIZE_BYTE|DMDSC_SRCINC;
 
+		_chdma->INTENCLR = ~0;
+		_chdma->INTFLAG = ~0;
+
 		_chdma->CTRLA = DMCH_ENABLE|DMCH_TRIGACT_BURST|DMCH_TRIGSRC_SERCOM5_TX;
 
 		_SU->CTRLB = _CTRLB|USART_TXEN;
 
-		HW::DMAC->SWTRIGCTRL = 1 << _dmaCh;
+		//HW::DMAC->SWTRIGCTRL = 1 << _dmaCh;
 
 	#elif defined(CPU_XMC48)
 
@@ -583,7 +588,9 @@ void ComPort::DisableTransmit()
 {
 	#ifdef CPU_SAME53	
 
+		_chdma->CTRLA = 0;
 		_SU->CTRLB = _CTRLB;	// Disable transmit and receive
+		_chdma->CTRLA = DMCH_SWRST;
 
 	#elif defined(CPU_XMC48)
 
@@ -603,6 +610,8 @@ void ComPort::EnableReceive(void* dst, word count)
 	_pm->CLR(_pinRTS);
 
 	#ifdef CPU_SAME53	
+
+		_chdma->CTRLA = 0;
 
 		_dmadsc->SRCADDR = &_SU->DATA;
 		_dmadsc->DSTADDR = (byte*)dst+count;
@@ -709,6 +718,8 @@ void ComPort::DisableReceive()
 
 		_chdma->CTRLA = 0;
 		_SU->CTRLB = _CTRLB;
+
+		_chdma->CTRLA = DMCH_SWRST;
 
 	#elif defined(CPU_XMC48)
 

@@ -54,7 +54,7 @@
 	// 84	- PC26	- CRC_CCITT_DMA
 	// 85	- PC27	- MEM USART READ
 	// 86	- PC28	- MEM USART RTS	
-	// 87	- PA27
+	// 87	- PA27	- MEM USART CRC ERROR
 	// 97	- PB00	- nc
 
 
@@ -522,8 +522,8 @@ extern "C" void SystemInit()
 
 	#ifdef CPU_SAME53	
 
-		HW::PIOA->DIRSET = (1<<25)|(1<<24)|(1<<21);
-		HW::PIOA->CLR((1<<25)|(1<<24)|(1<<21));
+		HW::PIOA->DIRSET = (1<<25)|(1<<24)|(1<<21)|(1<<27);
+		HW::PIOA->CLR((1<<25)|(1<<24)|(1<<21)|(1<<27));
 
 		PIO_MEM_USART->SetWRCONFIG(MEM_TXD|MEM_RXD|MEM_SCK, PORT_PMUX(3)|PORT_WRPINCFG|PORT_PMUXEN|PORT_WRPMUX|PORT_PULLEN);
 

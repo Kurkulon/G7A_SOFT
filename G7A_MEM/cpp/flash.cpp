@@ -12,6 +12,7 @@
 #include "trap.h"
 //#include "twi.h"
 #include "PointerCRC.h"
+#include "main.h"
 
 
 #pragma diag_suppress 550,177
@@ -2330,7 +2331,7 @@ static Rsp rspData;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-static byte GetRequestCRC(byte *s, u32 len)
+static byte GetRequestCRC_old(byte *s, u32 len)
 {
 	byte crc = 0;
 
@@ -2338,6 +2339,39 @@ static byte GetRequestCRC(byte *s, u32 len)
 
 	return crc;
 }
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#pragma push
+#pragma O3
+#pragma Otime
+
+static byte GetRequestCRC(byte *s, u32 len)
+{
+	byte crc = 0;
+
+	//u32 n = (~((u32)s))&3;
+
+	//while (n > 0) { crc += *(s++); n--;	len--;};
+
+	DataPointer p(s);
+
+	u32 n = len >> 2; len &= 3;
+
+	u32 crc32 = 0;
+
+	while (n > 0) { crc32 = __uadd8(crc32, *(p.d++)); n--; };
+
+	while (len > 0)	{ crc += *(p.b++); len--;	};
+
+	crc += (byte)crc32; crc32 >>= 8;
+	crc += (byte)crc32; crc32 >>= 8;
+	crc += (byte)crc32; crc32 >>= 8;
+	crc += (byte)crc32; 
+
+	return crc;
+}
+
+#pragma pop
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -2376,9 +2410,9 @@ static bool CreateRsp02(ComPort::WriteBuffer *wb)
 	rsp.header.cmd = DEVICE_COMMAND_MAIN;
 	rsp.header.crc = 0;
 
-	rsp.memory_data.version = 2;
-	rsp.memory_data.serial = 2;
-	rsp.memory_data.temperature = 2;
+	rsp.memory_data.version = GetDeviceVersion();
+	rsp.memory_data.serial = GetNumDevice();
+	rsp.memory_data.temperature = GetDeviceTemp();
 	rsp.memory_data.status = 0;
 	rsp.memory_data.errors = 0;
 
@@ -2534,8 +2568,12 @@ static bool RequestFunc(FLWB *fwb, ComPort::WriteBuffer *wb)
 	{
 		d[3] = -d[3];
 
+		HW::PIOA->BSET(27);
+
 		if (GetRequestCRC(d, fwb->dataLen) == 0) // (req.rw & 0xFF00) == 0xAA00) // 
 		{
+			HW::PIOA->BCLR(27);
+
 			fwb->dataLen -= fwb->vd.data - d;
 
 			DataPointer p(fwb->vd.data);
@@ -2560,8 +2598,11 @@ static bool RequestFunc(FLWB *fwb, ComPort::WriteBuffer *wb)
 		}
 		else
 		{
+			HW::PIOA->BCLR(27);
+			HW::PIOA->BSET(27);
 //			freeFlWrBuf.Add(fwb);
 			write.rejVec++;
+			HW::PIOA->BCLR(27);
 		};
 	};
 
