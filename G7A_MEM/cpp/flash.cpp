@@ -2405,8 +2405,8 @@ static bool CreateRsp02(ComPort::WriteBuffer *wb)
 		return false;
 	};
 
-	rsp.header.dst = DEVICE_MEMORY;
-	rsp.header.src = DEVICE_CONTROL;
+	rsp.header.dst = DEVICE_CONTROL;
+	rsp.header.src = DEVICE_MEMORY;
 	rsp.header.cmd = DEVICE_COMMAND_MAIN;
 	rsp.header.crc = 0;
 

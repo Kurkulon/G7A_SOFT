@@ -3479,6 +3479,20 @@ static void InitClock()
 	
 	::RTC t;
 
+	buf[0] = 0x0F;
+	buf[1] = 0x88;
+	dsc.adr = 0x68;
+	dsc.wdata = buf;
+	dsc.wlen = 2;
+	dsc.rdata = 0;
+	dsc.rlen = 0;
+	dsc.wdata2 = 0;
+	dsc.wlen2 = 0;
+
+	I2C_AddRequest(&dsc);
+
+	while (!dsc.ready);
+
 	dsc.adr = 0x68;
 	dsc.wdata = &reg;
 	dsc.wlen = 1;
