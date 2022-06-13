@@ -171,6 +171,8 @@
 	#define PIN_RTCINT		23 
 	#define RTCINT			(1UL<<PIN_RTCINT)
 
+	#define EnableVcore()	HW::PIOC->BSET(0)
+
 
 #elif defined(CPU_XMC48)
 
@@ -261,6 +263,8 @@
 	#define FCS1			(1<<PIN_FCS1) 
 	#define FCS2			(1<<PIN_FCS2) 
 	#define RB				(1<<PIN_RB) 
+
+	#define EnableVcore()	
 
 	// SDA_0_0 P1.5
 	// SCL_0_0 P0.8 P1.1
@@ -1130,7 +1134,8 @@ bool ResetNand()
 	while(NAND_BUSY());
 	NAND_DIR_OUT();
 	CMD_LATCH(NAND_CMD_RESET);
-	while(!NAND_BUSY());
+	NAND_CmdReadStatus();
+	u32 count = 1000; while (!NAND_BUSY() && (count-- > 0));
 	while(NAND_BUSY());
 	return true;
 }
@@ -3758,8 +3763,7 @@ void InitHardware()
 	
 	WDT_Init();
 
-
-	HW::PIOC->BSET(0);
+	EnableVcore();
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
