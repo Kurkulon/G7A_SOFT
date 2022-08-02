@@ -2937,7 +2937,11 @@ static __irq void I2C_Handler()
 	}
 	else if(state & I2C_MB) // Data can be transmitted 
 	{
-		if (twi_wrCount > 0)
+		if (I2C->STATUS.RXNACK)
+		{
+			nextdsc = true;
+		}
+		else if (twi_wrCount > 0)
 		{
 			I2C->DATA = *twi_wrPtr++;
 
@@ -2998,7 +3002,7 @@ static __irq void I2C_Handler()
 			//I2C->STATUS.BUSSTATE = BUSSTATE_IDLE;
 
 			I2C->INTFLAG = ~0;
-			I2C->INTENSET = I2C_MB|I2C_SB;
+			I2C->INTENSET = I2C_MB|I2C_SB|I2C_ERROR;
 
 			I2C->ADDR = (twi_dsc->adr << 1) | ((twi_wrCount == 0) ? 1 : 0);
 		}
@@ -3160,7 +3164,7 @@ bool I2C_Write(DSCI2C *d)
 		I2C->STATUS.BUSSTATE = BUSSTATE_IDLE;
 
 		I2C->INTFLAG = ~0;
-		I2C->INTENSET = I2C_MB|I2C_SB;
+		I2C->INTENSET = I2C_MB|I2C_SB|I2C_ERROR;
 
 		I2C->ADDR = (twi_dsc->adr << 1) | ((twi_wrCount == 0) ? 1 : 0);
 

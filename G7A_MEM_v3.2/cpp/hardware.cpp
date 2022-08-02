@@ -142,6 +142,9 @@
 
 	#define	CRC_DMACH		31
 
+	#define EnableVcore()	HW::PIOC->BSET(0)
+
+
 #elif defined(CPU_XMC48)
 
 	// Test Pins
@@ -231,6 +234,8 @@
 	#define FCS1			(1<<PIN_FCS1) 
 	#define FCS2			(1<<PIN_FCS2) 
 	#define RB				(1<<PIN_RB) 
+
+	#define EnableVcore()	
 
 	// SDA_0_0 P1.5
 	// SCL_0_0 P0.8 P1.1
@@ -1057,6 +1062,8 @@ bool ResetNand()
 	while(NAND_BUSY());
 	NAND_DIR_OUT();
 	CMD_LATCH(NAND_CMD_RESET);
+	NAND_CmdReadStatus();
+	u32 count = 1000; while (!NAND_BUSY() && (count-- > 0));
 	while(NAND_BUSY());
 	return true;
 }
@@ -2570,7 +2577,11 @@ static __irq void I2C_Handler()
 	}
 	else if(state & I2C_MB) // Data can be transmitted 
 	{
-		if (twi_wrCount > 0)
+		if (I2C->STATUS.RXNACK)
+		{
+			nextdsc = true;
+		}
+		else if (twi_wrCount > 0)
 		{
 			I2C->DATA = *twi_wrPtr++;
 
@@ -2631,7 +2642,7 @@ static __irq void I2C_Handler()
 			//I2C->STATUS.BUSSTATE = BUSSTATE_IDLE;
 
 			I2C->INTFLAG = ~0;
-			I2C->INTENSET = I2C_MB|I2C_SB;
+			I2C->INTENSET = I2C_MB|I2C_SB|I2C_ERROR;
 
 			I2C->ADDR = (twi_dsc->adr << 1) | ((twi_wrCount == 0) ? 1 : 0);
 		}
@@ -2793,7 +2804,7 @@ bool I2C_Write(DSCI2C *d)
 		I2C->STATUS.BUSSTATE = BUSSTATE_IDLE;
 
 		I2C->INTFLAG = ~0;
-		I2C->INTENSET = I2C_MB|I2C_SB;
+		I2C->INTENSET = I2C_MB|I2C_SB|I2C_ERROR;
 
 		I2C->ADDR = (twi_dsc->adr << 1) | ((twi_wrCount == 0) ? 1 : 0);
 
@@ -3299,7 +3310,7 @@ void InitHardware()
 	
 	WDT_Init();
 
-	HW::PIOC->BSET(0);
+	EnableVcore();
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

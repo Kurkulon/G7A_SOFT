@@ -44,6 +44,8 @@ struct NandMemSize
 
 };
 
+extern NandMemSize nandSize;
+
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 extern bool NAND_BUSY(); 
