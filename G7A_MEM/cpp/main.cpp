@@ -11,7 +11,7 @@
 #elif defined(CPU_XMC48)
 #endif
 
-#define VERSION			0x0202
+#define VERSION			0x0203
 
 //#pragma O3
 //#pragma Otime
@@ -22,9 +22,6 @@ const char build_date[] __attribute__((used)) = "\n" __DATE__ "\n" __TIME__ "\n"
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 u32 fps;
-i16 temp = 0;
-i16 cpu_temp = 0;
-i16 tempClock = 0;
 
 //inline u16 ReverseWord(u16 v) { __asm	{ rev16 v, v };	return v; }
 
@@ -52,13 +49,6 @@ static u16 verDevice = VERSION;
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-i16 GetDeviceTemp()
-{
-	return temp;
-}
-
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
 u16 GetDeviceVersion()
 {
 	return verDevice;
@@ -80,7 +70,7 @@ static void Response_0(u16 rw, MTB &mtb)
 	rsp.wrVec = FLASH_Vectors_Saved_Get();
 	rsp.errVec = FLASH_Vectors_Errors_Get();
 	*((__packed u64*)rsp.wrAdr) = FLASH_Current_Adress_Get();
-	rsp.temp = (temp+2)/4;
+	rsp.temp = (GetDeviceTemp()+2)/4;
 	rsp.status = FLASH_Status();
 
 	GetTime(&rsp.rtc);
@@ -223,7 +213,7 @@ static bool RequestMan_20(const u16 *data, u16 len, MTB &mtb)
 	rsp.wrVec = FLASH_Vectors_Saved_Get();
 	rsp.errVec = FLASH_Vectors_Errors_Get();
 	*((__packed u64*)rsp.wrAdr) = FLASH_Current_Adress_Get();
-	rsp.temp = (temp+5)/10;
+	rsp.temp = (GetDeviceTemp()+5)/10;
 	rsp.status = FLASH_Status();
 
 	GetTime(&rsp.rtc);
@@ -398,157 +388,6 @@ static bool RequestManNew(const u16 *buf, u16 len, MTB &mtb)
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-static void UpdateTemp()
-{
-	static byte i = 0;
-
-	static DSCI2C dsc, dsc2;
-
-	static byte reg = 0;
-	static u16 rbuf = 0;
-	static byte buf[10];
-
-	static TM32 tm;
-
-	switch (i)
-	{
-		case 0:
-
-			if (tm.Check(100))
-			{
-				buf[0] = 0x11;
-
-				dsc.adr = 0x68;
-				dsc.wdata = buf;
-				dsc.wlen = 1;
-				dsc.rdata = &rbuf;
-				dsc.rlen = 2;
-				dsc.wdata2 = 0;
-				dsc.wlen2 = 0;
-
-				if (I2C_AddRequest(&dsc))
-				{
-					i++;
-				};
-			};
-
-			break;
-
-		case 1:
-
-			if (dsc.ready)
-			{
-				if (dsc.ack && dsc.readedLen == dsc.rlen)
-				{
-					i16 t = ((i16)ReverseWord(rbuf) + 128) / 256;
-
-					if (t < (-60))
-					{
-						t += 256;
-					};
-
-					tempClock = t;
-				}
-				else
-				{
-					tempClock = -273;
-				};
-
-				i++;
-			};
-
-			break;
-
-		case 2:
-
-			buf[0] = 0x0E;
-			buf[1] = 0x20;
-			buf[2] = 0xC8;
-
-			dsc2.adr = 0x68;
-			dsc2.wdata = buf;
-			dsc2.wlen = 3;
-			dsc2.rdata = 0;
-			dsc2.rlen = 0;
-			dsc2.wdata2 = 0;
-			dsc2.wlen2 = 0;
-
-			if (I2C_AddRequest(&dsc2))
-			{
-				i++;
-			};
-
-			break;
-
-		case 3:
-
-			if (dsc2.ready)
-			{
-				buf[0] = 0;
-
-				dsc.adr = 0x49;
-				dsc.wdata = buf;
-				dsc.wlen = 1;
-				dsc.rdata = &rbuf;
-				dsc.rlen = 2;
-				dsc.wdata2 = 0;
-				dsc.wlen2 = 0;
-
-				if (I2C_AddRequest(&dsc))
-				{
-					i++;
-				};
-			};
-
-			break;
-
-		case 4:
-
-			if (dsc.ready)
-			{
-				if (dsc.ack && dsc.readedLen == dsc.rlen)
-				{
-					i32 t = (i16)ReverseWord(rbuf);
-
-					temp = (t * 10 + 64) / 128;
-				};
-				//else
-				//{
-				//	temp = -2730;
-				//};
-
-#ifdef CPU_SAME53	
-
-				i = 0;
-			};
-
-			break;
-
-#elif defined(CPU_XMC48)
-
-				HW::SCU_GENERAL->DTSCON = SCU_GENERAL_DTSCON_START_Msk;
-				
-				i++;
-			};
-
-			break;
-
-		case 5:
-
-			if (HW::SCU_GENERAL->DTSSTAT & SCU_GENERAL_DTSSTAT_RDY_Msk)
-			{
-				cpu_temp = ((i32)(HW::SCU_GENERAL->DTSSTAT & SCU_GENERAL_DTSSTAT_RESULT_Msk) - 605) * 1000 / 205;
-
-				i = 0;
-			};
-
-			break;
-#endif
-	};
-}
-
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
 static void UpdateMan()
 {
 	static MTB mtb;
@@ -642,7 +481,7 @@ static void UpdateParams()
 	switch(i++)
 	{
 		CALL( UpdateEMAC()		);
-		CALL( UpdateTemp()		);
+		CALL( UpdateHardware()	);
 		CALL( UpdateMan(); 		);
 		CALL( FLASH_Update();	);
 		CALL( I2C_Update();		);

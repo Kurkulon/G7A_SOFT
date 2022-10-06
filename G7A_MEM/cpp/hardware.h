@@ -147,5 +147,6 @@ extern bool SendManData_2(MTB *mtb);
 extern void InitHardware();
 extern void UpdateHardware();
 extern void SetClock(const RTC &t);
+extern i16 GetDeviceTemp();
 
 #endif // HARDWARE_H__23_12_2013__11_37

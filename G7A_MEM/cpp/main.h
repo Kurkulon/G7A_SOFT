@@ -2,7 +2,6 @@
 #define MEMORY_AT91SAM7X256_H
 
 
-extern i16 GetDeviceTemp();
 extern u16 GetDeviceVersion();
 
 //#define VERSION			0x0102

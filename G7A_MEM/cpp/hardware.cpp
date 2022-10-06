@@ -14,6 +14,9 @@
 #elif defined(CPU_XMC48)
 #endif
 
+i16 temp = 0;
+i16 cpu_temp = 0;
+i16 tempClock = 0;
 
 #ifdef CPU_SAME53	
 
@@ -3404,13 +3407,18 @@ bool I2C_Init()
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-void SetClock(const RTC &t)
+#define ADR_DS3232	0x68
+#define ADR_RV3129	0x56
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+static void SetClock_DS3232(const RTC &t)
 {
 	static DSCI2C dsc;
 
-	static byte reg = 0;
-	static u16 rbuf = 0;
-	static byte buf[10];
+	//static byte reg = 0;
+	//static u16 rbuf = 0;
+	static byte buf[8];
 
 	buf[0] = 0;
 	buf[1] = ((t.sec/10) << 4)|(t.sec%10);
@@ -3424,7 +3432,7 @@ void SetClock(const RTC &t)
 
 	buf[7] = ((y/10) << 4)|(y%10);
 
-	dsc.adr = 0x68;
+	dsc.adr = ADR_DS3232;
 	dsc.wdata = buf;
 	dsc.wlen = 8;
 	dsc.rdata = 0;
@@ -3440,6 +3448,160 @@ void SetClock(const RTC &t)
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+static void SetClock_RV3129(const RTC &t)
+{
+	static DSCI2C dsc;
+
+	//static byte reg = 0;
+	//static u16 rbuf = 0;
+	static byte buf[8];
+
+	buf[0] = 8;
+	buf[1] = ((t.sec/10) << 4)|(t.sec%10);
+	buf[2] = ((t.min/10) << 4)|(t.min%10);
+	buf[3] = ((t.hour/10) << 4)|(t.hour%10);
+	buf[4] = 1;
+	buf[5] = ((t.day/10) << 4)|(t.day%10);
+	buf[6] = ((t.mon/10) << 4)|(t.mon%10);
+
+	byte y = t.year % 100;
+
+	buf[7] = ((y/10) << 4)|(y%10);
+
+	dsc.adr = ADR_RV3129;
+	dsc.wdata = buf;
+	dsc.wlen = 8;
+	dsc.rdata = 0;
+	dsc.rlen = 0;
+	dsc.wdata2 = 0;
+	dsc.wlen2 = 0;
+
+	if (SetTime(t))
+	{
+		I2C_AddRequest(&dsc);
+	};
+}
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+static bool ReqClockTemp_DS3232(DSCI2C &dsc)
+{
+	static byte buf[3];
+
+	buf[0] = 0x11;
+
+	dsc.adr = ADR_DS3232;
+	dsc.wdata = buf;
+	dsc.wlen = 1;
+	dsc.rdata = buf+1;
+	dsc.rlen = 2;
+	dsc.wdata2 = 0;
+	dsc.wlen2 = 0;
+
+	return I2C_AddRequest(&dsc);
+}
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+static bool ReqClockTemp_RV3129(DSCI2C &dsc)
+{
+	static byte buf[2];
+
+	buf[0] = 0x20;
+
+	dsc.adr = ADR_RV3129;
+	dsc.wdata = buf;
+	dsc.wlen = 1;
+	dsc.rdata = buf+1;
+	dsc.rlen = 1;
+	dsc.wdata2 = 0;
+	dsc.wlen2 = 0;
+
+	return I2C_AddRequest(&dsc);
+}
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+static i16 GetClockTemp_DS3232(DSCI2C &dsc)
+{
+	byte *p = (byte*)dsc.rdata;
+
+	i16 t = ((i16)((p[0]<<8) + p[1]) + 128) / 256;
+
+	if (t < (-60))
+	{
+		t += 256;
+	};
+
+	return t;
+}
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+static i16 GetClockTemp_RV3129(DSCI2C &dsc)
+{
+	byte *p = (byte*)dsc.rdata;
+
+	return (i16)(p[0]) - 60;
+}
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+static bool StartConvClockTemp_DS3232(DSCI2C &dsc)
+{
+	static byte buf[3];
+
+	buf[0] = 0x0E;
+	buf[1] = 0x20;
+	buf[2] = 0xC8;
+
+	dsc.adr = ADR_DS3232;
+	dsc.wdata = buf;
+	dsc.wlen = 3;
+	dsc.rdata = 0;
+	dsc.rlen = 0;
+	dsc.wdata2 = 0;
+	dsc.wlen2 = 0;
+
+	return I2C_AddRequest(&dsc);
+}
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+static bool StartConvClockTemp_RV3129(DSCI2C &dsc)
+{
+	static byte buf[2];
+
+	buf[0] = 0x02; // Reset Control_INT Flag 
+	buf[1] = 0x00;
+
+	dsc.adr = ADR_RV3129;
+	dsc.wdata = buf;
+	dsc.wlen = 2;
+	dsc.rdata = 0;
+	dsc.rlen = 0;
+	dsc.wdata2 = 0;
+	dsc.wlen2 = 0;
+
+	return I2C_AddRequest(&dsc);
+}
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+static void (*pSetClock)(const RTC &t) = SetClock_DS3232;
+static bool (*pReqClockTemp)(DSCI2C &dsc) = ReqClockTemp_DS3232;
+static i16 (*pGetClockTemp)(DSCI2C &dsc) = GetClockTemp_DS3232;
+static bool (*pStartConvClockTemp)(DSCI2C &dsc) = StartConvClockTemp_DS3232;
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+void SetClock(const RTC &t)
+{
+	if (pSetClock != 0)	pSetClock(t);
+}
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 static __irq void Clock_IRQ()
 {
 	HW::PIOB->BSET(7);
@@ -3449,6 +3611,141 @@ static __irq void Clock_IRQ()
 	HW::EIC->INTFLAG = 1 << CLOCK_EXTINT;
 	HW::PIOB->BCLR(7);
 }
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+static bool InitClock_DS3232()
+{
+	DSCI2C dsc;
+
+	byte reg = 0;
+	byte buf[10];
+	
+	::RTC t;
+
+	buf[0] = 0x0F;
+	buf[1] = 0x88;
+	dsc.adr = ADR_DS3232;
+	dsc.wdata = buf;
+	dsc.wlen = 2;
+	dsc.rdata = 0;
+	dsc.rlen = 0;
+	dsc.wdata2 = 0;
+	dsc.wlen2 = 0;
+
+	I2C_AddRequest(&dsc);
+
+	while (!dsc.ready) I2C_Update();
+
+	if (!dsc.ack) return false;
+
+	dsc.adr = ADR_DS3232;
+	dsc.wdata = &reg;
+	dsc.wlen = 1;
+	dsc.rdata = buf;
+	dsc.rlen = 7;
+	dsc.wdata2 = 0;
+	dsc.wlen2 = 0;
+
+	I2C_AddRequest(&dsc);
+
+	while (!dsc.ready) I2C_Update();	// { HW::WDT->Update(); };
+
+	if (!dsc.ack) return false;
+
+	t.sec	= (buf[0]&0xF) + ((buf[0]>>4)*10);
+	t.min	= (buf[1]&0xF) + ((buf[1]>>4)*10);
+	t.hour	= (buf[2]&0xF) + ((buf[2]>>4)*10);
+	t.day	= (buf[4]&0xF) + ((buf[4]>>4)*10);
+	t.mon	= (buf[5]&0xF) + ((buf[5]>>4)*10);
+	t.year	= (buf[6]&0xF) + ((buf[6]>>4)*10) + 2000;
+
+	SetTime(t);
+
+	pSetClock = SetClock_DS3232;
+	pReqClockTemp = ReqClockTemp_DS3232;
+	pGetClockTemp = GetClockTemp_DS3232;
+	pStartConvClockTemp = StartConvClockTemp_DS3232;
+}
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+static bool InitClock_RV3129()
+{
+	DSCI2C dsc;
+
+	byte reg = 8;
+	byte buf[10];
+	
+	::RTC t;
+
+	buf[0] = 0x18;
+	buf[1] = 31;	// Timer Low
+	buf[2] = 0;		// Timer High
+
+	dsc.adr = ADR_RV3129;
+	dsc.wdata = buf;
+	dsc.wlen = 3;
+	dsc.rdata = 0;
+	dsc.rlen = 0;
+	dsc.wdata2 = 0;
+	dsc.wlen2 = 0;
+
+	I2C_AddRequest(&dsc);
+
+	while (!dsc.ready) I2C_Update();
+
+	if (!dsc.ack) return false;
+
+	buf[0] = 0x00;
+	buf[1] = 0x9F;	// Control_1
+	buf[2] = 0x02;	// Control_INT: TIE
+
+	dsc.adr = ADR_RV3129;
+	dsc.wdata = buf;
+	dsc.wlen = 3;
+	dsc.rdata = 0;
+	dsc.rlen = 0;
+	dsc.wdata2 = 0;
+	dsc.wlen2 = 0;
+
+	I2C_AddRequest(&dsc);
+
+	while (!dsc.ready) I2C_Update();
+
+	if (!dsc.ack) return false;
+
+	dsc.adr = ADR_RV3129;
+	dsc.wdata = &reg;
+	dsc.wlen = 1;
+	dsc.rdata = buf;
+	dsc.rlen = 7;
+	dsc.wdata2 = 0;
+	dsc.wlen2 = 0;
+
+	I2C_AddRequest(&dsc);
+
+	while (!dsc.ready) I2C_Update();	// { HW::WDT->Update(); };
+
+	if (!dsc.ack) return false;
+
+	t.sec	= (buf[0]&0xF) + ((buf[0]>>4)*10);
+	t.min	= (buf[1]&0xF) + ((buf[1]>>4)*10);
+	t.hour	= (buf[2]&0xF) + ((buf[2]>>4)*10);
+	t.day	= (buf[3]&0xF) + ((buf[3]>>4)*10);
+	t.mon	= (buf[5]&0xF) + ((buf[5]>>4)*10);
+	t.year	= (buf[6]&0xF) + ((buf[6]>>4)*10) + 2000;
+
+	SetTime(t);
+
+	pSetClock = SetClock_RV3129;
+	pReqClockTemp = ReqClockTemp_RV3129;
+	pGetClockTemp = GetClockTemp_RV3129;
+	pStartConvClockTemp = StartConvClockTemp_RV3129;
+}
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -3481,47 +3778,14 @@ static void InitClock()
 	EIC->INTENSET = 1 << CLOCK_EXTINT;
 	EIC->CTRLA = EIC_ENABLE;
 
-	DSCI2C dsc;
+	if (InitClock_DS3232())
+	{
 
-	byte reg = 0;
-	byte buf[10];
-	
-	::RTC t;
+	}
+	else if (InitClock_RV3129())
+	{
 
-	buf[0] = 0x0F;
-	buf[1] = 0x88;
-	dsc.adr = 0x68;
-	dsc.wdata = buf;
-	dsc.wlen = 2;
-	dsc.rdata = 0;
-	dsc.rlen = 0;
-	dsc.wdata2 = 0;
-	dsc.wlen2 = 0;
-
-	I2C_AddRequest(&dsc);
-
-	while (!dsc.ready);
-
-	dsc.adr = 0x68;
-	dsc.wdata = &reg;
-	dsc.wlen = 1;
-	dsc.rdata = buf;
-	dsc.rlen = 7;
-	dsc.wdata2 = 0;
-	dsc.wlen2 = 0;
-
-	I2C_AddRequest(&dsc);
-
-	while (!dsc.ready);// { HW::WDT->Update(); };
-
-	t.sec	= (buf[0]&0xF) + ((buf[0]>>4)*10);
-	t.min	= (buf[1]&0xF) + ((buf[1]>>4)*10);
-	t.hour	= (buf[2]&0xF) + ((buf[2]>>4)*10);
-	t.day	= (buf[4]&0xF) + ((buf[4]>>4)*10);
-	t.mon	= (buf[5]&0xF) + ((buf[5]>>4)*10);
-	t.year	= (buf[6]&0xF) + ((buf[6]>>4)*10) + 2000;
-
-	SetTime(t);
+	};
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -3723,6 +3987,128 @@ static void WDT_Init()
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+i16 GetDeviceTemp()
+{
+	return temp;
+}
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+static void UpdateTemp()
+{
+	static byte i = 0;
+
+	static DSCI2C dsc, dsc2;
+
+	static byte reg = 0;
+	static u16 rbuf = 0;
+	static byte buf[10];
+
+	static TM32 tm;
+
+	switch (i)
+	{
+		case 0:
+
+			if (tm.Check(101))
+			{
+				if (pReqClockTemp(dsc))
+				{
+					i++;
+				};
+			};
+
+			break;
+
+		case 1:
+
+			if (dsc.ready)
+			{
+				tempClock = (dsc.ack && dsc.readedLen == dsc.rlen) ? pGetClockTemp(dsc) : -273;
+
+				i++;
+			};
+
+			break;
+
+		case 2:
+
+			if (pStartConvClockTemp(dsc2))
+			{
+				i++;
+			};
+
+			break;
+
+		case 3:
+
+			if (dsc2.ready)
+			{
+				buf[0] = 0;
+
+				dsc.adr = 0x49;
+				dsc.wdata = buf;
+				dsc.wlen = 1;
+				dsc.rdata = &rbuf;
+				dsc.rlen = 2;
+				dsc.wdata2 = 0;
+				dsc.wlen2 = 0;
+
+				if (I2C_AddRequest(&dsc))
+				{
+					i++;
+				};
+			};
+
+			break;
+
+		case 4:
+
+			if (dsc.ready)
+			{
+				if (dsc.ack && dsc.readedLen == dsc.rlen)
+				{
+					i32 t = (i16)ReverseWord(rbuf);
+
+					temp = (t * 10 + 64) / 128;
+				};
+				//else
+				//{
+				//	temp = -2730;
+				//};
+
+#ifdef CPU_SAME53	
+
+				i = 0;
+			};
+
+			break;
+
+#elif defined(CPU_XMC48)
+
+				HW::SCU_GENERAL->DTSCON = SCU_GENERAL_DTSCON_START_Msk;
+				
+				i++;
+			};
+
+			break;
+
+		case 5:
+
+			if (HW::SCU_GENERAL->DTSSTAT & SCU_GENERAL_DTSSTAT_RDY_Msk)
+			{
+				cpu_temp = ((i32)(HW::SCU_GENERAL->DTSSTAT & SCU_GENERAL_DTSSTAT_RESULT_Msk) - 605) * 1000 / 205;
+
+				i = 0;
+			};
+
+			break;
+#endif
+	};
+}
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 void InitHardware()
 {
 	using namespace HW;
@@ -3775,19 +4161,21 @@ void InitHardware()
 
 void UpdateHardware()
 {
-	static byte i = 0;
+	UpdateTemp();
 
-	static Deb db(false, 20);
+//	static byte i = 0;
 
-	#define CALL(p) case (__LINE__-S): p; break;
+//	static Deb db(false, 20);
 
-	enum C { S = (__LINE__+3) };
-	switch(i++)
-	{
+//	#define CALL(p) case (__LINE__-S): p; break;
+
+//	enum C { S = (__LINE__+3) };
+//	switch(i++)
+//	{
 //		CALL( Update_AD5312();		);
-	};
+//	};
 
-	i = (i > (__LINE__-S-3)) ? 0 : i;
+//	i = (i > (__LINE__-S-3)) ? 0 : i;
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
