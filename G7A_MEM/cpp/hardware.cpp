@@ -3666,6 +3666,8 @@ static bool InitClock_DS3232()
 	pReqClockTemp = ReqClockTemp_DS3232;
 	pGetClockTemp = GetClockTemp_DS3232;
 	pStartConvClockTemp = StartConvClockTemp_DS3232;
+
+	return true;
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -3742,6 +3744,8 @@ static bool InitClock_RV3129()
 	pReqClockTemp = ReqClockTemp_RV3129;
 	pGetClockTemp = GetClockTemp_RV3129;
 	pStartConvClockTemp = StartConvClockTemp_RV3129;
+
+	return true;
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

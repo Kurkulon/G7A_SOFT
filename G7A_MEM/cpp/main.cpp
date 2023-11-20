@@ -11,7 +11,7 @@
 #elif defined(CPU_XMC48)
 #endif
 
-#define VERSION			0x0203
+#define VERSION			0x0204
 
 //#pragma O3
 //#pragma Otime
