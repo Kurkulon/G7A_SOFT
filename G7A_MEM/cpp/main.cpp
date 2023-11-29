@@ -447,7 +447,7 @@ static void UpdateMan()
 
 		case 2:
 
-			//if (tm.Check(US2RT(100)))
+			if (tm.Check(US2RT(500)))
 			{
 				//SendManData(&mtb);
 				SendManData_2(&mtb);
