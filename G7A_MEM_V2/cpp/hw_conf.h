@@ -127,10 +127,10 @@
 	// ++++++++++++++	DMA	0...31	++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 	#define	NAND_DMA				DMA_CH0
-	#define	PWMHA_DMA				DMA_CH1
-	#define	PWMLB_DMA				DMA_CH2
-	#define	PWMHB_DMA				DMA_CH3
-	#define	DACTC_DMA				DMA_CH4
+	//#define	PWMHA_DMA				DMA_CH1
+	//#define	PWMLB_DMA				DMA_CH2
+	//#define	PWMHB_DMA				DMA_CH3
+	//#define	DACTC_DMA				DMA_CH4
 	#define	UART0_DMA				DMA_CH5
 	#define	NAND_MEMCOPY_DMA		DMA_CH6
 	#define	I2C_DMA					DMA_CH7
