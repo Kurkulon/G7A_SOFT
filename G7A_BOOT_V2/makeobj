@@ -9,7 +9,7 @@ version = Release
 
 curdir = $+ $(%cdrive):$(%cwd) $-
 hdir = cpp
-libdir = $(curdir)\..\..\G_LIBS_ARM
+libdir = $(curdir)\..\..\G_LIBS
 bindir = $(%ARMCC50BIN)
 
 !ifeq version Debug
@@ -37,18 +37,16 @@ target_name = G7A_BOOT_$(targetcpu)
 cpu_compiler_options = --cpu=CORTEX-M4.fp.sp --thumb
 cpu_asm_options = --cpu CORTEX-M4.fp.sp --apcs /interwork	--pd "__PROGNAME__ SETS \"BOOT G7A.2.1(MS_UPR)-3.3\""
 cpu_link_options = --cpu CORTEX-M4.fp.sp
-cpu_obj = $(objdir)\startup_SAME53.o
-cpu_scatter = SAME53.sct
 cpu_obj = $(objdir)\startup_CM4.o
-cpu_scatter = $(libdir)\SAME53_BOOT.sct
+cpu_scatter = $(libdir)\Scatter\SAME53_BOOT.sct
 
 !else ifeq targetcpu XMC48
 
 cpu_compiler_options = --cpu=CORTEX-M4.fp.sp --thumb
 cpu_asm_options = --cpu CORTEX-M4.fp.sp --apcs /interwork	--pd "__PROGNAME__ SETS \"BOOT G7A.2.1(MS_UPR)-2.1\""
 cpu_link_options = --cpu CORTEX-M4.fp.sp
-cpu_obj = $(objdir)\startup_XMC4800.o
-cpu_scatter = XMC48.sct
+cpu_obj = $(objdir)\startup_CM4.o
+cpu_scatter = $(libdir)\Scatter\XMC48_BOOT.sct
 
 !else
 
@@ -75,7 +73,7 @@ libname = $(libdir)\$(targetcpu)_$(libsuffix).a
 .cpp:	$(cppdir)
 .o:	$(objdir)
 .h:	$(hdir)
-.s: $(libdir)\cpp
+.s: $(libdir)\cpp\ARM
 .d:	$(objdir)
 
 

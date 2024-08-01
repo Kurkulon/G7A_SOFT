@@ -3,13 +3,13 @@
 #include "time.h"
 
 #include "hardware.h"
-#include "CRC16_8005.h"
+#include "CRC\CRC16_8005.h"
 
-#include "SEGGER_RTT.h"
+#include "SEGGER_RTT\SEGGER_RTT.h"
 #include "hw_conf.h"
 #include "hw_rtm.h"
-#include "manch.h"
-#include "DMA.h"
+#include "MANCH\manch.h"
+#include "DMA\DMA.h"
 
 //#pragma O3
 //#pragma Otime
@@ -29,7 +29,7 @@
 #define	NUM_MEDIUM_BUF	8
 #define	NUM_HUGE_BUF	8
 
-#include <mem_imp.h>
+#include <MEM\mem_imp.h>
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -50,7 +50,7 @@ __forceinline 	void DisableVCORE()	{ PIO_ENVCORE->SET(ENVCORE); 	}
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-#include <system_imp.h>
+#include <ARM\system_imp.h>
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

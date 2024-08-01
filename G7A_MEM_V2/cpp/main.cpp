@@ -1,17 +1,17 @@
 #include "hardware.h"
 //#include "options.h"
-#include "emac.h"
-#include "xtrap.h"
-#include "trap.h"
-#include "flash.h"
-#include "CRC16.h"
+#include "EMAC\emac.h"
+#include "EMAC\xtrap.h"
+#include "EMAC\trap.h"
+#include "FLASH\NandFlash.h"
+#include "CRC\CRC16.h"
 #include "hw_com.h"
 //#include "CRC16_CCIT.h"
-#include "manch.h"
-#include "SEGGER_RTT.h"
+#include "MANCH\manch.h"
+#include "SEGGER_RTT\SEGGER_RTT.h"
 #include "PointerCRC.h"
 #include "hw_com.h"
-#include "mem.h"
+#include "MEM\mem.h"
 
 
 #ifdef CPU_SAME53	
@@ -109,15 +109,15 @@ static void Response_0(u16 rw, MTB &mtb)
 	Rsp &rsp = *((Rsp*)&txbuf);
 
 	rsp.rw = rw;
-	rsp.device = GetDeviceID();  
-	rsp.session = FLASH_Session_Get();	  
-	rsp.rcvVec =  FLASH_Vectors_Recieved_Get();
+	rsp.device = NandFlash_GetDeviceID();  
+	rsp.session = NandFlash_Session_Get();	  
+	rsp.rcvVec =  NandFlash_Vectors_Recieved_Get();
 	rsp.rejVec = badVec;
-	rsp.wrVec = FLASH_Vectors_Saved_Get();
-	rsp.errVec = FLASH_Vectors_Errors_Get();
-	*((__packed u64*)rsp.wrAdr) = FLASH_Current_Adress_Get();
+	rsp.wrVec = NandFlash_Vectors_Saved_Get();
+	rsp.errVec = NandFlash_Vectors_Errors_Get();
+	*((__packed u64*)rsp.wrAdr) = NandFlash_Current_Adress_Get();
 	rsp.temp = (GetDeviceTemp()+2)/4;
-	rsp.status = FLASH_Status();
+	rsp.status = NandFlash_Status();
 
 	GetTime(&rsp.rtc);
 
@@ -146,7 +146,7 @@ static bool RequestMan_1(const u16 *data, u16 len, MTB &mtb)
 
 	Response_0(data[0], mtb);
 
-	FLASH_WriteEnable();
+	NandFlash_WriteEnable();
 
 	return true;
 }
@@ -159,7 +159,7 @@ static bool RequestMan_2(const u16 *data, u16 len, MTB &mtb)
 
 	Response_0(data[0], mtb);
 
-	FLASH_WriteDisable();
+	NandFlash_WriteDisable();
 
 	return true;
 }
@@ -257,15 +257,15 @@ static bool RequestMan_20(const u16 *data, u16 len, MTB &mtb)
 	Rsp &rsp = *((Rsp*)&txbuf);
 
 	rsp.rw = (manReqWordNew & manReqMask) | 0x20;
-	rsp.device = GetDeviceID();  
-	rsp.session = FLASH_Session_Get();	  
-	rsp.rcvVec =  FLASH_Vectors_Recieved_Get();
+	rsp.device = NandFlash_GetDeviceID();  
+	rsp.session = NandFlash_Session_Get();	  
+	rsp.rcvVec =  NandFlash_Vectors_Recieved_Get();
 	rsp.rejVec = badVec;
-	rsp.wrVec = FLASH_Vectors_Saved_Get();
-	rsp.errVec = FLASH_Vectors_Errors_Get();
-	*((__packed u64*)rsp.wrAdr) = FLASH_Current_Adress_Get();
+	rsp.wrVec = NandFlash_Vectors_Saved_Get();
+	rsp.errVec = NandFlash_Vectors_Errors_Get();
+	*((__packed u64*)rsp.wrAdr) = NandFlash_Current_Adress_Get();
 	rsp.temp = (GetDeviceTemp()+5)/10;
-	rsp.status = FLASH_Status();
+	rsp.status = NandFlash_Status();
 
 	GetTime(&rsp.rtc);
 
@@ -301,7 +301,7 @@ static bool RequestMan_31(const u16 *data, u16 len, MTB &mtb)
 {
 	if (len != 1) return false;
 
-	FLASH_WriteEnable();
+	NandFlash_WriteEnable();
 
 	txbuf[0] = (manReqWordNew & manReqMask) | 0x31;
 
@@ -319,7 +319,7 @@ static bool RequestMan_32(const u16 *data, u16 len, MTB &mtb)
 {
 	if (len != 1) return false;
 
-	FLASH_WriteDisable();
+	NandFlash_WriteDisable();
 
 	txbuf[0] = (manReqWordNew & manReqMask) | 0x32;
 
@@ -1003,7 +1003,7 @@ static bool RequestFunc(Ptr<MB> &mb, ComPort::WriteBuffer *wb)
 			mb->dataOffset += sizeof(req.hdr);
 			mb->len -= sizeof(req.hdr);
 
-			if (RequestFlashWrite(mb, req.hdr.device, true))
+			if (NandFlash_RequestWrite(mb, req.hdr.device, true))
 			{
 				result = CreateRsp02(wb);
 			}
@@ -1091,7 +1091,7 @@ static void UpdateCom()
 	{
 		case 0:
 
-			mb = AllocFlashWriteBuffer(sizeof(Req));
+			mb = NandFlash_AllocWB(sizeof(Req));
 
 			if (mb.Valid())
 			{
@@ -1176,13 +1176,13 @@ static void UpdateParams()
 	enum C { S = (__LINE__+3) };
 	switch(i++)
 	{
-		CALL( UpdateEMAC()		);
-		CALL( UpdateHardware()	);
-		CALL( UpdateMan(); 		);
-		CALL( FLASH_Update();	);
-		CALL( I2C_Update();		);
-		CALL( SaveVars();		);
-		CALL( UpdateCom();		);
+		CALL( UpdateEMAC()			);
+		CALL( UpdateHardware()		);
+		CALL( UpdateMan(); 			);
+		CALL( NandFlash_Update();	);
+		CALL( I2C_Update();			);
+		CALL( SaveVars();			);
+		CALL( UpdateCom();			);
 	};
 
 	i = (i > (__LINE__-S-3)) ? 0 : i;
@@ -1254,7 +1254,7 @@ int main()
 
 	//InitTraps();
 
-	FLASH_Init();
+	NandFlash_Init();
 
 	com0.Connect(com0.SYNC_S, 2000000, 2, 2);
 

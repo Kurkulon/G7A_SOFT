@@ -1,8 +1,8 @@
 #include <types.h>
 #include <core.h>
-#include <SEGGER_RTT.h>
+#include <SEGGER_RTT\SEGGER_RTT.h>
 #include <list.h>
-#include <flash.h>
+#include <FLASH\NandFlash.h>
 
 #include "hardware.h"
 #include "hw_conf.h"
@@ -13,6 +13,9 @@
 //#define NAND_SAMSUNG
 #define NAND_MICRON
 
+#define NAND_READ_CRC_PIO
+#define NAND_WRITE_CRC_HW
+
 #define NAND_CHIP_BITS			1
 #define NAND_MAX_CHIP			(1<<NAND_CHIP_BITS)
 #define NAND_CHIP_MASK			(NAND_MAX_CHIP-1)
@@ -21,12 +24,11 @@
 #define FLASH_WRITE_BUFFER_NUM	8
 #define FLASH_READ_BUFFER_NUM	8
 
-//static void	HW_NAND_Init();
-
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-static const bool verifyWritePage = false;	// Проверка записаной страницы, путём чтения страницы и сравнения с буфером
-static const bool verifySpare = true;		// Проверка записаной страницы, путём чтения страницы и сравнения с буфером
+static const bool verifyWritePage		= false;	// Проверка записаной страницы, путём чтения страницы и сравнения с буфером
+static const bool verifySpare			= true;		// Проверка записаной страницы, путём чтения страницы и сравнения с буфером
+static const bool readPageCheckSpareCRC = false;	// Проверка записаной страницы, путём чтения страницы и сравнения с буфером
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -72,14 +74,14 @@ static const bool forceEraseWrite = true;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-#include <hw_nand_imp.h>
+#include <FLASH\hw_nand_imp.h>
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-#include <flash_imp.h>
+#include <FLASH\NandFlash_imp.h>
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-#include <CRC_CCITT_DMA_IMP.h>
+#include <CRC\CRC_CCITT_DMA_IMP.h>
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
