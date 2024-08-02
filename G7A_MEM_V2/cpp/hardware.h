@@ -9,16 +9,15 @@
 #include "hw_nand.h"
 #include "hw_rtm.h"
 #include "MANCH\manch.h"
-#include "spis.h"
 #include "clock.h"
 
 
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-extern u16 CRC_CCITT_PIO(const void *data, u32 len, u16 init);
+//extern u16 CRC_CCITT_PIO(const void *data, u32 len, u16 init);
 //extern u16 CRC_CCITT_DMA(const void *data, u32 len, u16 init);
-extern bool CRC_CCITT_DMA_Async(const void* data, u32 len, u16 init);
-extern bool CRC_CCITT_DMA_CheckComplete(u16* crc);
+//extern bool CRC_CCITT_DMA_Async(const void* data, u32 len, u16 init);
+//extern bool CRC_CCITT_DMA_CheckComplete(u16* crc);
 
 extern void InitHardware();
 extern void UpdateHardware();
