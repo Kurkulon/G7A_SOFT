@@ -143,7 +143,26 @@ link_options = $(cpu_link_options) --bestdebug --strict --map --xref --callgraph
 #
 ##################################################################################################
 
-$(objdir)\$(target_name).axf : $(cpu_obj) $(modules_obj)
+$(objdir)\$(target_name).txt : $(objdir)\$(target_name)_MSN.axf $(objdir)\$(target_name)_MS.axf
+
+##################################################################################################
+
+$(objdir)\$(target_name)_MSN.axf : manreqword_3900.o $(cpu_obj) $(modules_obj)
+	@echo Linking ...
+	@$(bindir)\armlink	$(link_options) &
+	--feedback "$(objdir)\$(target_name).fed" &
+	--scatter $(cpu_scatter) &
+	--list "$^&.map" &
+	-o "$^@" $< $(libname)
+	@rem $(bindir)\fromelf --i32 --output .\OBJ\$^&.hex $^@ 
+	@$(bindir)\fromelf --bin --output .\OBJ\$^&.bin $^@ 
+	@$(bindir)\fromelf --text -z $^@ 
+	@if NOT EXIST .\OBJ @md .\OBJ >nul
+	@copy /Y $^@ .\OBJ\ >nul
+	
+##################################################################################################
+
+$(objdir)\$(target_name)_MS.axf : manreqword_3C00.o $(cpu_obj) $(modules_obj)
 	@echo Linking ...
 	@$(bindir)\armlink	$(link_options) &
 	--feedback "$^*.fed" &
@@ -158,7 +177,15 @@ $(objdir)\$(target_name).axf : $(cpu_obj) $(modules_obj)
 	
 ##################################################################################################
 
-#$(objdir)\startup_SAME53.o : $(cppdir)\startup_SAME53.s
+manreqword_3900.o : manreqword.cpp
+	@echo Compiling $[. ...
+	@$(bindir)\armcc -DMAN_REQWORD=0x3900 $(compiler_options) -o "$(objdir)\$^." $[@
+
+##################################################################################################
+
+manreqword_3C00.o : manreqword.cpp
+	@echo Compiling $[. ...
+	@$(bindir)\armcc -DMAN_REQWORD=0x3C00 $(compiler_options) -o "$(objdir)\$^." $[@
 
 ##################################################################################################
 

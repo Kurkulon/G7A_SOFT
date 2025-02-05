@@ -207,6 +207,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\manreqword.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\cpp\startup_SAME53.s"
 			>
 		</File>

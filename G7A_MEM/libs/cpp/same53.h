@@ -164,7 +164,85 @@ extern byte core_sys_array[0x100000];
 	#define SDHC0_IRQ                135 	/**< 135 SAME53N19A SD/MMC Host Controller 0 (SDHC0) */
 	#define SDHC1_IRQ                136 	/**< 136 SAME53N19A SD/MMC Host Controller 1 (SDHC1) */
 
+	#define PID_AHB_HPB0       			(0)        	/**< \brief (MCLK_AHBMASK) HPB0 AHB Clock Mask */
+	#define PID_AHB_HPB1       			(1)        	/**< \brief (MCLK_AHBMASK) HPB1 AHB Clock Mask */
+	#define PID_AHB_HPB2       			(2)        	/**< \brief (MCLK_AHBMASK) HPB2 AHB Clock Mask */
+	#define PID_AHB_HPB3       			(3)        	/**< \brief (MCLK_AHBMASK) HPB3 AHB Clock Mask */
+	#define PID_AHB_DSU        			(4)        	/**< \brief (MCLK_AHBMASK) DSU AHB Clock Mask */
+	#define PID_AHB_HMATRIX    			(5)        	/**< \brief (MCLK_AHBMASK) HMATRIX AHB Clock Mask */
+	#define PID_AHB_NVMCTRL    			(6)        	/**< \brief (MCLK_AHBMASK) NVMCTRL AHB Clock Mask */
+	#define PID_AHB_HSRAM      			(7)        	/**< \brief (MCLK_AHBMASK) HSRAM AHB Clock Mask */
+	#define PID_AHB_CMCC       			(8)        	/**< \brief (MCLK_AHBMASK) CMCC AHB Clock Mask */
+	#define PID_AHB_DMAC       			(9)        	/**< \brief (MCLK_AHBMASK) DMAC AHB Clock Mask */
+	#define PID_AHB_USB        			(10)       	/**< \brief (MCLK_AHBMASK) USB AHB Clock Mask */
+	#define PID_AHB_BKUPRAM    			(11)       	/**< \brief (MCLK_AHBMASK) BKUPRAM AHB Clock Mask */
+	#define PID_AHB_PAC        			(12)       	/**< \brief (MCLK_AHBMASK) PAC AHB Clock Mask */
+	#define PID_AHB_QSPI       			(13)       	/**< \brief (MCLK_AHBMASK) QSPI AHB Clock Mask */
+	#define PID_AHB_GMAC       			(14)       	/**< \brief (MCLK_AHBMASK) GMAC AHB Clock Mask */
+	#define PID_AHB_SDHC0      			(15)       	/**< \brief (MCLK_AHBMASK) SDHC0 AHB Clock Mask */
+	#define PID_AHB_SDHC1      			(16)       	/**< \brief (MCLK_AHBMASK) SDHC1 AHB Clock Mask */
+	#define PID_AHB_ICM        			(19)       	/**< \brief (MCLK_AHBMASK) ICM AHB Clock Mask */
+	#define PID_AHB_PUKCC      			(20)       	/**< \brief (MCLK_AHBMASK) PUKCC AHB Clock Mask */
+	#define PID_AHB_QSPI_2X    			(21)       	/**< \brief (MCLK_AHBMASK) QSPI_2X AHB Clock Mask */
+	#define PID_AHB_NVMCTRL_SMEEPROM	(22)       	/**< \brief (MCLK_AHBMASK) NVMCTRL_SMEEPROM AHB Clock Mask */
+	#define PID_AHB_NVMCTRL_CACHE		(23)       	/**< \brief (MCLK_AHBMASK) NVMCTRL_CACHE AHB Clock Mask */
 
+	#define PID_PAC       			(32+0)        	/**< \brief (MCLK_APBAMASK) PAC APB Clock Enable */
+	#define PID_PM        			(32+1)        	/**< \brief (MCLK_APBAMASK) PM APB Clock Enable */
+	#define PID_MCLK      			(32+2)        	/**< \brief (MCLK_APBAMASK) MCLK APB Clock Enable */
+	#define PID_RSTC      			(32+3)        	/**< \brief (MCLK_APBAMASK) RSTC APB Clock Enable */
+	#define PID_OSCCTRL   			(32+4)        	/**< \brief (MCLK_APBAMASK) OSCCTRL APB Clock Enable */
+	#define PID_OSC32KCTRL			(32+5)        	/**< \brief (MCLK_APBAMASK) OSC32KCTRL APB Clock Enable */
+	#define PID_SUPC      			(32+6)        	/**< \brief (MCLK_APBAMASK) SUPC APB Clock Enable */
+	#define PID_GCLK      			(32+7)        	/**< \brief (MCLK_APBAMASK) GCLK APB Clock Enable */
+	#define PID_WDT       			(32+8)        	/**< \brief (MCLK_APBAMASK) WDT APB Clock Enable */
+	#define PID_RTC       			(32+9)        	/**< \brief (MCLK_APBAMASK) RTC APB Clock Enable */
+	#define PID_EIC       			(32+10)       	/**< \brief (MCLK_APBAMASK) EIC APB Clock Enable */
+	#define PID_FREQM     			(32+11)       	/**< \brief (MCLK_APBAMASK) FREQM APB Clock Enable */
+	#define PID_SERCOM0   			(32+12)       	/**< \brief (MCLK_APBAMASK) SERCOM0 APB Clock Enable */
+	#define PID_SERCOM1   			(32+13)       	/**< \brief (MCLK_APBAMASK) SERCOM1 APB Clock Enable */
+	#define PID_TC0       			(32+14)       	/**< \brief (MCLK_APBAMASK) TC0 APB Clock Enable */
+	#define PID_TC1       			(32+15)       	/**< \brief (MCLK_APBAMASK) TC1 APB Clock Enable */
+											  
+	#define PID_USB       			(64+0)        	/**< \brief (MCLK_APBBMASK) USB APB Clock Enable */
+	#define PID_DSU       			(64+1)        	/**< \brief (MCLK_APBBMASK) DSU APB Clock Enable */
+	#define PID_NVMCTRL   			(64+2)        	/**< \brief (MCLK_APBBMASK) NVMCTRL APB Clock Enable */
+	#define PID_PORT      			(64+4)        	/**< \brief (MCLK_APBBMASK) PORT APB Clock Enable */
+	#define PID_HMATRIX   			(64+6)        	/**< \brief (MCLK_APBBMASK) HMATRIX APB Clock Enable */
+	#define PID_EVSYS     			(64+7)        	/**< \brief (MCLK_APBBMASK) EVSYS APB Clock Enable */
+	#define PID_SERCOM2   			(64+9)        	/**< \brief (MCLK_APBBMASK) SERCOM2 APB Clock Enable */
+	#define PID_SERCOM3   			(64+10)       	/**< \brief (MCLK_APBBMASK) SERCOM3 APB Clock Enable */
+	#define PID_TCC0      			(64+11)       	/**< \brief (MCLK_APBBMASK) TCC0 APB Clock Enable */
+	#define PID_TCC1      			(64+12)       	/**< \brief (MCLK_APBBMASK) TCC1 APB Clock Enable */
+	#define PID_TC2       			(64+13)       	/**< \brief (MCLK_APBBMASK) TC2 APB Clock Enable */
+	#define PID_TC3       			(64+14)       	/**< \brief (MCLK_APBBMASK) TC3 APB Clock Enable */
+	#define PID_RAMECC    			(64+16)       	/**< \brief (MCLK_APBBMASK) RAMECC APB Clock Enable */
+
+	#define PID_GMAC      			(96+2)        	/**< \brief (MCLK_APBCMASK) GMAC APB Clock Enable */
+	#define PID_TCC2      			(96+3)        	/**< \brief (MCLK_APBCMASK) TCC2 APB Clock Enable */
+	#define PID_TCC3      			(96+4)        	/**< \brief (MCLK_APBCMASK) TCC3 APB Clock Enable */
+	#define PID_TC4       			(96+5)        	/**< \brief (MCLK_APBCMASK) TC4 APB Clock Enable */
+	#define PID_TC5       			(96+6)        	/**< \brief (MCLK_APBCMASK) TC5 APB Clock Enable */
+	#define PID_PDEC      			(96+7)        	/**< \brief (MCLK_APBCMASK) PDEC APB Clock Enable */
+	#define PID_AC        			(96+8)        	/**< \brief (MCLK_APBCMASK) AC APB Clock Enable */
+	#define PID_AES       			(96+9)        	/**< \brief (MCLK_APBCMASK) AES APB Clock Enable */
+	#define PID_TRNG      			(96+10)       	/**< \brief (MCLK_APBCMASK) TRNG APB Clock Enable */
+	#define PID_ICM       			(96+11)       	/**< \brief (MCLK_APBCMASK) ICM APB Clock Enable */
+	#define PID_QSPI      			(96+13)       	/**< \brief (MCLK_APBCMASK) QSPI APB Clock Enable */
+	#define PID_CCL       			(96+14)       	/**< \brief (MCLK_APBCMASK) CCL APB Clock Enable */
+
+	#define PID_SERCOM4   			(128+0)        	/**< \brief (MCLK_APBDMASK) SERCOM4 APB Clock Enable */
+	#define PID_SERCOM5   			(128+1)        	/**< \brief (MCLK_APBDMASK) SERCOM5 APB Clock Enable */
+	#define PID_SERCOM6   			(128+2)        	/**< \brief (MCLK_APBDMASK) SERCOM6 APB Clock Enable */
+	#define PID_SERCOM7   			(128+3)        	/**< \brief (MCLK_APBDMASK) SERCOM7 APB Clock Enable */
+	#define PID_TCC4      			(128+4)        	/**< \brief (MCLK_APBDMASK) TCC4 APB Clock Enable */
+	#define PID_TC6       			(128+5)        	/**< \brief (MCLK_APBDMASK) TC6 APB Clock Enable */
+	#define PID_TC7       			(128+6)        	/**< \brief (MCLK_APBDMASK) TC7 APB Clock Enable */
+	#define PID_ADC0      			(128+7)        	/**< \brief (MCLK_APBDMASK) ADC0 APB Clock Enable */
+	#define PID_ADC1      			(128+8)      	/**< \brief (MCLK_APBDMASK) ADC1 APB Clock Enable */
+	#define PID_DAC       			(128+9)      	/**< \brief (MCLK_APBDMASK) DAC APB Clock Enable */
+	#define PID_I2S       			(128+10)       	/**< \brief (MCLK_APBDMASK) I2S APB Clock Enable */
+	#define PID_PCC       			(128+11)       	/**< \brief (MCLK_APBDMASK) PCC APB Clock Enable */
 
 #pragma anon_unions
 
@@ -255,7 +333,7 @@ namespace T_HW
 	#define GCLK_EVSYS0					11
 	#define GCLK_EVSYS1					12
 	#define GCLK_EVSYS2					13
-	#define GCLK_EVSYS3					13
+	#define GCLK_EVSYS3					14
 	#define GCLK_EVSYS4					15
 	#define GCLK_EVSYS5					16
 	#define GCLK_EVSYS6					17
@@ -355,6 +433,9 @@ namespace T_HW
 		RW32  		APBBMASK;    /**< \brief Offset: 0x18 (R/W 32) APBB Mask */
 		RW32  		APBCMASK;    /**< \brief Offset: 0x1C (R/W 32) APBC Mask */
 		RW32  		APBDMASK;    /**< \brief Offset: 0x20 (R/W 32) APBD Mask */
+
+		void ClockEnable(u32 pid)	{ *((&AHBMASK)+pid/32) |= (1UL << (pid&31)); }
+		void ClockDisable(u32 pid)	{ *((&AHBMASK)+pid/32) &= ~(1UL << (pid&31)); }
 	};
 
 	#define MCLK_CKRDY				(1<<0)            /**< \brief (MCLK_INTENCLR) Clock Ready Interrupt Enable */
@@ -486,6 +567,8 @@ namespace T_HW
 	#define XOSC_STARTUP(value) 	(((value)&0xF) << 20)
 	#define XOSC_CFDPRESC(value)	(((value)&0xF) << 24)   /**< \brief (OSCCTRL_XOSCCTRL) Clock Failure Detector Prescaler */
 
+	#define XOSC_RDY0				(1<<0)					/**< \brief (OSCCTRL_STATUS) XOSC 0 Ready */
+	#define XOSC_RDY1				(1<<1)					/**< \brief (OSCCTRL_STATUS) XOSC 1 Ready */
 
 	#define DFLL_ENABLE 			(1<<1) 					/**< \brief (OSCCTRL_DFLLCTRLA) DFLL Enable */
 	#define DFLL_RUNSTDBY 			(1<<6) 					/**< \brief (OSCCTRL_DFLLCTRLA) Run in Standby */
@@ -673,8 +756,9 @@ namespace T_HW
 		RO32	SYNCBUSY;    		/**< \brief Offset: 0x8 (R/  32) Synchronization Busy */
 		RW8		CLEAR;       		/**< \brief Offset: 0xC ( /W  8) Clear */
 
-		void Reset() { CLEAR = 0xA5; }
-		void Update() { CLEAR = 0xA5; }
+		void Reset()	{ if (SYNCBUSY == 0) CLEAR = 0xA5; }
+		void Update()	{ if (SYNCBUSY == 0) CLEAR = 0xA5; }
+		void Disable()	{ CTRLA = 0; }
 	};
 
 	/* ========== Instance parameters for WDT peripheral ========== */
@@ -752,6 +836,8 @@ namespace T_HW
 	#define	PORT_HWSEL_LO      	(0<<31)
 	#define	PORT_HWSEL_HI      	(1UL<<31)
 
+	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 	struct S_PORT
 	{
 		RW32	DIR;         		/**< \brief Offset: 0x00 (R/W 32) Data Direction */
@@ -777,22 +863,22 @@ namespace T_HW
 
 		RO8		z__Reserved2[0x20];
 
-		void 	SET(u32 m) 			{ OUTSET = m; }
-		void 	CLR(u32 m) 			{ OUTCLR = m; }
-		void 	NOT(u32 m) 			{ OUTTGL = m; }
-		void 	WBIT(u32 m, bool c) { if (c) SET(m); else CLR(m); }
-		void 	BSET(u16 b) 		{ OUTSET = 1 << b; }
-		void 	BCLR(u16 b) 		{ OUTCLR = 1 << b; }
-		void 	BTGL(u16 b) 		{ OUTTGL = 1 << b; }
+		__forceinline void 	SET(u32 m) 			{ OUTSET = m; }
+		__forceinline void 	CLR(u32 m) 			{ OUTCLR = m; }
+		__forceinline void 	NOT(u32 m) 			{ OUTTGL = m; }
+		__forceinline void 	WBIT(u32 m, bool c) { if (c) SET(m); else CLR(m); }
+		__forceinline void 	BSET(u16 b) 		{ OUTSET = 1 << b; }
+		__forceinline void 	BCLR(u16 b) 		{ OUTCLR = 1 << b; }
+		__forceinline void 	BTGL(u16 b) 		{ OUTTGL = 1 << b; }
 
-		void	OUT8(byte v)		{ *((byte*)&OUT) = v; }
+		__forceinline void	OUT8(byte v)		{ *((byte*)&OUT) = v; }
 
-		bool 	TBSET(u16 b) 		{ return IN & (1<<b); }
-		bool 	TBCLR(u16 b) 		{ return (IN & (1<<b)) == 0; }
+		__forceinline bool 	TBSET(u16 b) 		{ return IN & (1<<b); }
+		__forceinline bool 	TBCLR(u16 b) 		{ return (IN & (1<<b)) == 0; }
 
 		//void 	SetPinMux(byte pinnum, byte value) { byte sh = (pinnum&1)<<2; pinnum >>= 1; PMUX[pinnum] = (PMUX[pinnum] & ~(0xF<<sh)) | (value<<sh); };
 		
-		void 	SetWRCONFIG(u32 mask, u32 mux) 
+		__forceinline void 	SetWRCONFIG(u32 mask, u32 mux) 
 		{ 
 			u32 t = (mux & 0xFFFF0000); 
 			WRCONFIG = t | (mask & 0xFFFF); 
@@ -840,7 +926,107 @@ namespace T_HW
 	#define	PINGFG_INEN			(1<<1)
 	#define	PINGFG_PULLEN       (1<<2)
 	#define	PINGFG_DRVSTR       (1<<6)
-											
+
+	#define PA00 	(1UL<<0)
+	#define PA01 	(1UL<<1)
+	#define PA02 	(1UL<<2)
+	#define PA03 	(1UL<<3)
+	#define PA04 	(1UL<<4)
+	#define PA05 	(1UL<<5)
+	#define PA06 	(1UL<<6)
+	#define PA07 	(1UL<<7)
+	#define PA08 	(1UL<<8)
+	#define PA09 	(1UL<<9)
+	#define PA10 	(1UL<<10)
+	#define PA11 	(1UL<<11)
+	#define PA12 	(1UL<<12)
+	#define PA13 	(1UL<<13)
+	#define PA14 	(1UL<<14)
+	#define PA15 	(1UL<<15)
+	#define PA16 	(1UL<<16)
+	#define PA17 	(1UL<<17)
+	#define PA18 	(1UL<<18)
+	#define PA19 	(1UL<<19)
+	#define PA20 	(1UL<<20)
+	#define PA21 	(1UL<<21)
+	#define PA22 	(1UL<<22)
+	#define PA23 	(1UL<<23)
+	#define PA24 	(1UL<<24)
+	#define PA25 	(1UL<<25)
+	#define PA26 	(1UL<<26)
+	#define PA27 	(1UL<<27)
+	#define PA28 	(1UL<<28)
+	#define PA29 	(1UL<<29)
+	#define PA30 	(1UL<<30)
+	#define PA31 	(1UL<<31)
+
+	#define PB00 	(1UL<<0)
+	#define PB01 	(1UL<<1)
+	#define PB02 	(1UL<<2)
+	#define PB03 	(1UL<<3)
+	#define PB04 	(1UL<<4)
+	#define PB05 	(1UL<<5)
+	#define PB06 	(1UL<<6)
+	#define PB07 	(1UL<<7)
+	#define PB08 	(1UL<<8)
+	#define PB09 	(1UL<<9)
+	#define PB10 	(1UL<<10)
+	#define PB11 	(1UL<<11)
+	#define PB12 	(1UL<<12)
+	#define PB13 	(1UL<<13)
+	#define PB14 	(1UL<<14)
+	#define PB15 	(1UL<<15)
+	#define PB16 	(1UL<<16)
+	#define PB17 	(1UL<<17)
+	#define PB18 	(1UL<<18)
+	#define PB19 	(1UL<<19)
+	#define PB20 	(1UL<<20)
+	#define PB21 	(1UL<<21)
+	#define PB22 	(1UL<<22)
+	#define PB23 	(1UL<<23)
+	#define PB24 	(1UL<<24)
+	#define PB25 	(1UL<<25)
+	#define PB26 	(1UL<<26)
+	#define PB27 	(1UL<<27)
+	#define PB28 	(1UL<<28)
+	#define PB29 	(1UL<<29)
+	#define PB30 	(1UL<<30)
+	#define PB31 	(1UL<<31)
+
+	#define PC00 	(1UL<<0)
+	#define PC01 	(1UL<<1)
+	#define PC02 	(1UL<<2)
+	#define PC03 	(1UL<<3)
+	#define PC04 	(1UL<<4)
+	#define PC05 	(1UL<<5)
+	#define PC06 	(1UL<<6)
+	#define PC07 	(1UL<<7)
+	#define PC08 	(1UL<<8)
+	#define PC09 	(1UL<<9)
+	#define PC10 	(1UL<<10)
+	#define PC11 	(1UL<<11)
+	#define PC12 	(1UL<<12)
+	#define PC13 	(1UL<<13)
+	#define PC14 	(1UL<<14)
+	#define PC15 	(1UL<<15)
+	#define PC16 	(1UL<<16)
+	#define PC17 	(1UL<<17)
+	#define PC18 	(1UL<<18)
+	#define PC19 	(1UL<<19)
+	#define PC20 	(1UL<<20)
+	#define PC21 	(1UL<<21)
+	#define PC22 	(1UL<<22)
+	#define PC23 	(1UL<<23)
+	#define PC24 	(1UL<<24)
+	#define PC25 	(1UL<<25)
+	#define PC26 	(1UL<<26)
+	#define PC27 	(1UL<<27)
+	#define PC28 	(1UL<<28)
+	#define PC29 	(1UL<<29)
+	#define PC30 	(1UL<<30)
+	#define PC31 	(1UL<<31)
+
+
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 	struct S_NVMCTRL
@@ -1088,6 +1274,22 @@ namespace T_HW
 	#define I2C_CMD_STOP	(3<<16)           	/**< \brief (SERCOM_I2CM_CTRLB) Command */
 	#define I2C_ACKACT		(1<<18)           	/**< \brief (SERCOM_I2CM_CTRLB) Acknowledge Action */
 
+	#define I2C_ADDR(value) ((value)&0x7FF)
+	#define I2C_LENEN       (1<<13)          	/**< (SERCOM_I2CM_ADDR) Length Enable Position */
+	#define I2C_HS          (1<<14)          	/**< (SERCOM_I2CM_ADDR) High Speed Mode Position */
+	#define I2C_TENBITEN    (1<<15)          	/**< (SERCOM_I2CM_ADDR) Ten Bit Addressing Enable Position */
+	#define I2C_LEN(value)  (((value)&0xFF)<<16)
+
+	#define I2C_BUSERR     (1<<0)               /**< (SERCOM_I2CM_STATUS) Bus Error Position */
+	#define I2C_ARBLOST    (1<<1)               /**< (SERCOM_I2CM_STATUS) Arbitration Lost Position */
+	#define I2C_RXNACK     (1<<2)               /**< (SERCOM_I2CM_STATUS) Received Not Acknowledge Position */
+	#define I2C_BUSSTATE   (1<<4)               /**< (SERCOM_I2CM_STATUS) Bus State Position */
+	#define I2C_LOWTOUT    (1<<6)               /**< (SERCOM_I2CM_STATUS) SCL Low Timeout Position */
+	#define I2C_CLKHOLD    (1<<7)               /**< (SERCOM_I2CM_STATUS) Clock Hold Position */
+	#define I2C_MEXTTOUT   (1<<8)               /**< (SERCOM_I2CM_STATUS) Master SCL Low Extend Timeout Position */
+	#define I2C_SEXTTOUT   (1<<9)               /**< (SERCOM_I2CM_STATUS) Slave SCL Low Extend Timeout Position */
+	#define I2C_LENERR     (1<<10)              /**< (SERCOM_I2CM_STATUS) Length Error Position */
+
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	
 	struct S_SPI
@@ -1138,10 +1340,13 @@ namespace T_HW
 	#define SPI_AMODE_2_ADDR	(1<<14)
 	#define SPI_AMODE_RANGE		(2<<14)
 	#define SPI_RXEN			(1<<17)		/**< \brief (SERCOM_SPI_CTRLB) Receiver Enable */
-	#define SPI_FIFOCLR_NONE	(0<<22)
-	#define SPI_FIFOCLR_TXFIFO	(1<<22)
-	#define SPI_FIFOCLR_RXFIFO	(2<<22)
-	#define SPI_FIFOCLR_BOTH	(3<<22)
+	//#define SPI_FIFOCLR_NONE	(0<<22)
+	//#define SPI_FIFOCLR_TXFIFO	(1<<22)
+	//#define SPI_FIFOCLR_RXFIFO	(2<<22)
+	//#define SPI_FIFOCLR_BOTH	(3<<22)
+
+	#define SPI_ICSPACE(v)		((v)&0x3F)	/**< (SERCOM_SPIM_CTRLC) Inter-Character Spacing Position */
+	#define SPI_DATA32B			(1UL<<24)	/**< (SERCOM_SPIM_CTRLC) Data 32 Bit Position */
 
 	#define SPI_DRE 			(1<<0)		/**< \brief (SERCOM_SPI_INTENCLR) Data Register Empty Interrupt Disable */
 	#define SPI_TXC 			(1<<1)		/**< \brief (SERCOM_SPI_INTENCLR) Transmit Complete Interrupt Disable */
@@ -1218,7 +1423,6 @@ namespace T_HW
 	#define USART_CPOL				(1<<29)		/**< \brief (SERCOM_USART_CTRLA) Clock Polarity */
 	#define USART_DORD				(1<<30)		/**< \brief (SERCOM_USART_CTRLA) Data Order */
 
-
 	#define USART_CHSIZE_8 			(0<<0)            /**< \brief (SERCOM_USART_CTRLB) Character Size */
 	#define USART_CHSIZE_9 			(1<<0)            /**< \brief (SERCOM_USART_CTRLB) Character Size */
 	#define USART_CHSIZE_5 			(5<<0)            /**< \brief (SERCOM_USART_CTRLB) Character Size */
@@ -1241,6 +1445,9 @@ namespace T_HW
 	#define USART_RXBRK  			(1<<5)            /**< \brief (SERCOM_USART_INTFLAG) Break Received Interrupt */
 	#define USART_ERROR  			(1<<7)            /**< \brief (SERCOM_USART_INTFLAG) Combined Error Interrupt */
 
+	#define USART_CTRLB				(1<<2)            /**< \brief (SERCOM_USART_SYNCBUSY) CTRLB Synchronization Busy */
+	#define USART_RXERRCNT			(1<<3)            /**< \brief (SERCOM_USART_SYNCBUSY) RXERRCNT Synchronization Busy */
+	#define USART_LENGTH			(1<<4)            /**< \brief (SERCOM_USART_SYNCBUSY) LENGTH Synchronization Busy */
 
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -1302,9 +1509,9 @@ namespace T_HW
 	#define TCC_CPTEN2        		(1<<26)           /**< \brief (TCC_CTRLA) Capture Channel 2 Enable */
 	#define TCC_CPTEN3        		(1<<27)           /**< \brief (TCC_CTRLA) Capture Channel 3 Enable */
 		
-	#define TCC_DIR        		(1<<0)            /**< \brief (TCC_CTRLBCLR) Counter Direction */
-	#define TCC_LUPD       		(1<<1)            /**< \brief (TCC_CTRLBCLR) Lock Update */
-	#define TCC_ONESHOT    		(1<<2)            /**< \brief (TCC_CTRLBCLR) One-Shot */
+	#define TCC_DIR        			(1<<0)            /**< \brief (TCC_CTRLBCLR) Counter Direction */
+	#define TCC_LUPD       			(1<<1)            /**< \brief (TCC_CTRLBCLR) Lock Update */
+	#define TCC_ONESHOT    			(1<<2)            /**< \brief (TCC_CTRLBCLR) One-Shot */
 	#define TCC_IDXCMD_DISABLE 		(0<<3)
 	#define TCC_IDXCMD_SET     		(1<<3)
 	#define TCC_IDXCMD_CLEAR   		(2<<3)
@@ -1315,109 +1522,123 @@ namespace T_HW
 	#define TCC_CMD_UPDATE     		(3<<5)
 	#define TCC_CMD_READSYNC   		(4<<5)
 
-	#define TCC_OVF        (1<<0)            /**< \brief (TCC_INTENCLR) Overflow Interrupt Enable */
-	#define TCC_TRG        (1<<1)            /**< \brief (TCC_INTENCLR) Retrigger Interrupt Enable */
-	#define TCC_CNT        (1<<2)            /**< \brief (TCC_INTENCLR) Counter Interrupt Enable */
-	#define TCC_ERR        (1<<3)            /**< \brief (TCC_INTENCLR) Error Interrupt Enable */
-	#define TCC_UFS        (1<<10)           /**< \brief (TCC_INTENCLR) Non-Recoverable Update Fault Interrupt Enable */
-	#define TCC_DFS        (1<<11)           /**< \brief (TCC_INTENCLR) Non-Recoverable Debug Fault Interrupt Enable */
-	#define TCC_FAULTA     (1<<12)           /**< \brief (TCC_INTENCLR) Recoverable Fault A Interrupt Enable */
-	#define TCC_FAULTB     (1<<13)           /**< \brief (TCC_INTENCLR) Recoverable Fault B Interrupt Enable */
-	#define TCC_FAULT0     (1<<14)           /**< \brief (TCC_INTENCLR) Non-Recoverable Fault 0 Interrupt Enable */
-	#define TCC_FAULT1     (1<<15)           /**< \brief (TCC_INTENCLR) Non-Recoverable Fault 1 Interrupt Enable */
-	#define TCC_MC0        (1<<16)           /**< \brief (TCC_INTENCLR) Match or Capture Channel 0 Interrupt Enable */
-	#define TCC_MC1        (1<<17)           /**< \brief (TCC_INTENCLR) Match or Capture Channel 1 Interrupt Enable */
-	#define TCC_MC2        (1<<18)           /**< \brief (TCC_INTENCLR) Match or Capture Channel 2 Interrupt Enable */
-	#define TCC_MC3        (1<<19)           /**< \brief (TCC_INTENCLR) Match or Capture Channel 3 Interrupt Enable */
+	#define TCC_OTMX(v)         	((v)&3)				/**< \brief (TCC_WEXCTRL) Output Matrix */
+	#define TCC_DTIEN0      		(1UL<<8)        	/**< \brief (TCC_WEXCTRL) Dead-time Insertion Generator 0 Enable */
+	#define TCC_DTIEN1      		(1UL<<9)        	/**< \brief (TCC_WEXCTRL) Dead-time Insertion Generator 1 Enable */
+	#define TCC_DTIEN2      		(1UL<<10)       	/**< \brief (TCC_WEXCTRL) Dead-time Insertion Generator 2 Enable */
+	#define TCC_DTIEN3      		(1UL<<11)       	/**< \brief (TCC_WEXCTRL) Dead-time Insertion Generator 3 Enable */
+	#define TCC_DTLS(v)         	(((v)&0xFF)<<16)	/**< \brief (TCC_WEXCTRL) Dead-time Low Side Outputs Value */
+	#define TCC_DTHS(v)         	(((v)&0xFF)<<24)	/**< \brief (TCC_WEXCTRL) Dead-time High Side Outputs Value */
 
-	#define TCC_NRE0         		(1<<0)            /**< \brief (TCC_DRVCTRL) Non-Recoverable State 0 Output Enable */
-	#define TCC_NRE1         		(1<<1)            /**< \brief (TCC_DRVCTRL) Non-Recoverable State 1 Output Enable */
-	#define TCC_NRE2         		(1<<2)            /**< \brief (TCC_DRVCTRL) Non-Recoverable State 2 Output Enable */
-	#define TCC_NRE3         		(1<<3)            /**< \brief (TCC_DRVCTRL) Non-Recoverable State 3 Output Enable */
-	#define TCC_NRE4         		(1<<4)            /**< \brief (TCC_DRVCTRL) Non-Recoverable State 4 Output Enable */
-	#define TCC_NRE5         		(1<<5)            /**< \brief (TCC_DRVCTRL) Non-Recoverable State 5 Output Enable */
-	#define TCC_NRE6         		(1<<6)            /**< \brief (TCC_DRVCTRL) Non-Recoverable State 6 Output Enable */
-	#define TCC_NRE7         		(1<<7)            /**< \brief (TCC_DRVCTRL) Non-Recoverable State 7 Output Enable */
-	#define TCC_NRV0         		(1<<8)            /**< \brief (TCC_DRVCTRL) Non-Recoverable State 0 Output Value */
-	#define TCC_NRV1         		(1<<9)            /**< \brief (TCC_DRVCTRL) Non-Recoverable State 1 Output Value */
-	#define TCC_NRV2         		(1<<10)           /**< \brief (TCC_DRVCTRL) Non-Recoverable State 2 Output Value */
-	#define TCC_NRV3         		(1<<11)           /**< \brief (TCC_DRVCTRL) Non-Recoverable State 3 Output Value */
-	#define TCC_NRV4         		(1<<12)           /**< \brief (TCC_DRVCTRL) Non-Recoverable State 4 Output Value */
-	#define TCC_NRV5         		(1<<13)           /**< \brief (TCC_DRVCTRL) Non-Recoverable State 5 Output Value */
-	#define TCC_NRV6         		(1<<14)           /**< \brief (TCC_DRVCTRL) Non-Recoverable State 6 Output Value */
-	#define TCC_NRV7         		(1<<15)           /**< \brief (TCC_DRVCTRL) Non-Recoverable State 7 Output Value */
-	#define TCC_INVEN0       		(1<<16)           /**< \brief (TCC_DRVCTRL) Output Waveform 0 Inversion */
-	#define TCC_INVEN1       		(1<<17)           /**< \brief (TCC_DRVCTRL) Output Waveform 1 Inversion */
-	#define TCC_INVEN2       		(1<<18)           /**< \brief (TCC_DRVCTRL) Output Waveform 2 Inversion */
-	#define TCC_INVEN3       		(1<<19)           /**< \brief (TCC_DRVCTRL) Output Waveform 3 Inversion */
-	#define TCC_INVEN4       		(1<<20)           /**< \brief (TCC_DRVCTRL) Output Waveform 4 Inversion */
-	#define TCC_INVEN5       		(1<<21)           /**< \brief (TCC_DRVCTRL) Output Waveform 5 Inversion */
-	#define TCC_INVEN6       		(1<<22)           /**< \brief (TCC_DRVCTRL) Output Waveform 6 Inversion */
-	#define TCC_INVEN7       		(1<<23)           /**< \brief (TCC_DRVCTRL) Output Waveform 7 Inversion */
+	#define TCC_OVF        			(1<<0)        		/**< \brief (TCC_INTENCLR) Overflow Interrupt Enable */
+	#define TCC_TRG        			(1<<1)        		/**< \brief (TCC_INTENCLR) Retrigger Interrupt Enable */
+	#define TCC_CNT        			(1<<2)        		/**< \brief (TCC_INTENCLR) Counter Interrupt Enable */
+	#define TCC_ERR        			(1<<3)        		/**< \brief (TCC_INTENCLR) Error Interrupt Enable */
+	#define TCC_UFS        			(1<<10)       		/**< \brief (TCC_INTENCLR) Non-Recoverable Update Fault Interrupt Enable */
+	#define TCC_DFS        			(1<<11)       		/**< \brief (TCC_INTENCLR) Non-Recoverable Debug Fault Interrupt Enable */
+	#define TCC_FAULTA     			(1<<12)       		/**< \brief (TCC_INTENCLR) Recoverable Fault A Interrupt Enable */
+	#define TCC_FAULTB     			(1<<13)       		/**< \brief (TCC_INTENCLR) Recoverable Fault B Interrupt Enable */
+	#define TCC_FAULT0     			(1<<14)       		/**< \brief (TCC_INTENCLR) Non-Recoverable Fault 0 Interrupt Enable */
+	#define TCC_FAULT1     			(1<<15)       		/**< \brief (TCC_INTENCLR) Non-Recoverable Fault 1 Interrupt Enable */
+	#define TCC_MC0        			(1<<16)       		/**< \brief (TCC_INTENCLR) Match or Capture Channel 0 Interrupt Enable */
+	#define TCC_MC1        			(1<<17)       		/**< \brief (TCC_INTENCLR) Match or Capture Channel 1 Interrupt Enable */
+	#define TCC_MC2        			(1<<18)       		/**< \brief (TCC_INTENCLR) Match or Capture Channel 2 Interrupt Enable */
+	#define TCC_MC3        			(1<<19)       		/**< \brief (TCC_INTENCLR) Match or Capture Channel 3 Interrupt Enable */
+
+	#define TCC_NRE0         		(1<<0)        		/**< \brief (TCC_DRVCTRL) Non-Recoverable State 0 Output Enable */
+	#define TCC_NRE1         		(1<<1)        		/**< \brief (TCC_DRVCTRL) Non-Recoverable State 1 Output Enable */
+	#define TCC_NRE2         		(1<<2)        		/**< \brief (TCC_DRVCTRL) Non-Recoverable State 2 Output Enable */
+	#define TCC_NRE3         		(1<<3)        		/**< \brief (TCC_DRVCTRL) Non-Recoverable State 3 Output Enable */
+	#define TCC_NRE4         		(1<<4)        		/**< \brief (TCC_DRVCTRL) Non-Recoverable State 4 Output Enable */
+	#define TCC_NRE5         		(1<<5)        		/**< \brief (TCC_DRVCTRL) Non-Recoverable State 5 Output Enable */
+	#define TCC_NRE6         		(1<<6)        		/**< \brief (TCC_DRVCTRL) Non-Recoverable State 6 Output Enable */
+	#define TCC_NRE7         		(1<<7)        		/**< \brief (TCC_DRVCTRL) Non-Recoverable State 7 Output Enable */
+	#define TCC_NRV0         		(1<<8)        		/**< \brief (TCC_DRVCTRL) Non-Recoverable State 0 Output Value */
+	#define TCC_NRV1         		(1<<9)        		/**< \brief (TCC_DRVCTRL) Non-Recoverable State 1 Output Value */
+	#define TCC_NRV2         		(1<<10)       		/**< \brief (TCC_DRVCTRL) Non-Recoverable State 2 Output Value */
+	#define TCC_NRV3         		(1<<11)       		/**< \brief (TCC_DRVCTRL) Non-Recoverable State 3 Output Value */
+	#define TCC_NRV4         		(1<<12)       		/**< \brief (TCC_DRVCTRL) Non-Recoverable State 4 Output Value */
+	#define TCC_NRV5         		(1<<13)       		/**< \brief (TCC_DRVCTRL) Non-Recoverable State 5 Output Value */
+	#define TCC_NRV6         		(1<<14)       		/**< \brief (TCC_DRVCTRL) Non-Recoverable State 6 Output Value */
+	#define TCC_NRV7         		(1<<15)       		/**< \brief (TCC_DRVCTRL) Non-Recoverable State 7 Output Value */
+	#define TCC_INVEN0       		(1<<16)       		/**< \brief (TCC_DRVCTRL) Output Waveform 0 Inversion */
+	#define TCC_INVEN1       		(1<<17)       		/**< \brief (TCC_DRVCTRL) Output Waveform 1 Inversion */
+	#define TCC_INVEN2       		(1<<18)       		/**< \brief (TCC_DRVCTRL) Output Waveform 2 Inversion */
+	#define TCC_INVEN3       		(1<<19)       		/**< \brief (TCC_DRVCTRL) Output Waveform 3 Inversion */
+	#define TCC_INVEN4       		(1<<20)       		/**< \brief (TCC_DRVCTRL) Output Waveform 4 Inversion */
+	#define TCC_INVEN5       		(1<<21)       		/**< \brief (TCC_DRVCTRL) Output Waveform 5 Inversion */
+	#define TCC_INVEN6       		(1<<22)       		/**< \brief (TCC_DRVCTRL) Output Waveform 6 Inversion */
+	#define TCC_INVEN7       		(1<<23)       		/**< \brief (TCC_DRVCTRL) Output Waveform 7 Inversion */
 	#define TCC_FILTERVAL0(value) 	((value)&0xF << 24)
 	#define TCC_FILTERVAL1(value) 	((value)&0xF << 28)
 
-	#define TCC_EVACT0_OFF       	(0x0)		/**< \brief (TCC_EVCTRL) Event action disabled */
-	#define TCC_EVACT0_RETRIGGER 	(0x1)		/**< \brief (TCC_EVCTRL) Start, restart or re-trigger counter on event */
-	#define TCC_EVACT0_COUNTEV   	(0x2)		/**< \brief (TCC_EVCTRL) Count on event */
-	#define TCC_EVACT0_START     	(0x3)		/**< \brief (TCC_EVCTRL) Start counter on event */
-	#define TCC_EVACT0_INC       	(0x4)		/**< \brief (TCC_EVCTRL) Increment counter on event */
-	#define TCC_EVACT0_COUNT     	(0x5)		/**< \brief (TCC_EVCTRL) Count on active state of asynchronous event */
-	#define TCC_EVACT0_FAULT     	(0x7)		/**< \brief (TCC_EVCTRL) Non-recoverable fault */
-	#define TCC_EVACT1_OFF       	(0x0<<3)	/**< \brief (TCC_EVCTRL) Event action disabled */
-	#define TCC_EVACT1_RETRIGGER 	(0x1<<3)	/**< \brief (TCC_EVCTRL) Re-trigger counter on event */
-	#define TCC_EVACT1_DIR       	(0x2<<3)	/**< \brief (TCC_EVCTRL) Direction control */
-	#define TCC_EVACT1_STOP      	(0x3<<3)	/**< \brief (TCC_EVCTRL) Stop counter on event */
-	#define TCC_EVACT1_DEC       	(0x4<<3)	/**< \brief (TCC_EVCTRL) Decrement counter on event */
-	#define TCC_EVACT1_PPW       	(0x5<<3)	/**< \brief (TCC_EVCTRL) Period capture value in CC0 register, pulse width capture value in CC1 register */
-	#define TCC_EVACT1_PWP       	(0x6<<3)	/**< \brief (TCC_EVCTRL) Period capture value in CC1 register, pulse width capture value in CC0 register */
-	#define TCC_EVACT1_FAULT     	(0x7<<3)	/**< \brief (TCC_EVCTRL) Non-recoverable fault */
-	#define TCC_CNTSEL_START     	(0x0<<6)	/**< \brief (TCC_EVCTRL) An interrupt/event is generated when a new counter cycle starts */
-	#define TCC_CNTSEL_END       	(0x1<<6)	/**< \brief (TCC_EVCTRL) An interrupt/event is generated when a counter cycle ends */
-	#define TCC_CNTSEL_BETWEEN   	(0x2<<6)	/**< \brief (TCC_EVCTRL) An interrupt/event is generated when a counter cycle ends, except for the first and last cycles */
-	#define TCC_CNTSEL_BOUNDARY  	(0x3<<6)	/**< \brief (TCC_EVCTRL) An interrupt/event is generated when a new counter cycle starts or a counter cycle ends */
-	#define TCC_OVFEO        		(1<<8)    	/**< \brief (TCC_EVCTRL) Overflow/Underflow Output Event Enable */
-	#define TCC_TRGEO        		(1<<9)    	/**< \brief (TCC_EVCTRL) Retrigger Output Event Enable */
-	#define TCC_CNTEO        		(1<<10)   	/**< \brief (TCC_EVCTRL) Timer/counter Output Event Enable */
-	#define TCC_TCINV0       		(1<<12)   	/**< \brief (TCC_EVCTRL) Inverted Event 0 Input Enable */
-	#define TCC_TCINV1       		(1<<13)   	/**< \brief (TCC_EVCTRL) Inverted Event 1 Input Enable */
-	#define TCC_TCEI0        		(1<<14)   	/**< \brief (TCC_EVCTRL) Timer/counter Event 0 Input Enable */
-	#define TCC_TCEI1        		(1<<15)   	/**< \brief (TCC_EVCTRL) Timer/counter Event 1 Input Enable */
-	#define TCC_MCEI0        		(1<<16)   	/**< \brief (TCC_EVCTRL) Match or Capture Channel 0 Event Input Enable */
-	#define TCC_MCEI1        		(1<<17)   	/**< \brief (TCC_EVCTRL) Match or Capture Channel 1 Event Input Enable */
-	#define TCC_MCEI2        		(1<<18)   	/**< \brief (TCC_EVCTRL) Match or Capture Channel 2 Event Input Enable */
-	#define TCC_MCEI3        		(1<<19)   	/**< \brief (TCC_EVCTRL) Match or Capture Channel 3 Event Input Enable */
-	#define TCC_MCEO0        		(1<<24)   	/**< \brief (TCC_EVCTRL) Match or Capture Channel 0 Event Output Enable */
-	#define TCC_MCEO1        		(1<<25)   	/**< \brief (TCC_EVCTRL) Match or Capture Channel 1 Event Output Enable */
-	#define TCC_MCEO2        		(1<<26)   	/**< \brief (TCC_EVCTRL) Match or Capture Channel 2 Event Output Enable */
-	#define TCC_MCEO3        		(1<<27)   	/**< \brief (TCC_EVCTRL) Match or Capture Channel 3 Event Output Enable */
+	#define TCC_EVACT0_OFF       	(0x0)				/**< \brief (TCC_EVCTRL) Event action disabled */
+	#define TCC_EVACT0_RETRIGGER 	(0x1)				/**< \brief (TCC_EVCTRL) Start, restart or re-trigger counter on event */
+	#define TCC_EVACT0_COUNTEV   	(0x2)				/**< \brief (TCC_EVCTRL) Count on event */
+	#define TCC_EVACT0_START     	(0x3)				/**< \brief (TCC_EVCTRL) Start counter on event */
+	#define TCC_EVACT0_INC       	(0x4)				/**< \brief (TCC_EVCTRL) Increment counter on event */
+	#define TCC_EVACT0_COUNT     	(0x5)				/**< \brief (TCC_EVCTRL) Count on active state of asynchronous event */
+	#define TCC_EVACT0_FAULT     	(0x7)				/**< \brief (TCC_EVCTRL) Non-recoverable fault */
+	#define TCC_EVACT1_OFF       	(0x0<<3)			/**< \brief (TCC_EVCTRL) Event action disabled */
+	#define TCC_EVACT1_RETRIGGER 	(0x1<<3)			/**< \brief (TCC_EVCTRL) Re-trigger counter on event */
+	#define TCC_EVACT1_DIR       	(0x2<<3)			/**< \brief (TCC_EVCTRL) Direction control */
+	#define TCC_EVACT1_STOP      	(0x3<<3)			/**< \brief (TCC_EVCTRL) Stop counter on event */
+	#define TCC_EVACT1_DEC       	(0x4<<3)			/**< \brief (TCC_EVCTRL) Decrement counter on event */
+	#define TCC_EVACT1_PPW       	(0x5<<3)			/**< \brief (TCC_EVCTRL) Period capture value in CC0 register, pulse width capture value in CC1 register */
+	#define TCC_EVACT1_PWP       	(0x6<<3)			/**< \brief (TCC_EVCTRL) Period capture value in CC1 register, pulse width capture value in CC0 register */
+	#define TCC_EVACT1_FAULT     	(0x7<<3)			/**< \brief (TCC_EVCTRL) Non-recoverable fault */
+	#define TCC_CNTSEL_START     	(0x0<<6)			/**< \brief (TCC_EVCTRL) An interrupt/event is generated when a new counter cycle starts */
+	#define TCC_CNTSEL_END       	(0x1<<6)			/**< \brief (TCC_EVCTRL) An interrupt/event is generated when a counter cycle ends */
+	#define TCC_CNTSEL_BETWEEN   	(0x2<<6)			/**< \brief (TCC_EVCTRL) An interrupt/event is generated when a counter cycle ends, except for the first and last cycles */
+	#define TCC_CNTSEL_BOUNDARY  	(0x3<<6)			/**< \brief (TCC_EVCTRL) An interrupt/event is generated when a new counter cycle starts or a counter cycle ends */
+	#define TCC_OVFEO        		(1<<8)    			/**< \brief (TCC_EVCTRL) Overflow/Underflow Output Event Enable */
+	#define TCC_TRGEO        		(1<<9)    			/**< \brief (TCC_EVCTRL) Retrigger Output Event Enable */
+	#define TCC_CNTEO        		(1<<10)   			/**< \brief (TCC_EVCTRL) Timer/counter Output Event Enable */
+	#define TCC_TCINV0       		(1<<12)   			/**< \brief (TCC_EVCTRL) Inverted Event 0 Input Enable */
+	#define TCC_TCINV1       		(1<<13)   			/**< \brief (TCC_EVCTRL) Inverted Event 1 Input Enable */
+	#define TCC_TCEI0        		(1<<14)   			/**< \brief (TCC_EVCTRL) Timer/counter Event 0 Input Enable */
+	#define TCC_TCEI1        		(1<<15)   			/**< \brief (TCC_EVCTRL) Timer/counter Event 1 Input Enable */
+	#define TCC_MCEI0        		(1<<16)   			/**< \brief (TCC_EVCTRL) Match or Capture Channel 0 Event Input Enable */
+	#define TCC_MCEI1        		(1<<17)   			/**< \brief (TCC_EVCTRL) Match or Capture Channel 1 Event Input Enable */
+	#define TCC_MCEI2        		(1<<18)   			/**< \brief (TCC_EVCTRL) Match or Capture Channel 2 Event Input Enable */
+	#define TCC_MCEI3        		(1<<19)   			/**< \brief (TCC_EVCTRL) Match or Capture Channel 3 Event Input Enable */
+	#define TCC_MCEO0        		(1<<24)   			/**< \brief (TCC_EVCTRL) Match or Capture Channel 0 Event Output Enable */
+	#define TCC_MCEO1        		(1<<25)   			/**< \brief (TCC_EVCTRL) Match or Capture Channel 1 Event Output Enable */
+	#define TCC_MCEO2        		(1<<26)   			/**< \brief (TCC_EVCTRL) Match or Capture Channel 2 Event Output Enable */
+	#define TCC_MCEO3        		(1<<27)   			/**< \brief (TCC_EVCTRL) Match or Capture Channel 3 Event Output Enable */
 
-	#define	TCC_WAVEGEN_NFRQ        (0x0)   /**< \brief (TCC_WAVE) Normal frequency */
-	#define	TCC_WAVEGEN_MFRQ        (0x1)   /**< \brief (TCC_WAVE) Match frequency */
-	#define	TCC_WAVEGEN_NPWM        (0x2)   /**< \brief (TCC_WAVE) Normal PWM */
-	#define	TCC_WAVEGEN_DSCRITICAL  (0x4)   /**< \brief (TCC_WAVE) Dual-slope critical */
-	#define	TCC_WAVEGEN_DSBOTTOM    (0x5)   /**< \brief (TCC_WAVE) Dual-slope with interrupt/event condition when COUNT reaches ZERO */
-	#define	TCC_WAVEGEN_DSBOTH      (0x6)   /**< \brief (TCC_WAVE) Dual-slope with interrupt/event condition when COUNT reaches ZERO or TOP */
-	#define	TCC_WAVEGEN_DSTOP       (0x7)   /**< \brief (TCC_WAVE) Dual-slope with interrupt/event condition when COUNT reaches TOP */
-	#define	TCC_RAMP_1          	(0x0<<4)   /**< \brief (TCC_WAVE) RAMP1 operation */
-	#define	TCC_RAMP_2A         	(0x1<<4)   /**< \brief (TCC_WAVE) Alternative RAMP2 operation */
-	#define	TCC_RAMP_2          	(0x2<<4)   /**< \brief (TCC_WAVE) RAMP2 operation */
-	#define	TCC_RAMP_2C         	(0x3<<4)   /**< \brief (TCC_WAVE) Critical RAMP2 operation */
-	#define TCC_CIPEREN         	(1<<7)            /**< \brief (TCC_WAVE) Circular period Enable */
-	#define TCC_CICCEN0         	(1<<8)            /**< \brief (TCC_WAVE) Circular Channel 0 Enable */
-	#define TCC_CICCEN1         	(1<<9)            /**< \brief (TCC_WAVE) Circular Channel 1 Enable */
-	#define TCC_CICCEN2         	(1<<10)           /**< \brief (TCC_WAVE) Circular Channel 2 Enable */
-	#define TCC_CICCEN3         	(1<<11)           /**< \brief (TCC_WAVE) Circular Channel 3 Enable */
-	#define TCC_POL0            	(1<<16)           /**< \brief (TCC_WAVE) Channel 0 Polarity */
-	#define TCC_POL1            	(1<<17)           /**< \brief (TCC_WAVE) Channel 1 Polarity */
-	#define TCC_POL2            	(1<<18)           /**< \brief (TCC_WAVE) Channel 2 Polarity */
-	#define TCC_POL3         		(1<<19)           /**< \brief (TCC_WAVE) Channel 3 Polarity */
-	#define TCC_POL4         		(1<<20)           /**< \brief (TCC_WAVE) Channel 4 Polarity */
-	#define TCC_POL5         		(1<<21)           /**< \brief (TCC_WAVE) Channel 5 Polarity */
-	#define TCC_SWAP0        		(1<<24)           /**< \brief (TCC_WAVE) Swap DTI Output Pair 0 */
-	#define TCC_SWAP1           	(1<<25)           /**< \brief (TCC_WAVE) Swap DTI Output Pair 1 */
-	#define TCC_SWAP2           	(1<<26)           /**< \brief (TCC_WAVE) Swap DTI Output Pair 2 */
-	#define TCC_SWAP3           	(1<<27)           /**< \brief (TCC_WAVE) Swap DTI Output Pair 3 */
+	#define	TCC_WAVEGEN_NFRQ        (0x0)   			/**< \brief (TCC_WAVE) Normal frequency */
+	#define	TCC_WAVEGEN_MFRQ        (0x1)   			/**< \brief (TCC_WAVE) Match frequency */
+	#define	TCC_WAVEGEN_NPWM        (0x2)   			/**< \brief (TCC_WAVE) Normal PWM */
+	#define	TCC_WAVEGEN_DSCRITICAL  (0x4)   			/**< \brief (TCC_WAVE) Dual-slope critical */
+	#define	TCC_WAVEGEN_DSBOTTOM    (0x5)   			/**< \brief (TCC_WAVE) Dual-slope with interrupt/event condition when COUNT reaches ZERO */
+	#define	TCC_WAVEGEN_DSBOTH      (0x6)   			/**< \brief (TCC_WAVE) Dual-slope with interrupt/event condition when COUNT reaches ZERO or TOP */
+	#define	TCC_WAVEGEN_DSTOP       (0x7)   			/**< \brief (TCC_WAVE) Dual-slope with interrupt/event condition when COUNT reaches TOP */
+	#define	TCC_RAMP_1          	(0x0<<4)			/**< \brief (TCC_WAVE) RAMP1 operation */
+	#define	TCC_RAMP_2A         	(0x1<<4)			/**< \brief (TCC_WAVE) Alternative RAMP2 operation */
+	#define	TCC_RAMP_2          	(0x2<<4)			/**< \brief (TCC_WAVE) RAMP2 operation */
+	#define	TCC_RAMP_2C         	(0x3<<4)			/**< \brief (TCC_WAVE) Critical RAMP2 operation */
+	#define TCC_CIPEREN         	(1<<7)            	/**< \brief (TCC_WAVE) Circular period Enable */
+	#define TCC_CICCEN0         	(1<<8)            	/**< \brief (TCC_WAVE) Circular Channel 0 Enable */
+	#define TCC_CICCEN1         	(1<<9)            	/**< \brief (TCC_WAVE) Circular Channel 1 Enable */
+	#define TCC_CICCEN2         	(1<<10)           	/**< \brief (TCC_WAVE) Circular Channel 2 Enable */
+	#define TCC_CICCEN3         	(1<<11)           	/**< \brief (TCC_WAVE) Circular Channel 3 Enable */
+	#define TCC_POL0            	(1<<16)           	/**< \brief (TCC_WAVE) Channel 0 Polarity */
+	#define TCC_POL1            	(1<<17)           	/**< \brief (TCC_WAVE) Channel 1 Polarity */
+	#define TCC_POL2            	(1<<18)           	/**< \brief (TCC_WAVE) Channel 2 Polarity */
+	#define TCC_POL3         		(1<<19)           	/**< \brief (TCC_WAVE) Channel 3 Polarity */
+	#define TCC_POL4         		(1<<20)           	/**< \brief (TCC_WAVE) Channel 4 Polarity */
+	#define TCC_POL5         		(1<<21)           	/**< \brief (TCC_WAVE) Channel 5 Polarity */
+	#define TCC_SWAP0        		(1<<24)           	/**< \brief (TCC_WAVE) Swap DTI Output Pair 0 */
+	#define TCC_SWAP1           	(1<<25)           	/**< \brief (TCC_WAVE) Swap DTI Output Pair 1 */
+	#define TCC_SWAP2           	(1<<26)           	/**< \brief (TCC_WAVE) Swap DTI Output Pair 2 */
+	#define TCC_SWAP3           	(1<<27)           	/**< \brief (TCC_WAVE) Swap DTI Output Pair 3 */
+
+	#define TCC0_CC_NUM				6
+	#define TCC1_CC_NUM				4
+	#define TCC2_CC_NUM				3
+	#define TCC3_CC_NUM				2
+	#define TCC4_CC_NUM				2
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -2162,33 +2383,261 @@ namespace T_HW
 
 	struct S_ADC
 	{
+		RW16	CTRLA;          /**< Offset: 0x00 (R/W  16) Control A */
+		RW8 	EVCTRL;         /**< Offset: 0x02 (R/W  8) Event Control */
+		RW8 	DBGCTRL;        /**< Offset: 0x03 (R/W  8) Debug Control */
+		RW16	INPUTCTRL;      /**< Offset: 0x04 (R/W  16) Input Control */
+		RW16	CTRLB;          /**< Offset: 0x06 (R/W  16) Control B */
+		RW8 	REFCTRL;        /**< Offset: 0x08 (R/W  8) Reference Control */
+		RO8					z__Reserved1[0x01];
+		RW8 	AVGCTRL;        /**< Offset: 0x0A (R/W  8) Average Control */
+		RW8 	SAMPCTRL;       /**< Offset: 0x0B (R/W  8) Sample Time Control */
+		RW16	WINLT;          /**< Offset: 0x0C (R/W  16) Window Monitor Lower Threshold */
+		RW16	WINUT;          /**< Offset: 0x0E (R/W  16) Window Monitor Upper Threshold */
+		RW16	GAINCORR;       /**< Offset: 0x10 (R/W  16) Gain Correction */
+		RW16	OFFSETCORR;     /**< Offset: 0x12 (R/W  16) Offset Correction */
+		RW8 	SWTRIG;         /**< Offset: 0x14 (R/W  8) Software Trigger */
+		RO8					z__Reserved2[0x17];
+		RW8 	INTENCLR;       /**< Offset: 0x2C (R/W  8) Interrupt Enable Clear */
+		RW8 	INTENSET;       /**< Offset: 0x2D (R/W  8) Interrupt Enable Set */
+		RW8 	INTFLAG;        /**< Offset: 0x2E (R/W  8) Interrupt Flag Status and Clear */
+		RO8 	STATUS;         /**< Offset: 0x2F (R/   8) Status */
+		RO32	SYNCBUSY;       /**< Offset: 0x30 (R/   32) Synchronization Busy */
+		RW32	DSEQDATA;       /**< Offset: 0x34 ( /W  32) DMA Sequencial Data */
+		RW32	DSEQCTRL;       /**< Offset: 0x38 (R/W  32) DMA Sequential Control */
+		RO32	DSEQSTAT;       /**< Offset: 0x3C (R/   32) DMA Sequencial Status */
+		RO16	RESULT;         /**< Offset: 0x40 (R/   16) Result Conversion Value */
+		RO8					z__Reserved3[0x02];
+		RO16	RESS;           /**< Offset: 0x44 (R/   16) Last Sample Result */
+		RO8					z__Reserved4[0x02];
+		RW16	CALIB;          /**< Offset: 0x48 (R/W  16) Calibration */ 
 	};
 
+	typedef S_ADC S_ADC0, S_ADC1;
+
+	#define ADC_SWRST               	(1UL<<0)            /**< (ADC_CTRLA) Software Reset Position */
+	#define ADC_ENABLE              	(1UL<<1)            /**< (ADC_CTRLA) Enable Position */
+	#define ADC_DUALSEL_BOTH			(0UL<<3)            /**< (ADC_CTRLA) Start event or software trigger will start a conversion on both ADCs  */
+	#define ADC_DUALSEL_INTERLEAVE		(1UL<<3)            /**< (ADC_CTRLA) START event or software trigger will alternatingly start a conversion on ADC0 and ADC1  */
+	#define ADC_SLAVEEN             	(1UL<<5)            /**< (ADC_CTRLA) Slave Enable Position */
+	#define ADC_RUNSTDBY            	(1UL<<6)            /**< (ADC_CTRLA) Run in Standby Position */
+	#define ADC_ONDEMAND            	(1UL<<7)            /**< (ADC_CTRLA) On Demand Control Position */
+	#define ADC_PRESCALER(value)    	(((value)&7)<<8)
+	#define ADC_PRESCALER_DIV2      	(0UL<<8)            /**< (ADC_CTRLA) Peripheral clock divided by 2  */
+	#define ADC_PRESCALER_DIV4      	(1UL<<8)            /**< (ADC_CTRLA) Peripheral clock divided by 4  */
+	#define ADC_PRESCALER_DIV8      	(2UL<<8)            /**< (ADC_CTRLA) Peripheral clock divided by 8  */
+	#define ADC_PRESCALER_DIV16     	(3UL<<8)            /**< (ADC_CTRLA) Peripheral clock divided by 16  */
+	#define ADC_PRESCALER_DIV32     	(4UL<<8)            /**< (ADC_CTRLA) Peripheral clock divided by 32  */
+	#define ADC_PRESCALER_DIV64     	(5UL<<8)            /**< (ADC_CTRLA) Peripheral clock divided by 64  */
+	#define ADC_PRESCALER_DIV128    	(6UL<<8)            /**< (ADC_CTRLA) Peripheral clock divided by 128  */
+	#define ADC_PRESCALER_DIV256    	(7UL<<8)            /**< (ADC_CTRLA) Peripheral clock divided by 256  */
+	#define ADC_R2R						(1UL<<15)			/**< (ADC_CTRLA) Rail to Rail Operation Enable Position */
+
+	#define ADC_FLUSHEI            		(1UL<<0)			/**< (ADC_EVCTRL) Flush Event Input Enable Position */
+	#define ADC_STARTEI            		(1UL<<1)			/**< (ADC_EVCTRL) Start Conversion Event Input Enable Position */
+	#define ADC_FLUSHINV           		(1UL<<2)			/**< (ADC_EVCTRL) Flush Event Invert Enable Position */
+	#define ADC_STARTINV           		(1UL<<3)			/**< (ADC_EVCTRL) Start Conversion Event Invert Enable Position */
+	#define ADC_RESRDYEO           		(1UL<<4)			/**< (ADC_EVCTRL) Result Ready Event Out Position */
+	#define ADC_WINMONEO           		(1UL<<5)			/**< (ADC_EVCTRL) Window Monitor Event Out Position */
+
+	#define ADC_DBGRUN					(1UL<<0)			/**< (ADC_DBGCTRL) Debug Run Position */ 
+
+	#define ADC_MUXPOS(value)			((value)&0x1F)
+	#define ADC_MUXPOS_AIN0       		(0x0)               	/**< (ADC_INPUTCTRL) ADC AIN0 Pin  */
+	#define ADC_MUXPOS_AIN1       		(0x1)               	/**< (ADC_INPUTCTRL) ADC AIN1 Pin  */
+	#define ADC_MUXPOS_AIN2       		(0x2)               	/**< (ADC_INPUTCTRL) ADC AIN2 Pin  */
+	#define ADC_MUXPOS_AIN3       		(0x3)               	/**< (ADC_INPUTCTRL) ADC AIN3 Pin  */
+	#define ADC_MUXPOS_AIN4       		(0x4)               	/**< (ADC_INPUTCTRL) ADC AIN4 Pin  */
+	#define ADC_MUXPOS_AIN5       		(0x5)               	/**< (ADC_INPUTCTRL) ADC AIN5 Pin  */
+	#define ADC_MUXPOS_AIN6       		(0x6)               	/**< (ADC_INPUTCTRL) ADC AIN6 Pin  */
+	#define ADC_MUXPOS_AIN7       		(0x7)               	/**< (ADC_INPUTCTRL) ADC AIN7 Pin  */
+	#define ADC_MUXPOS_AIN8       		(0x8)               	/**< (ADC_INPUTCTRL) ADC AIN8 Pin  */
+	#define ADC_MUXPOS_AIN9       		(0x9)               	/**< (ADC_INPUTCTRL) ADC AIN9 Pin  */
+	#define ADC_MUXPOS_AIN10      		(0xA)               	/**< (ADC_INPUTCTRL) ADC AIN10 Pin  */
+	#define ADC_MUXPOS_AIN11      		(0xB)               	/**< (ADC_INPUTCTRL) ADC AIN11 Pin  */
+	#define ADC_MUXPOS_AIN12      		(0xC)               	/**< (ADC_INPUTCTRL) ADC AIN12 Pin  */
+	#define ADC_MUXPOS_AIN13      		(0xD)               	/**< (ADC_INPUTCTRL) ADC AIN13 Pin  */
+	#define ADC_MUXPOS_AIN14      		(0xE)               	/**< (ADC_INPUTCTRL) ADC AIN14 Pin  */
+	#define ADC_MUXPOS_AIN15      		(0xF)               	/**< (ADC_INPUTCTRL) ADC AIN15 Pin  */
+	#define ADC_MUXPOS_AIN16      		(0x10)              	/**< (ADC_INPUTCTRL) ADC AIN16 Pin  */
+	#define ADC_MUXPOS_AIN17      		(0x11)              	/**< (ADC_INPUTCTRL) ADC AIN17 Pin  */
+	#define ADC_MUXPOS_AIN18      		(0x12)              	/**< (ADC_INPUTCTRL) ADC AIN18 Pin  */
+	#define ADC_MUXPOS_AIN19      		(0x13)              	/**< (ADC_INPUTCTRL) ADC AIN19 Pin  */
+	#define ADC_MUXPOS_AIN20      		(0x14)              	/**< (ADC_INPUTCTRL) ADC AIN20 Pin  */
+	#define ADC_MUXPOS_AIN21      		(0x15)              	/**< (ADC_INPUTCTRL) ADC AIN21 Pin  */
+	#define ADC_MUXPOS_AIN22      		(0x16)              	/**< (ADC_INPUTCTRL) ADC AIN22 Pin  */
+	#define ADC_MUXPOS_AIN23      		(0x17)              	/**< (ADC_INPUTCTRL) ADC AIN23 Pin  */
+	#define ADC_MUXPOS_SCALEDCOREVCC	(0x18)                  	/**< (ADC_INPUTCTRL) 1/4 Scaled Core Supply  */
+	#define ADC_MUXPOS_SCALEDVBAT 		(0x19)              	/**< (ADC_INPUTCTRL) 1/4 Scaled VBAT Supply  */
+	#define ADC_MUXPOS_SCALEDIOVCC		(0x1A)              	/**< (ADC_INPUTCTRL) 1/4 Scaled I/O Supply  */
+	#define ADC_MUXPOS_BANDGAP    		(0x1B)              	/**< (ADC_INPUTCTRL) Bandgap Voltage  */
+	#define ADC_MUXPOS_PTAT       		(0x1C)              	/**< (ADC_INPUTCTRL) Temperature Sensor TSENSP  */
+	#define ADC_MUXPOS_CTAT       		(0x1D)              	/**< (ADC_INPUTCTRL) Temperature Sensor TSENSC  */
+	#define ADC_MUXPOS_DAC        		(0x1E)              	/**< (ADC_INPUTCTRL) DAC Output  */
+	#define ADC_MUXPOS_PTC        		(0x1F)              	/**< (ADC_INPUTCTRL) PTC output (only on ADC0)  */
+	#define ADC_DIFFMODE				(1UL<<7)				/**< (ADC_INPUTCTRL) Differential Mode Position */
+	#define ADC_MUXNEG(value)			(((value)&0x1F)<<8)
+	#define ADC_MUXNEG_AIN0       		(0x00UL<<8)         	/**< (ADC_INPUTCTRL) ADC AIN0 Pin  */
+	#define ADC_MUXNEG_AIN1       		(0x01UL<<8)         	/**< (ADC_INPUTCTRL) ADC AIN1 Pin  */
+	#define ADC_MUXNEG_AIN2       		(0x02UL<<8)         	/**< (ADC_INPUTCTRL) ADC AIN2 Pin  */
+	#define ADC_MUXNEG_AIN3       		(0x03UL<<8)         	/**< (ADC_INPUTCTRL) ADC AIN3 Pin  */
+	#define ADC_MUXNEG_AIN4       		(0x04UL<<8)         	/**< (ADC_INPUTCTRL) ADC AIN4 Pin  */
+	#define ADC_MUXNEG_AIN5       		(0x05UL<<8)         	/**< (ADC_INPUTCTRL) ADC AIN5 Pin  */
+	#define ADC_MUXNEG_AIN6       		(0x06UL<<8)         	/**< (ADC_INPUTCTRL) ADC AIN6 Pin  */
+	#define ADC_MUXNEG_AIN7       		(0x07UL<<8)         	/**< (ADC_INPUTCTRL) ADC AIN7 Pin  */
+	#define ADC_MUXNEG_GND        		(0x18UL<<8)         	/**< (ADC_INPUTCTRL) Internal Ground  */
+	#define ADC_DSEQSTOP				(1UL<<15)           	/**< (ADC_INPUTCTRL) Stop DMA Sequencing Position */
+
+	#define ADC_LEFTADJ               	(1UL<<0)              	/**< (ADC_CTRLB) Left-Adjusted Result Position */
+	#define ADC_FREERUN               	(1UL<<1)              	/**< (ADC_CTRLB) Free Running Mode Position */
+	#define ADC_CORREN					(1UL<<2)                /**< (ADC_CTRLB) Digital Correction Logic Enable Position */
+	#define ADC_RESSEL_12BIT          	(0UL<<3)              	/**< (ADC_CTRLB) 12-bit result  */
+	#define ADC_RESSEL_16BIT          	(1UL<<3)              	/**< (ADC_CTRLB) For averaging mode output  */
+	#define ADC_RESSEL_10BIT          	(2UL<<3)              	/**< (ADC_CTRLB) 10-bit result  */
+	#define ADC_RESSEL_8BIT           	(3UL<<3)              	/**< (ADC_CTRLB) 8-bit result  */
+	#define ADC_WINMODE_DISABLE       	(0UL<<8)              	/**< (ADC_CTRLB) No window mode (default)  */
+	#define ADC_WINMODE_MODE1         	(1UL<<8)              	/**< (ADC_CTRLB) RESULT > WINLT  */
+	#define ADC_WINMODE_MODE2         	(2UL<<8)              	/**< (ADC_CTRLB) RESULT < WINUT  */
+	#define ADC_WINMODE_MODE3         	(3UL<<8)              	/**< (ADC_CTRLB) WINLT < RESULT < WINUT  */
+	#define ADC_WINMODE_MODE4         	(4UL<<8)              	/**< (ADC_CTRLB) !(WINLT < RESULT < WINUT)  */
+	#define ADC_WINSS                 	(1UL<<11)             	/**< (ADC_CTRLB) Window Single Sample Position */
+
+	#define	ADC_REFSEL_INTREF			(0x0)                   /**< (ADC_REFCTRL) Internal Bandgap Reference  */
+	#define	ADC_REFSEL_INTVCC	  		(0x2)                   /**< (ADC_REFCTRL) 1/2 VDDANA  */
+	#define	ADC_REFSEL_VDDANA	  		(0x3)                   /**< (ADC_REFCTRL) VDDANA  */
+	#define	ADC_REFSEL_AREFA    		(0x4)                   /**< (ADC_REFCTRL) External Reference A  */
+	#define	ADC_REFSEL_AREFB    		(0x5)                   /**< (ADC_REFCTRL) External Reference B  */
+	#define	ADC_REFSEL_AREFC    		(0x6)                   /**< (ADC_REFCTRL) External Reference C (only on ADC1)  */
+	#define	ADC_REFCOMP					(1UL<<7)                /**< (ADC_REFCTRL) Reference Buffer Offset Compensation Enable Position */
+
+	#define ADC_SAMPLENUM(value)    	((value)&15)
+	#define ADC_SAMPLENUM_1         	(0x0)             		/**< (ADC_AVGCTRL) 1 sample  */
+	#define ADC_SAMPLENUM_2         	(0x1)             		/**< (ADC_AVGCTRL) 2 samples  */
+	#define ADC_SAMPLENUM_4         	(0x2)             		/**< (ADC_AVGCTRL) 4 samples  */
+	#define ADC_SAMPLENUM_8         	(0x3)             		/**< (ADC_AVGCTRL) 8 samples  */
+	#define ADC_SAMPLENUM_16        	(0x4)             		/**< (ADC_AVGCTRL) 16 samples  */
+	#define ADC_SAMPLENUM_32        	(0x5)             		/**< (ADC_AVGCTRL) 32 samples  */
+	#define ADC_SAMPLENUM_64        	(0x6)             		/**< (ADC_AVGCTRL) 64 samples  */
+	#define ADC_SAMPLENUM_128       	(0x7)             		/**< (ADC_AVGCTRL) 128 samples  */
+	#define ADC_SAMPLENUM_256       	(0x8)             		/**< (ADC_AVGCTRL) 256 samples  */
+	#define ADC_SAMPLENUM_512       	(0x9)             		/**< (ADC_AVGCTRL) 512 samples  */
+	#define ADC_SAMPLENUM_1024      	(0xA)             		/**< (ADC_AVGCTRL) 1024 samples  */
+	#define ADC_ADJRES(value)       	(((value)&7)<<4)		/**< (ADC_AVGCTRL) Adjusting Result / Division Coefficient */	
+
+	#define ADC_SAMPLEN(value)			((value)&0x3F)			/**< (ADC_SAMPCTRL) Sampling Time Length  */
+	#define ADC_OFFCOMP		   			(1UL<<7)				/**< (ADC_SAMPCTRL) Comparator Offset Compensation Enable Position */
+
+	#define ADC_FLUSH					(1UL<<0)    			/**< (ADC_SWTRIG) ADC Conversion Flush Position */
+	#define ADC_START					(1UL<<1)    			/**< (ADC_SWTRIG) Start ADC Conversion Position */
+
+	#define ADC_RESRDY					(1UL<<0)       			/**< (ADC_INTFLAG) Result Ready Interrupt Flag Position */
+	#define ADC_OVERRUN					(1UL<<1)       			/**< (ADC_INTFLAG) Overrun Interrupt Flag Position */
+	#define ADC_WINMON					(1UL<<2)       			/**< (ADC_INTFLAG) Window Monitor Interrupt Flag Position */
+
+	#define ADC_ADCBUSY					(1UL<<0)				/**< (ADC_STATUS) ADC Busy Status Position */
+
+	#define ADC_SYNC_SWRST        		(1UL<<0)   				/**< (ADC_SYNCBUSY) SWRST Synchronization Busy Position */
+	#define ADC_SYNC_ENABLE       		(1UL<<1)   				/**< (ADC_SYNCBUSY) ENABLE Synchronization Busy Position */
+	#define ADC_SYNC_INPUTCTRL    		(1UL<<2)   				/**< (ADC_SYNCBUSY) Input Control Synchronization Busy Position */
+	#define ADC_SYNC_CTRLB        		(1UL<<3)   				/**< (ADC_SYNCBUSY) Control B Synchronization Busy Position */
+	#define ADC_SYNC_REFCTRL      		(1UL<<4)   				/**< (ADC_SYNCBUSY) Reference Control Synchronization Busy Position */
+	#define ADC_SYNC_AVGCTRL      		(1UL<<5)   				/**< (ADC_SYNCBUSY) Average Control Synchronization Busy Position */
+	#define ADC_SYNC_SAMPCTRL     		(1UL<<6)   				/**< (ADC_SYNCBUSY) Sampling Time Control Synchronization Busy Position */
+	#define ADC_SYNC_WINLT        		(1UL<<7)   				/**< (ADC_SYNCBUSY) Window Monitor Lower Threshold Synchronization Busy Position */
+	#define ADC_SYNC_WINUT        		(1UL<<8)   				/**< (ADC_SYNCBUSY) Window Monitor Upper Threshold Synchronization Busy Position */
+	#define ADC_SYNC_GAINCORR     		(1UL<<9)   				/**< (ADC_SYNCBUSY) Gain Correction Synchronization Busy Position */
+	#define ADC_SYNC_OFFSETCORR   		(1UL<<10)  				/**< (ADC_SYNCBUSY) Offset Correction Synchronization Busy Position */
+	#define ADC_SYNC_SWTRIG       		(1UL<<11)  				/**< (ADC_SYNCBUSY) Software Trigger Synchronization Busy Position */
+
+	#define ADC_DSEQ_INPUTCTRL    		(1UL<<0)               	/**< (ADC_DSEQCTRL) Input Control Position */
+	#define ADC_DSEQ_CTRLB        		(1UL<<1)               	/**< (ADC_DSEQCTRL) Control B Position */
+	#define ADC_DSEQ_REFCTRL      		(1UL<<2)               	/**< (ADC_DSEQCTRL) Reference Control Position */
+	#define ADC_DSEQ_AVGCTRL      		(1UL<<3)               	/**< (ADC_DSEQCTRL) Average Control Position */
+	#define ADC_DSEQ_SAMPCTRL     		(1UL<<4)               	/**< (ADC_DSEQCTRL) Sampling Time Control Position */
+	#define ADC_DSEQ_WINLT        		(1UL<<5)               	/**< (ADC_DSEQCTRL) Window Monitor Lower Threshold Position */
+	#define ADC_DSEQ_WINUT        		(1UL<<6)               	/**< (ADC_DSEQCTRL) Window Monitor Upper Threshold Position */
+	#define ADC_DSEQ_GAINCORR     		(1UL<<7)               	/**< (ADC_DSEQCTRL) Gain Correction Position */
+	#define ADC_DSEQ_OFFSETCORR   		(1UL<<8)               	/**< (ADC_DSEQCTRL) Offset Correction Position */
+	#define ADC_DSEQ_AUTOSTART    		(1UL<<31)              	/**< (ADC_DSEQCTRL) ADC Auto-Start Conversion Position */
+	#define ADC_DSEQ_BUSY	    		(1UL<<31)              	/**< (ADC_DSEQSTAT) DMA Sequencing Busy Position */ 
 
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-	//struct S_MATRIX
-	//{
-	//	AT91_REG		MCFG[16];
-	//	AT91_REG		SCFG[16];
-	//	struct { AT91_REG A; AT91_REG B; } PRAS[18];
-	//	AT91_REG		zreserve;
-	//	AT91_REG		SYSIO;
-	//	AT91_REG		zreserve1;
-	//	AT91_REG		SMCNFCS;
-	//};
+	struct S_DAC
+	{
+		RW8 	CTRLA;  		/**< Offset: 0x00 (R/W  8) Control A */
+		RW8 	CTRLB;  		/**< Offset: 0x01 (R/W  8) Control B */
+		RW8 	EVCTRL; 		/**< Offset: 0x02 (R/W  8) Event Control */
+		RO8						z__Reserved1[0x01];
+		RW8 	INTENCLR;  		/**< Offset: 0x04 (R/W  8) Interrupt Enable Clear */
+		RW8 	INTENSET;  		/**< Offset: 0x05 (R/W  8) Interrupt Enable Set */
+		RW8 	INTFLAG;   		/**< Offset: 0x06 (R/W  8) Interrupt Flag Status and Clear */
+		RO8 	STATUS;    		/**< Offset: 0x07 (R/   8) Status */
+		RO32	SYNCBUSY;  		/**< Offset: 0x08 (R/   32) Synchronization Busy */
+		RW16	DACCTRL[2];		/**< Offset: 0x0C (R/W  16) DAC n Control */
+		RW16	DATA[2];   		/**< Offset: 0x10 ( /W  16) DAC n Data */
+		RW16	DATABUF[2];		/**< Offset: 0x14 ( /W  16) DAC n Data Buffer */
+		RW8 	DBGCTRL;   		/**< Offset: 0x18 (R/W  8) Debug Control */
+		RO8						z__Reserved2[0x03];
+		RO16	RESULT[2];		/**< Offset: 0x1C (R/   16) Filter Result */ 	
+	};
 
-	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	#define DAC_SWRST			(1UL<<0)					/**< (DAC_CTRLA) Software Reset Position */
+	#define DAC_ENABLE			(1UL<<1)					/**< (DAC_CTRLA) Enable DAC Controller Position */
 
-	//struct S_EFC
-	//{
-	//	AT91_REG		FMR;
-	//	AT91_REG		FCR;
-	//	AT91_REG		FSR;
-	//	AT91_REG		FRR;
-	//};
+	#define	DAC_DIFF			(1UL<<0)                    /**< (DAC_CTRLB) Differential mode enable Position */
+	#define	DAC_REFSEL_VREFAU	(0UL<<1)                    /**< (DAC_CTRLB) External reference unbuffered  */
+	#define	DAC_REFSEL_VDDANA	(1UL<<1)                    /**< (DAC_CTRLB) Analog supply  */
+	#define	DAC_REFSEL_VREFAB	(2UL<<1)                    /**< (DAC_CTRLB) External reference buffered  */
+	#define	DAC_REFSEL_INTREF	(3UL<<1)                    /**< (DAC_CTRLB) Internal bandgap reference  */
 
-	//typedef S_EFC S_EFC0, S_EFC1;
+	#define DAC_STARTEI0 		(1UL<<0)					/**< (DAC_EVCTRL) Start Conversion Event Input DAC 0 Position */
+	#define DAC_STARTEI1 		(1UL<<1)					/**< (DAC_EVCTRL) Start Conversion Event Input DAC 1 Position */
+	#define DAC_EMPTYEO0 		(1UL<<2)					/**< (DAC_EVCTRL) Data Buffer Empty Event Output DAC 0 Position */
+	#define DAC_EMPTYEO1 		(1UL<<3)					/**< (DAC_EVCTRL) Data Buffer Empty Event Output DAC 1 Position */
+	#define DAC_INVEI0   		(1UL<<4)					/**< (DAC_EVCTRL) Enable Invertion of DAC 0 input event Position */
+	#define DAC_INVEI1   		(1UL<<5)					/**< (DAC_EVCTRL) Enable Invertion of DAC 1 input event Position */
+	#define DAC_RESRDYEO0		(1UL<<6)					/**< (DAC_EVCTRL) Result Ready Event Output 0 Position */
+	#define DAC_RESRDYEO1		(1UL<<7)					/**< (DAC_EVCTRL) Result Ready Event Output 1 Position */
+
+	#define DAC_UNDERRUN0 		(1UL<<0)					/**< (DAC_INTFLAG) Result 0 Underrun Position */
+	#define DAC_UNDERRUN1 		(1UL<<1)					/**< (DAC_INTFLAG) Result 1 Underrun Position */
+	#define DAC_EMPTY0    		(1UL<<2)					/**< (DAC_INTFLAG) Data Buffer 0 Empty Position */
+	#define DAC_EMPTY1    		(1UL<<3)					/**< (DAC_INTFLAG) Data Buffer 1 Empty Position */
+	#define DAC_RESRDY0   		(1UL<<4)					/**< (DAC_INTFLAG) Result 0 Ready Position */
+	#define DAC_RESRDY1   		(1UL<<5)					/**< (DAC_INTFLAG) Result 1 Ready Position */
+	#define DAC_OVERRUN0  		(1UL<<6)					/**< (DAC_INTFLAG) Result 0 Overrun Position */
+	#define DAC_OVERRUN1  		(1UL<<7)					/**< (DAC_INTFLAG) Result 1 Overrun Position */
+	
+	#define DAC_READY0         	(1UL<<0)   					/**< (DAC_STATUS) DAC 0 Startup Ready Position */
+	#define DAC_READY1         	(1UL<<1)   					/**< (DAC_STATUS) DAC 1 Startup Ready Position */
+	#define DAC_EOC0          	(1UL<<2)   					/**< (DAC_STATUS) DAC 0 End of Conversion Position */
+	#define DAC_EOC1          	(1UL<<3)   					/**< (DAC_STATUS) DAC 1 End of Conversion Position */
+
+	#define DAC_DATA0			(1UL<<2)               		/**< (DAC_SYNCBUSY) Data DAC 0 Position */
+	#define DAC_DATA1			(1UL<<3)               		/**< (DAC_SYNCBUSY) Data DAC 1 Position */
+	#define DAC_DATABUF0		(1UL<<4)               		/**< (DAC_SYNCBUSY) Data Buffer DAC 0 Position */
+	#define DAC_DATABUF1		(1UL<<5)               		/**< (DAC_SYNCBUSY) Data Buffer DAC 1 Position */
+
+	#define DAC_LEFTADJ			(1UL<<0)         			/**< (DAC_DACCTRL) Left Adjusted Data Position */
+	//#define DAC_ENABLE			(1UL<<1)     			/**< (DAC_DACCTRL) Enable DAC0 Position */
+	#define	DAC_CC100K			(0UL<<2)         			/**< (DAC_DACCTRL) 100kSPS  */
+	#define	DAC_CC1M			(1UL<<2)         			/**< (DAC_DACCTRL) 500kSPS  */
+	#define	DAC_CC12M			(2UL<<2)         			/**< (DAC_DACCTRL) 1MSPS  */
+	#define DAC_FEXT			(1UL<<5)         			/**< (DAC_DACCTRL) Standalone Filter Position */
+	#define DAC_RUNSTDBY		(1UL<<6)         			/**< (DAC_DACCTRL) Run in Standby Position */
+	#define DAC_DITHER			(1UL<<7)         			/**< (DAC_DACCTRL) Dithering Mode Position */
+	#define DAC_REFRESH(value)  (((value)&15)<<8)			/**< (DAC_DACCTRL) Refresh period x 30 us */
+	#define	DAC_OSR_1           (0UL<<13)        			/**< (DAC_DACCTRL) No Over Sampling  */
+	#define	DAC_OSR_2           (1UL<<13)        			/**< (DAC_DACCTRL) 2x Over Sampling Ratio  */
+	#define	DAC_OSR_4           (2UL<<13)        			/**< (DAC_DACCTRL) 4x Over Sampling Ratio  */
+	#define	DAC_OSR_8           (3UL<<13)        			/**< (DAC_DACCTRL) 8x Over Sampling Ratio  */
+	#define	DAC_OSR_16          (4UL<<13)        			/**< (DAC_DACCTRL) 16x Over Sampling Ratio  */
+	#define	DAC_OSR_32          (5UL<<13)        			/**< (DAC_DACCTRL) 32x Over Sampling Ratio  */
+
+	#define DAC_DBGRUN			(1UL<<0)                    /**< (DAC_DBGCTRL) Debug Run Position */ 
+
+
 
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -2319,6 +2768,155 @@ namespace T_HW
 		RO32		TLPITI;      /**< \brief Offset: 0x27C (R/  32) Receive LPI Time Register */
 	};
 	
+	/* -------- GMAC_NCR : (GMAC Offset: 0x000) Network Control Register -------- */
+	#define GMAC_LBL			(0x1u << 1) /**< \brief (GMAC_NCR) Loop Back Local */
+	#define GMAC_RXEN			(0x1u << 2) /**< \brief (GMAC_NCR) Receive Enable */
+	#define GMAC_TXEN			(0x1u << 3) /**< \brief (GMAC_NCR) Transmit Enable */
+	#define GMAC_MPE			(0x1u << 4) /**< \brief (GMAC_NCR) Management Port Enable */
+	#define GMAC_CLRSTAT 		(0x1u << 5) /**< \brief (GMAC_NCR) Clear Statistics Registers */
+	#define GMAC_INCSTAT 		(0x1u << 6) /**< \brief (GMAC_NCR) Increment Statistics Registers */
+	#define GMAC_WESTAT			(0x1u << 7) /**< \brief (GMAC_NCR) Write Enable for Statistics Registers */
+	#define GMAC_BP				(0x1u << 8) /**< \brief (GMAC_NCR) Back pressure */
+	#define GMAC_TSTART			(0x1u << 9) /**< \brief (GMAC_NCR) Start Transmission */
+	#define GMAC_THALT			(0x1u << 10) /**< \brief (GMAC_NCR) Transmit Halt */
+	#define GMAC_TXPF			(0x1u << 11) /**< \brief (GMAC_NCR) Transmit Pause Frame */
+	#define GMAC_TXZQPF			(0x1u << 12) /**< \brief (GMAC_NCR) Transmit Zero Quantum Pause Frame */
+	//#define GMAC_RDS			(0x1u << 14) /**< \brief (GMAC_NCR) Read Snapshot */
+	#define GMAC_SRTSM			(0x1u << 15) /**< \brief (GMAC_NCR) Store Receive Time Stamp to Memory */
+	#define GMAC_ENPBPR			(0x1u << 16) /**< \brief (GMAC_NCR) Enable PFC Priority-based Pause Reception */
+	#define GMAC_TXPBPF			(0x1u << 17) /**< \brief (GMAC_NCR) Transmit PFC Priority-based Pause Frame */
+	#define GMAC_FNP			(0x1u << 18) /**< \brief (GMAC_NCR) Flush Next Packet */
+	#define GMAC_LPI			(0x1u << 19) 
+
+	/* -------- GMAC_NCFGR : (GMAC Offset: 0x004) Network Configuration Register -------- */
+	#define GMAC_SPD		(0x1u << 0) /**< \brief (GMAC_NCFGR) Speed */
+	#define GMAC_FD			(0x1u << 1) /**< \brief (GMAC_NCFGR) Full Duplex */
+	#define GMAC_DNVLAN 	(0x1u << 2) /**< \brief (GMAC_NCFGR) Discard Non-VLAN FRAMES */
+	#define GMAC_JFRAME 	(0x1u << 3) /**< \brief (GMAC_NCFGR) Jumbo Frame Size */
+	#define GMAC_CAF		(0x1u << 4) /**< \brief (GMAC_NCFGR) Copy All Frames */
+	#define GMAC_NBC		(0x1u << 5) /**< \brief (GMAC_NCFGR) No Broadcast */
+	#define GMAC_MTIHEN 	(0x1u << 6) /**< \brief (GMAC_NCFGR) Multicast Hash Enable */
+	#define GMAC_UNIHEN 	(0x1u << 7) /**< \brief (GMAC_NCFGR) Unicast Hash Enable */
+	#define GMAC_MAXFS		(0x1u << 8) /**< \brief (GMAC_NCFGR) 1536 Maximum Frame Size */
+	#define GMAC_RTY		(0x1u << 12) /**< \brief (GMAC_NCFGR) Retry Test */
+	#define GMAC_PEN		(0x1u << 13) /**< \brief (GMAC_NCFGR) Pause Enable */
+	#define GMAC_RXBUFO_P	14
+	#define GMAC_RXBUFO_M	(0x3u << GMAC_RXBUFO_P) /**< \brief (GMAC_NCFGR) Receive Buffer Offset */
+	#define GMAC_RXBUFO(value) ((GMAC_RXBUFO_M & ((value) << GMAC_NCFGR_RXBUFO_P)))
+	#define GMAC_LFERD		(0x1u << 16) /**< \brief (GMAC_NCFGR) Length Field Error Frame Discard */
+	#define GMAC_RFCS		(0x1u << 17) /**< \brief (GMAC_NCFGR) Remove FCS */
+	#define GMAC_CLK_P 18
+	#define GMAC_CLK_M			(0x7u << GMAC_CLK_P) /**< \brief (GMAC_NCFGR) MDC CLock Division */
+	#define   GMAC_CLK_MCK_8	(0x0u << 18) /**< \brief (GMAC_NCFGR) MCK divided by 8 (MCK up to 20 MHz) */
+	#define   GMAC_CLK_MCK_16 	(0x1u << 18) /**< \brief (GMAC_NCFGR) MCK divided by 16 (MCK up to 40 MHz) */
+	#define   GMAC_CLK_MCK_32 	(0x2u << 18) /**< \brief (GMAC_NCFGR) MCK divided by 32 (MCK up to 80 MHz) */
+	#define   GMAC_CLK_MCK_48 	(0x3u << 18) /**< \brief (GMAC_NCFGR) MCK divided by 48 (MCK up to 120MHz) */
+	#define   GMAC_CLK_MCK_64 	(0x4u << 18) /**< \brief (GMAC_NCFGR) MCK divided by 64 (MCK up to 160 MHz) */
+	#define   GMAC_CLK_MCK_96 	(0x5u << 18) /**< \brief (GMAC_NCFGR) MCK divided by 96 (MCK up to 240 MHz) */
+	#define GMAC_DBW_P 21
+	#define GMAC_DBW_M			(0x3u << GMAC_DBW_P) /**< \brief (GMAC_NCFGR) Data Bus Width */
+	#define GMAC_DBW(value)		((GMAC_DBW_M & ((value) << GMAC_DBW_P)))
+	#define GMAC_DCPF			(0x1u << 23) /**< \brief (GMAC_NCFGR) Disable Copy of Pause Frames */
+	#define GMAC_RXCOEN 		(0x1u << 24) /**< \brief (GMAC_NCFGR) Receive Checksum Offload Enable */
+	#define GMAC_EFRHD			(0x1u << 25) /**< \brief (GMAC_NCFGR) Enable Frames Received in Half Duplex */
+	#define GMAC_IRXFCS 		(0x1u << 26) /**< \brief (GMAC_NCFGR) Ignore RX FCS */
+	#define GMAC_IPGSEN 		(0x1u << 28) /**< \brief (GMAC_NCFGR) IP Stretch Enable */
+	#define GMAC_RXBP			(0x1u << 29) /**< \brief (GMAC_NCFGR) Receive Bad Preamble */
+	#define GMAC_IRXER			(0x1u << 30) /**< \brief (GMAC_NCFGR) Ignore IPG GRXER */
+	/* -------- GMAC_NSR : (GMAC Offset: 0x008) Network Status Register -------- */
+	#define GMAC_MDIO 			(0x1u << 1) /**< \brief (GMAC_NSR) MDIO Input Status */
+	#define GMAC_IDLE 			(0x1u << 2) /**< \brief (GMAC_NSR) PHY Management Logic Idle */
+	/* -------- GMAC_UR : (GMAC Offset: 0x00C) User Register -------- */
+	#define GMAC_MII (0x1u << 0) /**< \brief (GMAC_UR)  */
+	/* -------- GMAC_DCFGR : (GMAC Offset: 0x010) DMA Configuration Register -------- */
+	#define GMAC_FBLDO_P 0
+	#define GMAC_FBLDO_M (0x1fu << GMAC_FBLDO_P) /**< \brief (GMAC_DCFGR) Fixed Burst Length for DMA Data Operations: */
+	#define GMAC_FBLDO_SINGLE (0x1u << 0) /**< \brief (GMAC_DCFGR) 00001: Always use SINGLE AHB bursts */
+	#define GMAC_FBLDO_INCR4 (0x4u << 0) /**< \brief (GMAC_DCFGR) 001xx: Attempt to use INCR4 AHB bursts (Default) */
+	#define GMAC_FBLDO_INCR8 (0x8u << 0) /**< \brief (GMAC_DCFGR) 01xxx: Attempt to use INCR8 AHB bursts */
+	#define GMAC_FBLDO_INCR16 (0x10u << 0) /**< \brief (GMAC_DCFGR) 1xxxx: Attempt to use INCR16 AHB bursts */
+	#define GMAC_ESMA (0x1u << 6) /**< \brief (GMAC_DCFGR) Endian Swap Mode Enable for Management Descriptor Accesses */
+	#define GMAC_ESPA (0x1u << 7) /**< \brief (GMAC_DCFGR) Endian Swap Mode Enable for Packet Data Accesses */
+	#define GMAC_TXCOEN (0x1u << 11) /**< \brief (GMAC_DCFGR) Transmitter Checksum Generation Offload Enable */
+	#define GMAC_DRBS_P 16
+	#define GMAC_DRBS_M (0xffu << GMAC_DRBS_P) /**< \brief (GMAC_DCFGR) DMA Receive Buffer Size */
+	#define GMAC_DRBS(value) ((GMAC_DRBS_M & ((value) << GMAC_DRBS_P)))
+	#define GMAC_RXBMS_EIGHTH     (0<<8)            /**< \brief (GMAC_DCFGR) Receiver Packet Buffer Memory Size Select */
+	#define GMAC_RXBMS_QUARTER    (1<<8)            /**< \brief (GMAC_DCFGR) Receiver Packet Buffer Memory Size Select */
+	#define GMAC_RXBMS_HALF       (2<<8)            /**< \brief (GMAC_DCFGR) Receiver Packet Buffer Memory Size Select */
+	#define GMAC_RXBMS_FULL       (3<<8)            /**< \brief (GMAC_DCFGR) Receiver Packet Buffer Memory Size Select */
+	#define GMAC_TXPBMS_Pos       10           /**< \brief (GMAC_DCFGR) Transmitter Packet Buffer Memory Size Select */
+	#define GMAC_TXPBMS           ((0x1) << GMAC_TXPBMS_Pos)
+	#define GMAC_DDRP_Pos         24           /**< \brief (GMAC_DCFGR) DMA Discard Receive Packets */
+	#define GMAC_DDRP             ((0x1) << GMAC_DDRP_Pos)
+
+	/* -------- GMAC_TSR : (GMAC Offset: 0x014) Transmit Status Register -------- */
+	#define TSR_UBR (0x1u << 0) /**< \brief (GMAC_TSR) Used Bit Read */
+	#define TSR_COL (0x1u << 1) /**< \brief (GMAC_TSR) Collision Occurred */
+	#define TSR_RLE (0x1u << 2) /**< \brief (GMAC_TSR) Retry Limit Exceeded */
+	#define TSR_TXGO (0x1u << 3) /**< \brief (GMAC_TSR) Transmit Go */
+	#define TSR_TFC (0x1u << 4) /**< \brief (GMAC_TSR) Transmit Frame Corruption due to AHB error */
+	#define TSR_TXCOMP (0x1u << 5) /**< \brief (GMAC_TSR) Transmit Complete */
+	#define TSR_UND (0x1u << 6) /**< \brief (GMAC_TSR) Transmit Under Run */
+	#define TSR_HRESP (0x1u << 8) /**< \brief (GMAC_TSR) HRESP Not OK */
+	/* -------- GMAC_RSR : (GMAC Offset: 0x020) Receive Status Register -------- */
+	#define RSR_BNA (0x1u << 0) /**< \brief (GMAC_RSR) Buffer Not Available */
+	#define RSR_REC (0x1u << 1) /**< \brief (GMAC_RSR) Frame Received */
+	#define RSR_RXOVR (0x1u << 2) /**< \brief (GMAC_RSR) Receive Overrun */
+	#define RSR_HNO (0x1u << 3) /**< \brief (GMAC_RSR) HRESP Not OK */
+	/* -------- GMAC_MAN : (GMAC Offset: 0x034) PHY Maintenance Register -------- */
+	#define GMAC_MAN_DATA_Pos 0
+	#define GMAC_MAN_DATA_Msk (0xffffu << GMAC_MAN_DATA_Pos) /**< \brief (GMAC_MAN) PHY Data */
+	#define GMAC_MAN_DATA(value) ((GMAC_MAN_DATA_Msk & ((value) << GMAC_MAN_DATA_Pos)))
+	#define GMAC_MAN_WTN_Pos 16
+	#define GMAC_MAN_WTN_Msk (0x3u << GMAC_MAN_WTN_Pos) /**< \brief (GMAC_MAN) Write Ten */
+	#define GMAC_MAN_WTN(value) ((GMAC_MAN_WTN_Msk & ((value) << GMAC_MAN_WTN_Pos)))
+	#define GMAC_MAN_REGA_Pos 18
+	#define GMAC_MAN_REGA_Msk (0x1fu << GMAC_MAN_REGA_Pos) /**< \brief (GMAC_MAN) Register Address */
+	#define GMAC_MAN_REGA(value) ((GMAC_MAN_REGA_Msk & ((value) << GMAC_MAN_REGA_Pos)))
+	#define GMAC_MAN_PHYA_Pos 23
+	#define GMAC_MAN_PHYA_Msk (0x1fu << GMAC_MAN_PHYA_Pos) /**< \brief (GMAC_MAN) PHY Address */
+	#define GMAC_MAN_PHYA(value) ((GMAC_MAN_PHYA_Msk & ((value) << GMAC_MAN_PHYA_Pos)))
+	#define GMAC_MAN_OP_Pos 28
+	#define GMAC_MAN_OP_Msk (0x3u << GMAC_MAN_OP_Pos) /**< \brief (GMAC_MAN) Operation */
+	#define GMAC_MAN_OP(value) ((GMAC_MAN_OP_Msk & ((value) << GMAC_MAN_OP_Pos)))
+	#define GMAC_MAN_CLTTO (0x1u << 30) /**< \brief (GMAC_MAN) Clause 22 Operation */
+	#define GMAC_MAN_WZO (0x1u << 31) /**< \brief (GMAC_MAN) Write ZERO */
+
+	/* Receive status defintion */
+	#define RD_BROADCAST_ADDR   (1U << 31)  /* Broadcat address detected         */
+	#define RD_MULTICAST_HASH   (1U << 30)  /* MultiCast hash match              */
+	#define RD_UNICAST_HASH     (1U << 29)  /* UniCast hash match                */
+	//#define RD_EXTERNAL_ADDR    (1U << 28)  /* External Address match            */
+	#define RD_SARMF	        (1U << 27)  /* Specific address 1 match          */
+	#define RD_SA_MATCH         (3U << 25)  /* Specific address 2 match          */
+	#define RD_TYPE_ID          (3U << 22)  /* Type ID match                     */
+	#define RD_IP_CHECK         (3U << 22)  /* Type ID match                     */
+	#define RD_IP_OK			(1U << 22)  /* Type ID match                     */
+	#define RD_IP_TCP_OK		(2U << 22)  /* Type ID match                     */
+	#define RD_IP_UDP_OK		(3U << 22)  /* Type ID match                     */
+	#define RD_VLAN_TAG         (1U << 21)  /* VLAN tag detected                 */
+	#define RD_PRIORITY_TAG     (1U << 20)  /* PRIORITY tag detected             */
+	#define RD_VLAN_PRIORITY    (7U << 17)  /* PRIORITY Mask                     */
+	#define RD_CFI_IND          (1U << 16)  /* CFI indicator                     */
+	#define RD_EOF              (1U << 15)  /* EOF                               */
+	#define RD_SOF              (1U << 14)  /* SOF                               */
+	#define RD_BAD_FCS			(1U << 13)  /* Receive Buffer Offset Mask        */
+	#define RD_LENGTH_MASK      0x1FFF      /* Length of frame mask              */
+
+	/* Transmit Status definition */
+	#define TD_TRANSMIT_OK      (1U << 31)  /* Transmit OK                       */
+	#define TD_TRANSMIT_WRAP    (1U << 30)  /* Wrap bit: mark the last descriptor*/
+	#define TD_TRANSMIT_ERR     (1U << 29)  /* RLE:transmit error                */
+	#define TD_TRANSMIT_UND     (1U << 28)  /* Transmit Underrun                 */
+	#define TD_BUF_EX           (1U << 27)  /* Buffers exhausted in mid frame    */
+	#define TD_TRANSMIT_NO_CRC  (1U << 16)  /* No CRC will be appended to frame  */
+	#define TD_LAST_BUF         (1U << 15)  /* Last buffer in TX frame           */
+	#define TD_LENGTH_MASK      0x1FFF      /* Length of frame mask              */
+
+	#define OWNERSHIP_BIT		1
+	#define WRAP_BIT			2
+
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 	struct S_CMCC
@@ -2342,6 +2940,38 @@ namespace T_HW
 
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+	struct S_RSTC
+	{
+		RO8   RCAUSE;        /**< Offset: 0x00 (R/   8) Reset Cause */
+		RO8							z__Reserved1[0x01];
+		RO8   BKUPEXIT;      /**< Offset: 0x02 (R/   8) Backup Exit Source */ 
+	};
+
+	#define RSTC_POR    	(1<<0)   /**< (RSTC_RCAUSE) Power On Reset Position */
+	#define RSTC_BODCORE	(1<<1)   /**< (RSTC_RCAUSE) Brown Out CORE Detector Reset Position */
+	#define RSTC_BODVDD 	(1<<2)   /**< (RSTC_RCAUSE) Brown Out VDD Detector Reset Position */
+	#define RSTC_NVM    	(1<<3)   /**< (RSTC_RCAUSE) NVM Reset Position */
+	#define RSTC_EXT    	(1<<4)   /**< (RSTC_RCAUSE) External Reset Position */
+	#define RSTC_WDT    	(1<<5)   /**< (RSTC_RCAUSE) Watchdog Reset Position */
+	#define RSTC_SYST   	(1<<6)   /**< (RSTC_RCAUSE) System Reset Request Position */
+	#define RSTC_BACKUP 	(1<<7)   /**< (RSTC_RCAUSE) Backup Reset Position */
+	#define RSTC_RTC    	(1<<1)   /**< (RSTC_BKUPEXIT) Real Timer Counter Interrupt Position */
+	#define RSTC_BBPS   	(1<<2)   /**< (RSTC_BKUPEXIT) Battery Backup Power Switch Position */
+	#define RSTC_HIB    	(1<<7)   /**< (RSTC_BKUPEXIT) Hibernate Position */
+
+	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+	union SERCOM
+	{
+		S_USART		*usart;
+		S_SPI		*spi;
+		S_I2C		*i2c;
+
+		SERCOM()			: usart(0)	{}
+		SERCOM(S_USART *p)	: usart(p)	{}
+		SERCOM(S_SPI *p)	: spi(p)	{}
+		SERCOM(S_I2C *p)	: i2c(p)	{}
+	};
 };
 
 
@@ -2361,6 +2991,7 @@ namespace HW
 	MK_PTR(PM,			0x40000400);
 	MK_PTR(MCLK,		0x40000800);
 	MK_PTR(WDT,			0x40002000);
+	MK_PTR(RSTC,		0x40000C00);
 	MK_PTR(OSCCTRL,		0x40001000);
 	MK_PTR(OSC32KCTRL,	0x40001400);
 
@@ -2368,6 +2999,9 @@ namespace HW
 	MK_PTR(PIOB,	0x41008080);
 	MK_PTR(PIOC,	0x41008100);
 
+	MK_PTR(ADC0,	0x43001c00);
+	MK_PTR(ADC1,	0x43002000);
+	MK_PTR(DAC,		0x43002400);
 
 	MK_PTR(NVMCTRL,	0x41004000);
 	MK_PTR(RTC,		0x40002400);
@@ -2464,24 +3098,30 @@ namespace HW
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-	inline bool RamCheck(void *ptr)
+	inline bool RamCheck(const void *ptr)
 	{
-		//u32 v = (u32)ptr;
+		u32 v = ((u32)ptr);
 
-		return ((u32)ptr & ~0x20003FFF) == 0; //(v >= 0x20000000 && v < 0x20004000);
-
+		return ((v & ~0x3FFFF) == 0x20000000);
 	};
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-	inline bool RomCheck(void *ptr)
+	inline bool RomCheck(const void *ptr)
 	{
 		//u32 v = (u32)ptr;
 
-		return ((u32)ptr & ~0x1FFFF) == 0; //(v >= 0x000000 && v < 0x20000);
+		return ((u32)ptr & ~0x7FFFF) == 0; //(v >= 0x000000 && v < 0x20000);
 
 	};
+
+	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+	inline void SystemReset()
+	{
+		CM4::SCB->AIRCR = 0x05FA0000|SCB_AIRCR_SYSRESETREQ_Msk;
+	}
 
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -2492,6 +3132,11 @@ extern T_HW::AT91_IHP VectorTableExt[137];
 
 extern T_HW::DMADESC DmaTable[32];
 extern T_HW::DMADESC DmaWRB[32];
+
+//extern u32 BOOT_CHECK_REGISTER;
+
+//#define BOOT_CHECK_REGISTER_VALUE_BOOTLOADER	0xAAAAAAAA
+//#define BOOT_CHECK_REGISTER_VALUE_PROGRAMM		0x55555555
 
 #undef MK_PTR
 #undef MKPID

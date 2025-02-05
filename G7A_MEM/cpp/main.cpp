@@ -11,7 +11,7 @@
 #elif defined(CPU_XMC48)
 #endif
 
-#define VERSION			0x0204
+#define VERSION			0x0205
 
 //#pragma O3
 //#pragma Otime
@@ -40,12 +40,14 @@ u16 manTrmData[50];
 u16 txbuf[128 + 512 + 16];
 
 
-static u16 manReqWord = 0x3A00;
+//static u16 manReqWord = 0x3A00;
 static u16 manReqMask = 0xFF00;
-static u16 manReqWordNew = 0x3C00;
+//static u16 GetManReqWord() = 0x3C00;
 
 static u16 numDevice = 0;
 static u16 verDevice = VERSION;
+
+extern u16 GetManReqWord();
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -56,112 +58,112 @@ u16 GetDeviceVersion()
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-static void Response_0(u16 rw, MTB &mtb)
-{
-	__packed struct Rsp {u16 rw; u16 device; u16 session; u32 rcvVec; u32 rejVec; u32 wrVec; u32 errVec; u16 wrAdr[3]; u16 numDevice; u16 version; u16 temp; byte status; byte flags; RTC rtc; };
-
-	Rsp &rsp = *((Rsp*)&txbuf);
-
-	rsp.rw = rw;
-	rsp.device = GetDeviceID();  
-	rsp.session = FLASH_Session_Get();	  
-	rsp.rcvVec =  FLASH_Vectors_Recieved_Get();
-	rsp.rejVec = FLASH_Vectors_Rejected_Get();
-	rsp.wrVec = FLASH_Vectors_Saved_Get();
-	rsp.errVec = FLASH_Vectors_Errors_Get();
-	*((__packed u64*)rsp.wrAdr) = FLASH_Current_Adress_Get();
-	rsp.temp = (GetDeviceTemp()+2)/4;
-	rsp.status = FLASH_Status();
-
-	GetTime(&rsp.rtc);
-
-	mtb.data = txbuf;
-	mtb.len = sizeof(rsp)/2;
-	mtb.next = 0;
-}
-
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-static bool RequestMan_0(const u16 *data, u16 len, MTB &mtb)
-{
-	if (len != 1) return false;
-
-	Response_0(data[0], mtb);
-
-	return true;
-}
+//static void Response_0(u16 rw, MTB &mtb)
+//{
+//	__packed struct Rsp {u16 rw; u16 device; u16 session; u32 rcvVec; u32 rejVec; u32 wrVec; u32 errVec; u16 wrAdr[3]; u16 numDevice; u16 version; u16 temp; byte status; byte flags; RTC rtc; };
+//
+//	Rsp &rsp = *((Rsp*)&txbuf);
+//
+//	rsp.rw = rw;
+//	rsp.device = GetDeviceID();  
+//	rsp.session = FLASH_Session_Get();	  
+//	rsp.rcvVec =  FLASH_Vectors_Recieved_Get();
+//	rsp.rejVec = FLASH_Vectors_Rejected_Get();
+//	rsp.wrVec = FLASH_Vectors_Saved_Get();
+//	rsp.errVec = FLASH_Vectors_Errors_Get();
+//	*((__packed u64*)rsp.wrAdr) = FLASH_Current_Adress_Get();
+//	rsp.temp = (GetDeviceTemp()+2)/4;
+//	rsp.status = FLASH_Status();
+//
+//	GetTime(&rsp.rtc);
+//
+//	mtb.data = txbuf;
+//	mtb.len = sizeof(rsp)/2;
+//	mtb.next = 0;
+//}
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-static bool RequestMan_1(const u16 *data, u16 len, MTB &mtb)
-{
-	if (len != 1) return false;
-
-	Response_0(data[0], mtb);
-
-	FLASH_WriteEnable();
-
-	return true;
-}
+//static bool RequestMan_0(const u16 *data, u16 len, MTB &mtb)
+//{
+//	if (len != 1) return false;
+//
+//	Response_0(data[0], mtb);
+//
+//	return true;
+//}
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-static bool RequestMan_2(const u16 *data, u16 len, MTB &mtb)
-{
-	if (len != 1) return false;
-
-	Response_0(data[0], mtb);
-
-	FLASH_WriteDisable();
-
-	return true;
-}
-
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-static bool RequestMan_3(const u16 *data, u16 len, MTB &mtb)
-{
-	if (len != 1) return false;
-
-	Response_0(data[0], mtb);
-
-	return true;
-}
+//static bool RequestMan_1(const u16 *data, u16 len, MTB &mtb)
+//{
+//	if (len != 1) return false;
+//
+//	Response_0(data[0], mtb);
+//
+//	FLASH_WriteEnable();
+//
+//	return true;
+//}
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-static bool RequestMan_4(const u16 *data, u16 len, MTB &mtb)
-{
-	if (len != 5) return false;
-
-	SetClock(*(RTC*)(&data[1]));
-
-	Response_0(data[0], mtb);
-
-	return true;
-}
+//static bool RequestMan_2(const u16 *data, u16 len, MTB &mtb)
+//{
+//	if (len != 1) return false;
+//
+//	Response_0(data[0], mtb);
+//
+//	FLASH_WriteDisable();
+//
+//	return true;
+//}
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-static bool RequestMan(const u16 *buf, u16 len, MTB &mtb)
-{
-	if (buf == 0 || len == 0) return false;
+//static bool RequestMan_3(const u16 *data, u16 len, MTB &mtb)
+//{
+//	if (len != 1) return false;
+//
+//	Response_0(data[0], mtb);
+//
+//	return true;
+//}
 
-	bool r = false;
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-	byte i = buf[0] & 0xFF;
+//static bool RequestMan_4(const u16 *data, u16 len, MTB &mtb)
+//{
+//	if (len != 5) return false;
+//
+//	SetClock(*(RTC*)(&data[1]));
+//
+//	Response_0(data[0], mtb);
+//
+//	return true;
+//}
 
-	switch (i)
-	{
-		case 0x00: 	r = RequestMan_0(buf, len, mtb); break;
-		case 0x01: 	r = RequestMan_1(buf, len, mtb); break;
-		case 0x02: 	r = RequestMan_2(buf, len, mtb); break;
-		case 0x03: 	r = RequestMan_3(buf, len, mtb); break;
-		case 0x04: 	r = RequestMan_4(buf, len, mtb); break;
-	};
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-	return r;
-}
+//static bool RequestMan(const u16 *buf, u16 len, MTB &mtb)
+//{
+//	if (buf == 0 || len == 0) return false;
+//
+//	bool r = false;
+//
+//	byte i = buf[0] & 0xFF;
+//
+//	switch (i)
+//	{
+//		case 0x00: 	r = RequestMan_0(buf, len, mtb); break;
+//		case 0x01: 	r = RequestMan_1(buf, len, mtb); break;
+//		case 0x02: 	r = RequestMan_2(buf, len, mtb); break;
+//		case 0x03: 	r = RequestMan_3(buf, len, mtb); break;
+//		case 0x04: 	r = RequestMan_4(buf, len, mtb); break;
+//	};
+//
+//	return r;
+//}
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -169,7 +171,7 @@ static bool RequestMan_00(const u16 *data, u16 len, MTB &mtb)
 {
 	if (len != 1) return false;
 
-	txbuf[0] = (manReqWordNew & manReqMask) | 0x00;
+	txbuf[0] = (GetManReqWord() & manReqMask) | 0x00;
 	txbuf[1] = GetNumDevice();
 	txbuf[2] = verDevice;
 
@@ -186,7 +188,7 @@ static bool RequestMan_10(const u16 *data, u16 len, MTB &mtb)
 {
 	if (len != 1) return false;
 
-	txbuf[0] = (manReqWordNew & manReqMask) | 0x10;
+	txbuf[0] = (GetManReqWord() & manReqMask) | 0x10;
 
 	mtb.data = txbuf;
 	mtb.len = 1;
@@ -205,7 +207,7 @@ static bool RequestMan_20(const u16 *data, u16 len, MTB &mtb)
 
 	Rsp &rsp = *((Rsp*)&txbuf);
 
-	rsp.rw = (manReqWordNew & manReqMask) | 0x20;
+	rsp.rw = (GetManReqWord() & manReqMask) | 0x20;
 	rsp.device = GetDeviceID();  
 	rsp.session = FLASH_Session_Get();	  
 	rsp.rcvVec =  FLASH_Vectors_Recieved_Get();
@@ -233,7 +235,7 @@ static bool RequestMan_30(const u16 *data, u16 len, MTB &mtb)
 
 	SetClock(*(RTC*)(&data[1]));
 
-	txbuf[0] = (manReqWordNew & manReqMask) | 0x30;
+	txbuf[0] = (GetManReqWord() & manReqMask) | 0x30;
 
 	mtb.data = txbuf;
 	mtb.len = 1;
@@ -250,7 +252,7 @@ static bool RequestMan_31(const u16 *data, u16 len, MTB &mtb)
 
 	FLASH_WriteEnable();
 
-	txbuf[0] = (manReqWordNew & manReqMask) | 0x31;
+	txbuf[0] = (GetManReqWord() & manReqMask) | 0x31;
 
 	mtb.data = txbuf;
 	mtb.len = 1;
@@ -267,7 +269,7 @@ static bool RequestMan_32(const u16 *data, u16 len, MTB &mtb)
 
 	FLASH_WriteDisable();
 
-	txbuf[0] = (manReqWordNew & manReqMask) | 0x32;
+	txbuf[0] = (GetManReqWord() & manReqMask) | 0x32;
 
 	mtb.data = txbuf;
 	mtb.len = 1;
@@ -284,7 +286,7 @@ static bool RequestMan_33(const u16 *data, u16 len, MTB &mtb)
 
 	// Erase all
 
-	txbuf[0] = (manReqWordNew & manReqMask) | 0x33;
+	txbuf[0] = (GetManReqWord() & manReqMask) | 0x33;
 
 	mtb.data = txbuf;
 	mtb.len = 1;
@@ -318,7 +320,7 @@ static bool RequestMan_80(const u16 *data, u16 len, MTB &mtb)
 			return false;
 	};
 
-	txbuf[0] = (manReqWordNew & manReqMask) | 0x80;
+	txbuf[0] = (GetManReqWord() & manReqMask) | 0x80;
 
 	mtb.data = txbuf;
 	mtb.len = 1;
@@ -333,7 +335,7 @@ static bool RequestMan_90(const u16 *data, u16 len, MTB &mtb)
 {
 	if (len != 1) return false;
 
-	txbuf[0] = (manReqWordNew & manReqMask) | 0x90;
+	txbuf[0] = (GetManReqWord() & manReqMask) | 0x90;
 
 	mtb.data = txbuf;
 	mtb.len = 1;
@@ -348,7 +350,7 @@ static bool RequestMan_F0(const u16 *data, u16 len, MTB &mtb)
 {
 	if (len != 1) return false;
 
-	txbuf[0] = (manReqWordNew & manReqMask) | 0xF0;
+	txbuf[0] = (GetManReqWord() & manReqMask) | 0xF0;
 
 	mtb.data = txbuf;
 	mtb.len = 1;
@@ -420,11 +422,7 @@ static void UpdateMan()
 
 				if (mrb.OK && mrb.len > 0)
 				{
-					if ((manRcvData[0] & manReqMask) == manReqWord)
-					{
-						i = (RequestMan(manRcvData, mrb.len, mtb)) ? (i+1) : 0;
-					}
-					else if ((manRcvData[0] & manReqMask) == manReqWordNew)
+					if ((manRcvData[0] & manReqMask) == GetManReqWord())
 					{
 						i = (RequestManNew(manRcvData, mrb.len, mtb)) ? (i+1) : 0;
 					}

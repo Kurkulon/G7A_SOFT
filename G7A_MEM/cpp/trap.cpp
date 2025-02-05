@@ -51,6 +51,9 @@ static bool startSendSession = false;
 static bool stop = false;
 static bool pause = false;
 
+static TM32 tmReboot;
+static bool cmdReboot = false;
+
 
 /******************************************************/
 static void TRAP_MakePacketHeaders(char *data, bool need_ask, bool is_ask, char device);
@@ -700,7 +703,9 @@ void TRAP_HandleRxData(Trap *t, u32 size)
 					case TRAP_BOOTLOADER_COMMAND_START:
 
 						if(need_ask == TRAP_PACKET_NEED_ASK) TRAP_SendAsknowlege(TRAP_BOOTLOADER_DEVICE, TrapRxCounter);
-//						BootLoader_Start_Delay();
+
+						cmdReboot = true;
+						tmReboot.Reset();
 
 						break;
 
@@ -1040,6 +1045,10 @@ void TRAP_Init()
 
 void TRAP_Idle()
 {
+	#ifndef WIN32
+					if (cmdReboot && tmReboot.Check(100)) HW::SystemReset(); 
+	#endif
+
 	UpdateSendVector();
 }
 
